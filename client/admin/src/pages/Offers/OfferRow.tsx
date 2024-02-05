@@ -1,13 +1,22 @@
-import { IconButton, ListItem, ListItemButton, ListItemText, Switch, useTheme } from '@mui/material';
-import { OffersInterface } from '../../../../_shared/types';
-import { useContext, useState } from 'react';
-import EditOffer from './EditOffer';
+import {
+  CircularProgress,
+  IconButton,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Switch,
+  useTheme
+} from '@mui/material';
+import { OffersInterface } from '../../../../../_shared/types';
+import { useState } from 'react';
 import { Icon } from '@mdi/react';
 import { mdiDragHorizontalVariant, mdiTrashCan } from '@mdi/js';
-import { SupabaseContext } from '../../../../_shared/components/SupabaseProvider/SupabaseProvider';
 import { Modal } from '../../../../_shared/components';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useSnackbar } from 'notistack';
+import { useCreateOffer, useDeleteOffer } from '../../../../_shared/api';
+import { useNavigate } from 'react-router-dom';
 
 interface Props {
   offer: OffersInterface;
@@ -16,33 +25,37 @@ interface Props {
 const OfferRow = ({ offer }: Props) => {
   const [status, setStatus] = useState('');
   const theme = useTheme();
-  const { supabase } = useContext(SupabaseContext);
   const { attributes, setNodeRef, transform, transition, listeners } = useSortable({ id: offer.id });
+  const { enqueueSnackbar } = useSnackbar();
+  const navigate = useNavigate();
+
+  const handleError = (err: any) => {
+    if (err.response.data.statusText) {
+      enqueueSnackbar(err.response.data.statusText, { variant: 'error' });
+    }
+
+    setStatus('');
+  };
+
+  const deleteOffer = useDeleteOffer(() => setStatus(''), handleError);
+  const updateOffer = useCreateOffer();
 
   const style = { transform: CSS.Transform.toString(transform), transition };
 
-  const handleDelete = async () => {
-    if (supabase) {
-      if (offer.logo_path) {
-        await supabase.storage.from('offers').remove([offer.logo_path]);
-      }
+  const handleDelete = () => {
+    setStatus('Deleting');
 
-      await supabase.from('offers').delete().eq('id', offer.id);
-    }
+    deleteOffer.mutate(offer.id);
   };
 
-  const handleToggle = async () => {
-    if (supabase) {
-      const status = offer.status === 'active' ? 'inactive' : 'active';
+  const handleToggle = () => {
+    const status = offer.status === 'active' ? 'inactive' : 'active';
 
-      await supabase.from('offers').update({ status }).eq('id', offer.id);
-    }
+    updateOffer.mutate({ ...offer, status });
   };
 
   return (
     <ListItem disableGutters disablePadding ref={setNodeRef} divider {...attributes} style={style}>
-      {status === 'Edit' && <EditOffer offer={offer} cancel={() => setStatus('')} />}
-
       <Modal
         open={status === 'Confirm Delete'}
         title='Are you sure you want to delete this offer?'
@@ -56,15 +69,19 @@ const OfferRow = ({ offer }: Props) => {
         <Icon path={mdiDragHorizontalVariant} size={1} />
       </IconButton>
 
-      <ListItemButton onClick={() => setStatus('Edit')}>
+      <ListItemButton onClick={() => navigate('/offers/create', { state: { offerId: offer.id } })}>
         <ListItemText primary={offer.name} />
       </ListItemButton>
 
       <Switch color='success' checked={offer.status === 'active'} onChange={handleToggle} />
 
-      <IconButton size='small' sx={{ ml: 1 }} onClick={() => setStatus('Confirm Delete')}>
-        <Icon path={mdiTrashCan} size={1} color={theme.palette.error.main} />
-      </IconButton>
+      {status === 'Deleting' ? (
+        <CircularProgress size={20} />
+      ) : (
+        <IconButton size='small' sx={{ ml: 1 }} onClick={() => setStatus('Confirm Delete')}>
+          <Icon path={mdiTrashCan} size={1} color={theme.palette.error.main} />
+        </IconButton>
+      )}
     </ListItem>
   );
 };

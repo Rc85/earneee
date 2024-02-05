@@ -126,7 +126,7 @@ const AffiliateForm = ({ affiliate }: Props) => {
   };
 
   return (
-    <>
+    <Box component='form' onSubmit={handleSubmit}>
       <Box sx={{ mb: 1, display: 'flex' }}>
         {Boolean(form.logoUrl) ? (
           <Box
@@ -278,7 +278,7 @@ const AffiliateForm = ({ affiliate }: Props) => {
       >
         Submit
       </LoadingButton>
-    </>
+    </Box>
   );
 };
 

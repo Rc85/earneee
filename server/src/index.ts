@@ -42,6 +42,7 @@ app.use(/^\/api\/v1\/auth\/admin.*/, middlewares.adminSession, middlewares.authe
 app.use(routers.userRouter);
 app.use(routers.affiliateRouter);
 app.use(routers.categoryRouter);
+app.use(routers.offerRouter);
 
 app.use(middlewares.errorHandler);
 

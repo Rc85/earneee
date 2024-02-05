@@ -15,3 +15,5 @@ export * from './affiliates/mutations';
 export * from './affiliates/queries';
 export * from './categories/mutations';
 export * from './categories/queries';
+export * from './offers/mutations';
+export * from './offers/queries';

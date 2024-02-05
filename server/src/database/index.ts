@@ -3,6 +3,7 @@ import { resultsToCamelCase } from '../../../_shared/utils';
 import { DatabaseCreateOptions, DatabaseQueryOptions, DatabaseRetrieveOptions } from '../../../_shared/types';
 import { affiliates } from './affiliates';
 import { categories } from './categories';
+import { offers } from './offers';
 
 const config: pg.PoolConfig = {
   host: process.env.PG_HOST,
@@ -165,7 +166,8 @@ export const database = {
       });
   },
   affiliates,
-  categories
+  categories,
+  offers
 };
 
 const generateMultiInsertParamString = (params: any[], columns: string[]) => {

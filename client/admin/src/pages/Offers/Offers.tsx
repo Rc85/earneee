@@ -1,12 +1,9 @@
 import { Button, List } from '@mui/material';
-import { Section } from '../../../../_shared/components';
+import { Loading, Section } from '../../../../_shared/components';
 import { Icon } from '@mdi/react';
 import { mdiPlusBox } from '@mdi/js';
 import CreateOffer from './CreateOffer';
 import { useNavigate } from 'react-router-dom';
-import { useContext, useEffect, useState } from 'react';
-import { OffersInterface } from '../../../../_shared/types';
-import { SupabaseContext } from '../../../../_shared/components/SupabaseProvider/SupabaseProvider';
 import OfferRow from './OfferRow';
 import {
   DndContext,
@@ -23,52 +20,21 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy
 } from '@dnd-kit/sortable';
+import { retrieveOffers, useSortOffers } from '../../../../_shared/api';
 
 const Offers = () => {
   const navigate = useNavigate();
-  const [offers, setOffers] = useState<OffersInterface[]>([]);
-  const { supabase } = useContext(SupabaseContext);
+  const { isLoading, data: { data: { offers } } = { data: {} } } = retrieveOffers();
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
-
-  useEffect(() => {
-    (async () => {
-      await retrieveOffers();
-
-      if (supabase) {
-        const dbChanges = supabase
-          .channel('schema-db-changes')
-          .on('postgres_changes', { event: '*', schema: 'public' }, async (payload) => {
-            if (payload.table === 'offers') {
-              await retrieveOffers();
-            }
-          });
-
-        dbChanges.subscribe();
-
-        return () => {
-          dbChanges.unsubscribe();
-        };
-      }
-    })();
-  }, []);
-
-  const retrieveOffers = async () => {
-    if (supabase) {
-      const offers = await supabase.from('offers').select().order('ordinance');
-
-      if (offers.data) {
-        setOffers(offers.data);
-      }
-    }
-  };
+  const sortOffers = useSortOffers();
 
   const handleDragEnd = async (e: DragEndEvent) => {
     const { active, over } = e;
 
-    if (active.id !== over?.id) {
+    if (active.id !== over?.id && offers) {
       const oldIndex = offers.findIndex((offer) => offer.id === active.id);
       const newIndex = offers.findIndex((offer) => offer.id === over?.id);
 
@@ -81,13 +47,13 @@ const Offers = () => {
         offer.ordinance = index + 1;
       }
 
-      if (supabase) {
-        await supabase.from('offers').upsert(sortedOffers);
-      }
+      sortOffers.mutate({ offers: sortedOffers });
     }
   };
 
-  return (
+  return isLoading ? (
+    <Loading />
+  ) : (
     <Section
       title='Offers'
       titleVariant='h3'
@@ -104,9 +70,9 @@ const Offers = () => {
       ]}
     >
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={offers} strategy={verticalListSortingStrategy}>
+        <SortableContext items={offers || []} strategy={verticalListSortingStrategy}>
           <List disablePadding>
-            {offers.map((offer) => (
+            {offers?.map((offer) => (
               <OfferRow key={offer.id} offer={offer} />
             ))}
           </List>
