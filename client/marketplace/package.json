@@ -1,0 +1,19 @@
+{
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "supabase": "supabase",
+    "migrate": "supabase migrate down --database-url postgres://postgres:T36lLAARj0boZPwX@db.exgzxyjfgouichzkhwjd.supabase.co:5432/postgres"
+  },
+  "dependencies": {
+    "@emotion/cache": "^11.11.0",
+    "@mui/material-nextjs": "^5.15.0",
+    "@supabase/ssr": "latest",
+    "next": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "20.3.1"
+  }
+}

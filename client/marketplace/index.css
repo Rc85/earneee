@@ -1,0 +1,65 @@
+html {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+body {
+  margin: 0;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+code {
+  background-color: #4f4f4f;
+  padding: 3px 5px;
+  border-radius: 2px;
+}
+
+a {
+  color: #ff661f;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.product-card a,
+.carousel-container a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.product-description img {
+  max-width: 100%;
+}
+
+.brand-name {
+  font-family: 'Archivo', sans-serif !important;
+  font-weight: 900 !important;
+  font-style: italic !important;
+  background-image: linear-gradient(270deg, #000, #ff661f);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -moz-background-clip: text;
+  -moz-text-fill-color: transparent;
+}
+
+.search-category-select {
+  padding-right: 3px;
+  padding-left: 3px;
+  padding-top: 7px;
+  padding-bottom: 8px;
+  border-radius: 0px;
+  border-left-width: 0px;
+  border-right-width: 0px;
+  border-top-color: #bdbdbd;
+  border-bottom-color: #bdbdbd;
+}
+
+.search-category-select:focus-visible {
+  outline: none;
+}
