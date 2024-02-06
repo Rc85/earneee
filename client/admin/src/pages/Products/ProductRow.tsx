@@ -1,11 +1,20 @@
-import { IconButton, ListItem, ListItemButton, ListItemText, Switch, useTheme } from '@mui/material';
-import { ProductsInterface } from '../../../../_shared/types';
+import {
+  CircularProgress,
+  IconButton,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Switch,
+  useTheme
+} from '@mui/material';
+import { ProductsInterface } from '../../../../../_shared/types';
 import { Icon } from '@mdi/react';
 import { mdiChevronRight, mdiTrashCan } from '@mdi/js';
-import { useContext, useState } from 'react';
-import { SupabaseContext } from '../../../../_shared/components/SupabaseProvider/SupabaseProvider';
+import { useState } from 'react';
 import { Modal } from '../../../../_shared/components';
 import { useNavigate } from 'react-router-dom';
+import { useCreateProduct, useDeleteProduct } from '../../../../_shared/api';
+import { useSnackbar } from 'notistack';
 
 interface Props {
   product: ProductsInterface;
@@ -14,29 +23,42 @@ interface Props {
 const ProductRow = ({ product }: Props) => {
   const theme = useTheme();
   const [status, setStatus] = useState('');
-  const { supabase } = useContext(SupabaseContext);
   const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
 
-  const handleToggle = async () => {
-    if (supabase) {
-      setStatus('Loading');
-
-      const status = product.status === 'available' ? 'unavailable' : 'available';
-
-      await supabase.from('products').update({ status }).eq('id', product.id);
-
-      setStatus('');
+  const handleSuccess = (response: any) => {
+    if (response.data.statusText) {
+      enqueueSnackbar(response.data.statusText, { variant: 'success' });
     }
+
+    setStatus('');
+  };
+
+  const handleError = (err: any) => {
+    if (err.response.data.statusText) {
+      enqueueSnackbar(err.response.data.statusText, { variant: 'error' });
+    }
+
+    setStatus('');
+  };
+
+  const updateProduct = useCreateProduct(handleSuccess, handleError);
+  const deleteProduct = useDeleteProduct(handleSuccess, handleError);
+
+  const handleToggle = () => {
+    const status = product.status === 'available' ? 'unavailable' : 'available';
+
+    updateProduct.mutate({ ...product, status });
   };
 
   const handleDeleteClick = () => {
     setStatus('Confirm Delete');
   };
 
-  const handleDelete = async () => {
-    if (supabase) {
-      await supabase.from('products').delete().eq('id', product.id);
-    }
+  const handleDelete = () => {
+    setStatus('Deleting');
+
+    deleteProduct.mutate(product.id);
   };
 
   const handleCancel = () => {
@@ -70,9 +92,13 @@ const ProductRow = ({ product }: Props) => {
         checked={product.status === 'available'}
       />
 
-      <IconButton size='small' onClick={handleDeleteClick} sx={{ mr: 1 }}>
-        <Icon path={mdiTrashCan} size={1} color={theme.palette.error.main} />
-      </IconButton>
+      {status === 'Deleting' ? (
+        <CircularProgress size={20} />
+      ) : (
+        <IconButton size='small' onClick={handleDeleteClick} sx={{ mr: 1 }}>
+          <Icon path={mdiTrashCan} size={1} color={theme.palette.error.main} />
+        </IconButton>
+      )}
 
       <Icon path={mdiChevronRight} size={1} />
     </ListItem>

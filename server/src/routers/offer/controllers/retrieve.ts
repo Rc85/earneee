@@ -14,7 +14,7 @@ export const retrieveOffers = async (req: Request, resp: Response, next: NextFun
     where.push(`o.id = $1`);
   }
 
-  const offers = await database.offers.retrieve({
+  const offers = await database.offer.retrieve({
     where: where.join(' AND '),
     params,
     orderBy: 'o.ordinance',

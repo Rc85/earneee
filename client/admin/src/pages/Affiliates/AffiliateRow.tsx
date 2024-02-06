@@ -68,11 +68,11 @@ const AffiliateRow = ({ affiliate }: Props) => {
         />
       </Modal>
 
-      <ListItemIcon>
-        <Avatar src={affiliate.logoUrl || '/broken.jpg'} alt={affiliate.name} />
-      </ListItemIcon>
-
       <ListItemButton onClick={() => navigate('/affiliates/add', { state: { affiliateId: affiliate.id } })}>
+        <ListItemIcon>
+          <Avatar src={affiliate.logoUrl || '/broken.jpg'} alt={affiliate.name} />
+        </ListItemIcon>
+
         <ListItemText primary={affiliate.name} />
       </ListItemButton>
 

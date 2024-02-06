@@ -13,7 +13,7 @@ export const retrieveAffiliates = async (req: Request, resp: Response, next: Nex
     params.push(req.query.affiliateId);
   }
 
-  const affiliates = await database.affiliates.retrieve({
+  const affiliates = await database.affiliate.retrieve({
     where: where.join(' AND '),
     params,
     offset,
@@ -21,7 +21,7 @@ export const retrieveAffiliates = async (req: Request, resp: Response, next: Nex
     client
   });
 
-  const count = await database.affiliates.retrieve({ where: where.join(' AND '), params, client });
+  const count = await database.affiliate.retrieve({ where: where.join(' AND '), params, client });
 
   resp.locals.response = { status: 200, data: { affiliates, count: count.length } };
 

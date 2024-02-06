@@ -1,6 +1,6 @@
 import { TextField, InputAdornment, FormControlLabel, Checkbox, Box, CircularProgress } from '@mui/material';
 import { ProductVariantsInterface } from '../../../../../_shared/types';
-import { FormEvent, useContext, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { deepEqual, generateKey } from '../../../../../_shared/utils';
 import { useSnackbar } from 'notistack';
 import { Icon } from '@mdi/react';
@@ -8,9 +8,9 @@ import { mdiArrowUpDropCircle } from '@mdi/js';
 import { RichTextEditor } from '../../../../_shared/components';
 import { useEditor } from '@tiptap/react';
 import { editorExtensions } from '../../../../_shared/constants';
-import { SupabaseContext } from '../../../../_shared/components/SupabaseProvider/SupabaseProvider';
 import { useNavigate, useParams } from 'react-router-dom';
 import { LoadingButton } from '@mui/lab';
+import { useCreateProductVariant } from '../../../../_shared/api';
 
 interface Props {
   variant?: ProductVariantsInterface;
@@ -34,23 +34,41 @@ const VariantForm = ({ variant }: Props) => {
     [variant]
   );
   const [status, setStatus] = useState('');
-  const initialVariant = {
+  const initialVariant: ProductVariantsInterface = {
     id: generateKey(1),
     name: '',
     price: 0,
     ordinance: 0,
     description: null,
     featured: false,
-    url: null,
-    product_id: '',
+    productId: productId!,
     status: 'available',
-    created_at: new Date().toISOString(),
-    updated_at: null
+    createdAt: new Date().toISOString(),
+    updatedAt: null
   };
   const [initialState, setInitialState] = useState<ProductVariantsInterface>(initialVariant);
   const [form, setForm] = useState<ProductVariantsInterface>(initialVariant);
   const { enqueueSnackbar } = useSnackbar();
-  const { supabase } = useContext(SupabaseContext);
+
+  const handleSuccess = () => {
+    setStatus('');
+
+    if (variant) {
+      return enqueueSnackbar('Variant updated', { variant: 'success' });
+    }
+
+    navigate(`/product/${productId}/variants`);
+  };
+
+  const handleError = (err: any) => {
+    setStatus('');
+
+    if (err.response.data.statusText) {
+      enqueueSnackbar(err.response.data.statusText, { variant: 'error' });
+    }
+  };
+
+  const createVariant = useCreateProductVariant(handleSuccess, handleError);
 
   useEffect(() => {
     if (variant) {
@@ -71,30 +89,9 @@ const VariantForm = ({ variant }: Props) => {
       form.description = content;
     }
 
-    if (supabase) {
-      setStatus('Loading');
+    setStatus('Loading');
 
-      const response = await supabase.from('product_variants').upsert({
-        id: form.id,
-        name: form.name,
-        price: form.price,
-        description: form.description,
-        featured: form.featured,
-        product_id: productId
-      });
-
-      setStatus('');
-
-      if (response.error) {
-        return enqueueSnackbar('An error occurred', { variant: 'error' });
-      }
-
-      enqueueSnackbar(variant ? 'Variant updated' : 'Variant added', { variant: 'success' });
-
-      if (!variant) {
-        navigate(`/product/${productId}/variant/${form.id}`);
-      }
-    }
+    createVariant.mutate(form);
   };
 
   return (

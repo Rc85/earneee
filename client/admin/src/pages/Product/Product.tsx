@@ -10,56 +10,25 @@ import {
   Typography
 } from '@mui/material';
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
-import { useContext, useEffect, useState } from 'react';
-import { SupabaseContext } from '../../../../_shared/components/SupabaseProvider/SupabaseProvider';
-import { ProductsInterface } from '../../../../_shared/types';
 import { grey } from '@mui/material/colors';
 import { Icon } from '@mdi/react';
 import { mdiPencil, mdiPlusBox, mdiViewGridPlus } from '@mdi/js';
 import EditProduct from './EditProduct';
 import ProductVariants from './ProductVariants';
 import AddVariant from './AddVariant';
+import { retrieveProducts } from '../../../../_shared/api';
+import { Loading } from '../../../../_shared/components';
 
 const Product = () => {
+  const navigate = useNavigate();
   const params = useParams();
   const { productId } = params;
-  const { supabase } = useContext(SupabaseContext);
-  const [product, setProduct] = useState<ProductsInterface>();
-  const navigate = useNavigate();
+  const { isLoading, data: { data: { products } } = { data: {} } } = retrieveProducts({ productId });
+  const product = products?.[0];
 
-  useEffect(() => {
-    if (supabase) {
-      (async () => {
-        await retrieveProduct();
-
-        const dbChanges = supabase
-          .channel('schema-db-changes')
-          .on('postgres_changes', { event: '*', schema: 'public' }, async (payload) => {
-            if (payload.table === 'products') {
-              await retrieveProduct();
-            }
-          });
-
-        dbChanges.subscribe();
-
-        return () => {
-          dbChanges.unsubscribe();
-        };
-      })();
-    }
-  }, []);
-
-  const retrieveProduct = async () => {
-    if (supabase) {
-      const product = await supabase.from('products').select().eq('id', productId);
-
-      if (product.data) {
-        setProduct(product.data[0]);
-      }
-    }
-  };
-
-  return (
+  return isLoading ? (
+    <Loading />
+  ) : (
     <Box sx={{ display: 'flex', flexGrow: 1 }}>
       <Box
         sx={{

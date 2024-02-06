@@ -8,15 +8,15 @@ import { deleteAffiliate } from './controllers/delete';
 const router = Router();
 
 router.post(
-  '/api/v1/auth/admin/affiliates/add',
+  '/api/v1/auth/admin/affiliate/add',
   dbConnect,
   middleware(validateAddAffiliate),
   middleware(addAffiliate),
   response
 );
 
-router.get('/api/v1/affiliates/retrieve', dbConnect, middleware(retrieveAffiliates), response);
+router.get('/api/v1/affiliate/retrieve', dbConnect, middleware(retrieveAffiliates), response);
 
-router.delete('/api/v1/auth/admin/affiliates/delete', dbConnect, middleware(deleteAffiliate), response);
+router.delete('/api/v1/auth/admin/affiliate/delete', dbConnect, middleware(deleteAffiliate), response);
 
 export default router;

@@ -1,9 +1,11 @@
 import pg from 'pg';
 import { resultsToCamelCase } from '../../../_shared/utils';
 import { DatabaseCreateOptions, DatabaseQueryOptions, DatabaseRetrieveOptions } from '../../../_shared/types';
-import { affiliates } from './affiliates';
-import { categories } from './categories';
-import { offers } from './offers';
+import { affiliate } from './affiliate';
+import { category } from './category';
+import { product } from './product';
+import { offer } from './offer';
+import { user } from './user';
 
 const config: pg.PoolConfig = {
   host: process.env.PG_HOST,
@@ -141,7 +143,7 @@ export const database = {
     return await database
       .query(statement, options?.params)
       .then((result: any) => {
-        return resultsToCamelCase(result.rows)[0].count;
+        return result.rows[0].count;
       })
       .catch((err: any) => {
         console.log(statement);
@@ -165,9 +167,11 @@ export const database = {
         throw err;
       });
   },
-  affiliates,
-  categories,
-  offers
+  affiliate,
+  category,
+  offer,
+  product,
+  user
 };
 
 const generateMultiInsertParamString = (params: any[], columns: string[]) => {

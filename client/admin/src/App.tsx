@@ -25,7 +25,13 @@ import { QueryClientProvider, QueryClient } from 'react-query';
 axios.defaults.baseURL = import.meta.env.VITE_SERVER_URL;
 
 const App = () => {
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        refetchOnWindowFocus: false
+      }
+    }
+  });
 
   return (
     <Provider store={store}>

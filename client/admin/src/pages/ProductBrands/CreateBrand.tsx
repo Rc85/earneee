@@ -1,68 +1,89 @@
 import { Box, Button, CircularProgress, IconButton, TextField, useTheme } from '@mui/material';
-import { Section } from '../../../../_shared/components';
+import { Loading, Section } from '../../../../_shared/components';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Icon } from '@mdi/react';
 import { mdiArrowUpDropCircle, mdiRefresh, mdiTrashCan, mdiUpload } from '@mdi/js';
 import { grey } from '@mui/material/colors';
-import { ChangeEvent, FormEvent, useContext, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
 import { deepEqual, generateKey } from '../../../../../_shared/utils';
-import { ProductBrandsInterface, UserProfilesInterface } from '../../../../../_shared/types';
+import { ProductBrandUrlsInterface, ProductBrandsInterface } from '../../../../../_shared/types';
 import { LoadingButton } from '@mui/lab';
-import { SupabaseContext } from '../../../../_shared/components/SupabaseProvider/SupabaseProvider';
 import { useSnackbar } from 'notistack';
+import { retrieveProductBrands, retrieveUserProfiles, useCreateProductBrand } from '../../../../_shared/api';
+import { countries } from '../../../../../_shared';
 
 const CreateBrand = () => {
   const location = useLocation();
-  const brand: ProductBrandsInterface | undefined = location.state?.brand;
+  const brandId = location.state?.brandId;
+  const { isLoading, data: { data: { brands } } = { data: { brands: [] } } } = brandId
+    ? retrieveProductBrands({ brandId })
+    : { isLoading: false };
+  const brand = brands?.[0];
   const theme = useTheme();
   const fileInputRef = useRef<any>();
-  const [users, setUsers] = useState<UserProfilesInterface[]>([]);
   const [status, setStatus] = useState('');
-  const initialState: ProductBrandsInterface = brand || {
+  const initial = {
     id: generateKey(1),
     name: '',
-    logo_url: null,
-    logo_path: null,
+    logoUrl: null,
+    logoPath: null,
     owner: null,
     status: 'active',
-    created_at: new Date().toISOString(),
-    updated_at: null
+    createdAt: new Date().toISOString(),
+    updatedAt: null,
+    urls: []
   };
-  const [form, setForm] = useState<ProductBrandsInterface>(JSON.parse(JSON.stringify(initialState)));
-  const { supabase } = useContext(SupabaseContext);
-  const [file, setFile] = useState<File>();
+  const [initialState, setInitialState] = useState<ProductBrandsInterface>({ ...initial });
+  const [form, setForm] = useState<ProductBrandsInterface>({ ...initial });
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
+  const { data: { data: { userProfiles } } = { data: {} } } = retrieveUserProfiles();
 
   useEffect(() => {
-    (async () => {
-      if (supabase) {
-        const users = await supabase.from('user_profiles_with_email').select().order('email');
+    if (brand) {
+      setForm({ ...brand });
 
-        if (users.data) {
-          setUsers(users.data);
-        }
-      }
-    })();
-  }, []);
+      setInitialState({ ...brand });
+    }
+  }, [brand]);
+
+  const handleSuccess = (response: any) => {
+    setStatus('');
+
+    if (response.data.statusText && brand) {
+      return enqueueSnackbar(response.data.statusText, { variant: 'success' });
+    }
+
+    navigate(-1);
+  };
+
+  const handleError = (err: any) => {
+    setStatus('');
+
+    if (err.response.data.statusText) {
+      enqueueSnackbar(err.response.data.statusText, { variant: 'error' });
+    }
+  };
+
+  const createProductBrand = useCreateProductBrand(handleSuccess, handleError);
 
   const handleRemoveLogo = () => {
-    setForm({ ...form, logo_url: null });
+    setForm({ ...form, logoUrl: null });
+
+    createProductBrand.mutate(form);
   };
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
 
     if (file) {
-      setFile(file);
-
       const fileReader = new FileReader();
 
       fileReader.onload = (e) => {
         const data = e.target?.result;
 
         if (data && typeof data === 'string') {
-          setForm({ ...form, logo_url: data });
+          setForm({ ...form, logoUrl: data });
 
           fileInputRef.current.value = '';
         }
@@ -72,44 +93,43 @@ const CreateBrand = () => {
     }
   };
 
-  const handleSubmit = async (e?: FormEvent) => {
+  const handleSubmit = (e?: FormEvent) => {
     e?.preventDefault();
 
-    if (supabase) {
-      setStatus('Loading');
+    setStatus('Loading');
 
-      if (file) {
-        fileInputRef.current.value = '';
-
-        const response = await supabase.storage
-          .from('product_brands')
-          .upload(`${form.id}/logo.png`, file, { upsert: true });
-
-        if (response.error) {
-          setStatus('');
-
-          return enqueueSnackbar(response.error.message, { variant: 'error' });
-        }
-
-        form.logo_path = response.data.path;
-        form.logo_url = `${import.meta.env.VITE_STORAGE_URL}product_brands/${response.data.path}`;
-      } else if (!form.logo_url && form.logo_path) {
-        await supabase.storage.from('product_brands').remove([form.logo_path]);
-      }
-
-      const response = await supabase.from('product_brands').upsert(form);
-
-      setStatus('');
-
-      if (response.error) {
-        return enqueueSnackbar(response.error.message, { variant: 'error' });
-      }
-
-      navigate(-1);
-    }
+    createProductBrand.mutate(form);
   };
 
-  return (
+  const handleUrlChange = (value: string, key: keyof ProductBrandUrlsInterface, index: number) => {
+    const urls = form.urls ? [...form.urls] : [];
+
+    urls[index][key] = value;
+
+    setForm({ ...form, urls });
+  };
+
+  const handleRemoveUrl = (index: number) => {
+    const urls = form.urls ? [...form.urls] : [];
+
+    if (index >= 0) {
+      urls.splice(index, 1);
+    }
+
+    setForm({ ...form, urls });
+  };
+
+  const handleAddWebsiteLinkClick = () => {
+    const urls = form.urls ? [...form.urls] : [];
+
+    urls.push({ id: generateKey(1), url: '', country: 'CA', brandId: '', createdAt: '', updatedAt: '' });
+
+    setForm({ ...form, urls });
+  };
+
+  return isLoading ? (
+    <Loading />
+  ) : (
     <Section
       title='Create Brand'
       titleVariant='h3'
@@ -119,13 +139,13 @@ const CreateBrand = () => {
       onSubmit={handleSubmit}
     >
       <Box sx={{ display: 'flex', mb: 1 }}>
-        {Boolean(form.logo_url) ? (
+        {Boolean(form.logoUrl) ? (
           <Box
             sx={{
               backgroundRepeat: 'no-repeat',
               backgroundColor: 'white',
               backgroundPosition: 'center',
-              backgroundImage: `url(${form.logo_url})`,
+              backgroundImage: `url(${form.logoUrl})`,
               backgroundSize: 'contain',
               width: '150px',
               height: '150px',
@@ -188,14 +208,52 @@ const CreateBrand = () => {
             value={form.owner || ''}
           >
             <option value=''></option>
-            {users.map((user) => (
+            {userProfiles?.map((user) => (
               <option key={user.id} value={user.id}>
-                {user.email}
+                {user.email} {user.firstName ? `(${user.firstName}${user.lastName})` : ''}
               </option>
             ))}
           </TextField>
         </Box>
       </Box>
+
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }} onClick={handleAddWebsiteLinkClick}>
+        <Button>Add Website Link</Button>
+      </Box>
+
+      {form.urls?.map((url, i) => (
+        <Box key={url.id} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+          <TextField
+            label='URL'
+            type='url'
+            required
+            autoFocus
+            sx={{ mr: 1, mb: '0px !important' }}
+            onChange={(e) => handleUrlChange(e.target.value, 'url', i)}
+            value={url.url}
+          />
+
+          <TextField
+            label='Country'
+            required
+            select
+            SelectProps={{ native: true }}
+            onChange={(e) => handleUrlChange(e.target.value, 'country', i)}
+            value={url.country}
+            sx={{ mb: '0px !important' }}
+          >
+            {countries.map((country) => (
+              <option key={country.code} value={country.code}>
+                {country.name}
+              </option>
+            ))}
+          </TextField>
+
+          <IconButton size='small' onClick={() => handleRemoveUrl(i)}>
+            <Icon path={mdiTrashCan} size={1} />
+          </IconButton>
+        </Box>
+      ))}
 
       <LoadingButton
         type='submit'

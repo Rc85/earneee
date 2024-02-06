@@ -1,54 +1,23 @@
-import { Button, List } from '@mui/material';
-import { Section } from '../../../../_shared/components';
+import { Box, Button, List, Pagination } from '@mui/material';
+import { Loading, Section } from '../../../../_shared/components';
 import { Icon } from '@mdi/react';
 import { mdiPlusBox } from '@mdi/js';
 import CreateBrand from './CreateBrand';
 import { useNavigate } from 'react-router-dom';
-import { useContext, useEffect, useState } from 'react';
-import { ProductBrandsInterface } from '../../../../../_shared/types';
-import { SupabaseContext } from '../../../../_shared/components/SupabaseProvider/SupabaseProvider';
 import ProductBrandRow from './ProductBrandRow';
+import { retrieveProductBrands } from '../../../../_shared/api';
+import { useState } from 'react';
 
 const ProductBrands = () => {
   const navigate = useNavigate();
-  const [brands, setBrands] = useState<ProductBrandsInterface[]>([]);
-  const { supabase } = useContext(SupabaseContext);
+  const [page, setPage] = useState(0);
+  const { isLoading, data: { data: { brands, count = 0 } } = { data: {} } } = retrieveProductBrands();
 
-  useEffect(() => {
-    (async () => {
-      await retrieveBrands();
-
-      if (supabase) {
-        const dbChanges = supabase
-          .channel('schema-db-changes')
-          .on('postgres_changes', { event: '*', schema: 'public' }, async (payload) => {
-            if (payload.table === 'product_brands') {
-              await retrieveBrands();
-            }
-          });
-
-        dbChanges.subscribe();
-
-        return () => {
-          dbChanges.unsubscribe();
-        };
-      }
-    })();
-  }, []);
-
-  const retrieveBrands = async () => {
-    if (supabase) {
-      const response = await supabase.from('product_brands').select().order('name');
-
-      if (response.data) {
-        setBrands(response.data);
-      }
-    }
-  };
-
-  return (
+  return isLoading ? (
+    <Loading />
+  ) : (
     <Section
-      title='Product Brand'
+      title='Product Brands'
       titleVariant='h3'
       position='center'
       disableGutters
@@ -64,10 +33,14 @@ const ProductBrands = () => {
       ]}
     >
       <List disablePadding>
-        {brands.map((brand) => (
+        {brands?.map((brand) => (
           <ProductBrandRow key={brand.id} brand={brand} />
         ))}
       </List>
+
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+        <Pagination count={Math.ceil(count / 20)} page={page + 1} onChange={(_, page) => setPage(page - 1)} />
+      </Box>
     </Section>
   );
 };

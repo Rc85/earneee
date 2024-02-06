@@ -17,3 +17,6 @@ export * from './categories/mutations';
 export * from './categories/queries';
 export * from './offers/mutations';
 export * from './offers/queries';
+export * from './products/queries';
+export * from './users/queries';
+export * from './products/mutations';

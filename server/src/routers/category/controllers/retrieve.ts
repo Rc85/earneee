@@ -14,7 +14,7 @@ export const retrieveCategories = async (req: Request, resp: Response, next: Nex
     where.push(`c.parent_id IS NULL`);
   }
 
-  const categories = await database.categories.retrieve({
+  const categories = await database.category.retrieve({
     where: where.join(' AND '),
     params,
     orderBy: 'c.ordinance',

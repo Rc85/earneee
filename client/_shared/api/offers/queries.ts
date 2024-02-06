@@ -6,7 +6,7 @@ export const retrieveOffers = (options?: { offerId: string }) => {
   return useQuery<{ data: { offers: OffersInterface[] } }>(['offers', options?.offerId], () =>
     axios({
       method: 'get',
-      url: '/api/v1/offers/retrieve',
+      url: '/api/v1/offer/retrieve',
       params: options,
       withCredentials: true
     })

@@ -33,4 +33,11 @@ router.post(
   response
 );
 
+router.get(
+  /^\/api\/v1\/auth\/(admin|user)\/profile\/retrieve/,
+  dbConnect,
+  middleware(controllers.retrieveUserProfiles),
+  response
+);
+
 export default router;

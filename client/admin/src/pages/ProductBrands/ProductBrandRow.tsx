@@ -9,13 +9,13 @@ import {
   Switch,
   useTheme
 } from '@mui/material';
-import { ProductBrandsInterface } from '../../../../_shared/types';
+import { ProductBrandsInterface } from '../../../../../_shared/types';
 import { Icon } from '@mdi/react';
 import { mdiTrashCan } from '@mdi/js';
-import { useContext, useState } from 'react';
-import { SupabaseContext } from '../../../../_shared/components/SupabaseProvider/SupabaseProvider';
+import { useState } from 'react';
 import { Modal } from '../../../../_shared/components';
 import { useNavigate } from 'react-router-dom';
+import { useCreateProductBrand, useDeleteProductBrand } from '../../../../_shared/api';
 
 interface Props {
   brand: ProductBrandsInterface;
@@ -24,29 +24,23 @@ interface Props {
 const ProductBrandRow = ({ brand }: Props) => {
   const theme = useTheme();
   const [status, setStatus] = useState('');
-  const { supabase } = useContext(SupabaseContext);
   const navigate = useNavigate();
+  const updateBrand = useCreateProductBrand();
+  const deleteBrand = useDeleteProductBrand(
+    () => setStatus(''),
+    () => setStatus('')
+  );
 
-  const handleToggle = async () => {
-    if (supabase) {
-      const status = brand.status === 'active' ? 'inactive' : 'active';
+  const handleToggle = () => {
+    const status = brand.status === 'active' ? 'inactive' : 'active';
 
-      await supabase.from('product_brands').update({ status }).eq('id', brand.id);
-    }
+    updateBrand.mutate({ ...brand, status });
   };
 
-  const handleDelete = async () => {
-    if (supabase) {
-      setStatus('Deleting');
+  const handleDelete = () => {
+    setStatus('Deleting');
 
-      if (brand.logo_path) {
-        await supabase.storage.from('product_brands').remove([brand.logo_path]);
-      }
-
-      await supabase.from('product_brands').delete().eq('id', brand.id);
-
-      setStatus('');
-    }
+    deleteBrand.mutate(brand.id);
   };
 
   return (
@@ -60,12 +54,10 @@ const ProductBrandRow = ({ brand }: Props) => {
         cancelText='No'
       />
 
-      <ListItemButton onClick={() => navigate('/brand/create', { state: { brand } })}>
-        {brand.logo_url && (
-          <ListItemIcon>
-            <Avatar src={brand.logo_url} />
-          </ListItemIcon>
-        )}
+      <ListItemButton onClick={() => navigate('/brand/create', { state: { brandId: brand.id } })}>
+        <ListItemIcon>
+          <Avatar src={brand.logoUrl || '/broken.jpg'} alt={brand.name} />
+        </ListItemIcon>
 
         <ListItemText primary={brand.name} />
       </ListItemButton>

@@ -118,7 +118,7 @@ const TopBar = ({ maxWidth }: Props) => {
                   <Icon path={mdiStarCircle} size={1} />
                 </ListItemIcon>
 
-                <ListItemText primary='Product Brand' />
+                <ListItemText primary='Product Brands' />
               </ListItemButton>
             </ListItem>
           )}

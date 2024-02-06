@@ -12,7 +12,7 @@ export const useAddAffiliate = (onSuccess?: (data: any) => void, onError?: (err:
     (options: AffiliatesInterface) =>
       axios({
         method: 'post',
-        url: '/api/v1/auth/admin/affiliates/add',
+        url: '/api/v1/auth/admin/affiliate/add',
         withCredentials: true,
         data: options
       }),
@@ -41,7 +41,7 @@ export const useDeleteAffiliate = (onSuccess?: (data: any) => void, onError?: (e
     (options: { affiliateId: string; deleteAllProducts?: boolean }) =>
       axios({
         method: 'delete',
-        url: '/api/v1/auth/admin/affiliates/delete',
+        url: '/api/v1/auth/admin/affiliate/delete',
         withCredentials: true,
         params: options
       }),

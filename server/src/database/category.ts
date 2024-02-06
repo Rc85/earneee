@@ -3,7 +3,7 @@ import { DatabaseRetrieveOptions } from '../../../_shared/types';
 import { resultsToCamelCase } from '../../../_shared/utils';
 import { HttpException } from '../utils';
 
-export const categories = {
+export const category = {
   retrieve: async (options?: DatabaseRetrieveOptions) => {
     const database = options?.client || db;
     const statement = `SELECT

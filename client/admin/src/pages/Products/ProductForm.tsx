@@ -3,19 +3,19 @@ import { RichTextEditor } from '../../../../_shared/components';
 import { LoadingButton } from '@mui/lab';
 import { Icon } from '@mdi/react';
 import { mdiArrowUpDropCircle, mdiTrashCan } from '@mdi/js';
-import { ChangeEvent, FormEvent, useContext, useEffect, useState } from 'react';
+import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { useEditor } from '@tiptap/react';
 import { editorExtensions } from '../../../../_shared/constants';
-import { SupabaseContext } from '../../../../_shared/components/SupabaseProvider/SupabaseProvider';
-import { generateKey } from '../../../../../_shared/utils';
 import { useSnackbar } from 'notistack';
-import {
-  AffiliatesInterface,
-  CategoriesInterface,
-  ProductBrandsInterface,
-  ProductsInterface
-} from '../../../../../_shared/types';
+import { CategoriesInterface, ProductsInterface } from '../../../../../_shared/types';
 import { useNavigate } from 'react-router-dom';
+import {
+  retrieveAffiliates,
+  retrieveCategories,
+  retrieveProductBrands,
+  useCreateProduct
+} from '../../../../_shared/api';
+import { generateKey } from '../../../../../_shared/utils';
 
 interface Props {
   product?: ProductsInterface;
@@ -26,17 +26,17 @@ const editorStyle = { mb: 1.5 };
 const ProductForm = ({ product }: Props) => {
   const [status, setStatus] = useState('');
   const [form, setForm] = useState<ProductsInterface>({
-    id: '',
+    id: generateKey(1),
     name: '',
     description: '',
     type: '',
-    affiliate_id: '',
-    category_id: 0,
-    brand_id: '',
+    affiliateId: '',
+    categoryId: 0,
+    brandId: '',
     excerpt: '',
     status: 'available',
-    created_at: '',
-    updated_at: ''
+    createdAt: '',
+    updatedAt: ''
   });
   const editor = useEditor(
     {
@@ -48,79 +48,46 @@ const ProductForm = ({ product }: Props) => {
     },
     [product]
   );
-  const { supabase } = useContext(SupabaseContext);
   const { enqueueSnackbar } = useSnackbar();
   const [selectedCategories, setSelectedCategories] = useState<CategoriesInterface[]>([]);
-  const [categories, setCategories] = useState<CategoriesInterface[]>([]);
   const navigate = useNavigate();
-  const [affiliates, setAffiliates] = useState<AffiliatesInterface[]>([]);
-  const [brands, setBrands] = useState<ProductBrandsInterface[]>([]);
+  const { data: { data: { brands } } = { data: {} } } = retrieveProductBrands();
+  const { data: { data: { affiliates } } = { data: {} } } = retrieveAffiliates();
+  const { data: { data: { categories } } = { data: {} } } = retrieveCategories({
+    parentId: selectedCategories[selectedCategories.length - 1]?.id || null
+  });
 
   useEffect(() => {
-    if (supabase) {
-      (async () => {
-        const affiliates = await supabase
-          .from('affiliates')
-          .select()
-          .order('name')
-          .returns<AffiliatesInterface[]>();
+    if (product) {
+      setForm({ ...product });
 
-        if (affiliates.data) {
-          setAffiliates(affiliates.data);
+      if (product.category) {
+        const exists = selectedCategories.find((category) => category.id === product.category?.id);
+
+        if (!exists) {
+          setSelectedCategories([...selectedCategories, product.category]);
         }
-
-        const brands = await supabase
-          .from('product_brands')
-          .select('id, name')
-          .eq('status', 'active')
-          .returns<ProductBrandsInterface[]>();
-
-        if (brands.data) {
-          setBrands(brands.data);
-        }
-
-        if (product) {
-          setForm(product);
-
-          const exists = selectedCategories.find((category) => category.id === product.category_id);
-
-          if (!exists) {
-            const category = await supabase
-              .from('categories')
-              .select()
-              .eq('id', product.category_id)
-              .returns<CategoriesInterface[]>();
-
-            if (category.data?.[0]) {
-              setSelectedCategories([...selectedCategories, category.data[0]]);
-            }
-          }
-        }
-      })();
+      }
     }
   }, [product]);
 
-  useEffect(() => {
-    (async () => {
-      if (supabase) {
-        let parentId: number | undefined = selectedCategories[selectedCategories.length - 1]?.id;
+  const handleSuccess = () => {
+    setStatus('');
 
-        const select = supabase.from('categories').select();
+    if (product) {
+      return enqueueSnackbar('Product updated', { variant: 'success' });
+    }
 
-        if (parentId == null) {
-          select.is('parent_id', null);
-        } else {
-          select.eq('parent_id', parentId);
-        }
+    navigate(-1);
+  };
 
-        const response = await select.order('ordinance, name');
+  const handleError = (err: any) => {
+    if (err.response.data.statusText) {
+      enqueueSnackbar(err.response.data.statusText, { variant: 'error' });
+    }
+  };
 
-        if (response.data) {
-          setCategories(response.data);
-        }
-      }
-    })();
-  }, [selectedCategories.length]);
+  const createProduct = useCreateProduct(handleSuccess, handleError);
 
   const handleSubmit = async (e?: FormEvent) => {
     e?.preventDefault();
@@ -135,37 +102,10 @@ const ProductForm = ({ product }: Props) => {
       return enqueueSnackbar('Category required', { variant: 'error' });
     }
 
-    if (supabase) {
+    if (selectedCategories.length) {
       setStatus('Loading');
 
-      const id = product?.id || generateKey(1);
-
-      const response = await supabase.from('products').upsert({
-        id,
-        name: form.name,
-        type: form.type,
-        affiliate_id: form.affiliate_id || null,
-        brand_id: form.brand_id || null,
-        excerpt: form.excerpt || null,
-        category_id: categoryId,
-        description: form.description || null
-      });
-
-      setStatus('');
-
-      if (response.error) {
-        const message = response.error.code === '23505' ? 'Name already exist' : response.error.message;
-
-        return enqueueSnackbar(message, { variant: 'error' });
-      }
-
-      enqueueSnackbar(product ? 'Updated' : 'Created', {
-        variant: 'success'
-      });
-
-      if (!product) {
-        navigate(`/product/${id}`);
-      }
+      createProduct.mutate({ ...form, categoryId: selectedCategories[selectedCategories.length - 1].id });
     }
   };
 
@@ -174,12 +114,10 @@ const ProductForm = ({ product }: Props) => {
   };
 
   const handleCategoryChange = async (e: ChangeEvent<HTMLInputElement>) => {
-    if (supabase) {
-      const selectedCategory = categories.find((category) => category.id === parseInt(e.target.value));
+    const category = categories?.find((category) => category.id === parseInt(e.target.value));
 
-      if (selectedCategory) {
-        setSelectedCategories([...selectedCategories, selectedCategory]);
-      }
+    if (category) {
+      setSelectedCategories([...selectedCategories, category]);
     }
   };
 
@@ -230,13 +168,13 @@ const ProductForm = ({ product }: Props) => {
         </Box>
       )}
 
-      {categories.length > 0 && (
+      {categories && categories.length > 0 && (
         <TextField
           select
           label='Category'
           SelectProps={{ native: true }}
           onChange={handleCategoryChange}
-          value={form.category_id || ''}
+          value={form.categoryId || ''}
         >
           <option value=''></option>
           {categories.map((category) => (
@@ -264,11 +202,11 @@ const ProductForm = ({ product }: Props) => {
         select
         label='Affiliate'
         SelectProps={{ native: true }}
-        onChange={(e) => handleChange('affiliate_id', e.target.value)}
-        value={form.affiliate_id || ''}
+        onChange={(e) => handleChange('affiliateId', e.target.value)}
+        value={form.affiliateId || ''}
       >
         <option value=''></option>
-        {affiliates.map((affiliate) => (
+        {affiliates?.map((affiliate) => (
           <option key={affiliate.id} value={affiliate.id}>
             {affiliate.name}
           </option>
@@ -279,11 +217,11 @@ const ProductForm = ({ product }: Props) => {
         select
         label='Brand'
         SelectProps={{ native: true }}
-        onChange={(e) => handleChange('brand_id', e.target.value)}
-        value={form.brand_id || ''}
+        onChange={(e) => handleChange('brandId', e.target.value)}
+        value={form.brandId || ''}
       >
         <option value=''></option>
-        {brands.map((brand) => (
+        {brands?.map((brand) => (
           <option key={brand.id} value={brand.id}>
             {brand.name}
           </option>

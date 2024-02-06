@@ -1,3 +1,5 @@
+import { ProductBrandUrlsInterface } from '.';
+
 export interface ProductBrandsInterface {
   id: string;
   name: string;
@@ -7,4 +9,5 @@ export interface ProductBrandsInterface {
   status: string;
   createdAt: string;
   updatedAt: string | null;
+  urls?: ProductBrandUrlsInterface[];
 }
