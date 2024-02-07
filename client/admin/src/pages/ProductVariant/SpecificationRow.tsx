@@ -9,9 +9,8 @@ import {
 import { ProductSpecificationsInterface } from '../../../../../_shared/types';
 import { Icon } from '@mdi/react';
 import { mdiDragHorizontalVariant, mdiTrashCan } from '@mdi/js';
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { Modal } from '../../../../_shared/components';
-import { SupabaseContext } from '../../../../_shared/components/SupabaseProvider/SupabaseProvider';
 import AddSpecification from './AddSpecification';
 import { useDeleteProductSpecification } from '../../../../_shared/api';
 import { useSortable } from '@dnd-kit/sortable';

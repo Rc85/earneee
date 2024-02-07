@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 import { setIsLoading } from '../../redux/app';
 import {
   ProductBrandsInterface,
+  ProductMediaInterface,
   ProductOptionsInterface,
   ProductSpecificationsInterface,
   ProductVariantsInterface,
@@ -355,6 +356,151 @@ export const useSortProductSpecifications = (
         dispatch(setIsLoading(false));
 
         queryClient.invalidateQueries(['specifications']);
+
+        onSuccess?.(data);
+      },
+      onError: (err) => {
+        dispatch(setIsLoading(false));
+
+        onError?.(err);
+      }
+    }
+  );
+};
+
+export const useUploadProductMedia = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    (options: FormData | { variantId: string; image: string }) =>
+      axios({
+        method: 'post',
+        url: '/api/v1/auth/admin/product/media/upload',
+        withCredentials: true,
+        data: options
+      }),
+    {
+      onSuccess: (data) => {
+        dispatch(setIsLoading(false));
+
+        queryClient.invalidateQueries(['product media']);
+
+        onSuccess?.(data);
+      },
+      onError: (err) => {
+        dispatch(setIsLoading(false));
+
+        onError?.(err);
+      }
+    }
+  );
+};
+
+export const useAddProductMedia = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    (options: ProductMediaInterface) =>
+      axios({
+        method: 'post',
+        url: '/api/v1/auth/admin/product/media/add',
+        withCredentials: true,
+        data: options
+      }),
+    {
+      onSuccess: (data) => {
+        dispatch(setIsLoading(false));
+
+        queryClient.invalidateQueries(['product media']);
+
+        onSuccess?.(data);
+      },
+      onError: (err) => {
+        dispatch(setIsLoading(false));
+
+        onError?.(err);
+      }
+    }
+  );
+};
+
+export const useSortProductMedia = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    (options: { media: ProductMediaInterface[] }) =>
+      axios({
+        method: 'put',
+        url: '/api/v1/auth/admin/product/media/sort',
+        withCredentials: true,
+        data: options
+      }),
+    {
+      onSuccess: (data) => {
+        dispatch(setIsLoading(false));
+
+        queryClient.invalidateQueries(['product media']);
+
+        onSuccess?.(data);
+      },
+      onError: (err) => {
+        dispatch(setIsLoading(false));
+
+        onError?.(err);
+      }
+    }
+  );
+};
+
+export const useUpdateProductMedia = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    (options: ProductMediaInterface) =>
+      axios({
+        method: 'put',
+        url: '/api/v1/auth/admin/product/media/update',
+        withCredentials: true,
+        data: options
+      }),
+    {
+      onSuccess: (data) => {
+        dispatch(setIsLoading(false));
+
+        queryClient.invalidateQueries(['product media']);
+
+        onSuccess?.(data);
+      },
+      onError: (err) => {
+        dispatch(setIsLoading(false));
+
+        onError?.(err);
+      }
+    }
+  );
+};
+
+export const useDeleteProductMedia = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    (mediaId: string) =>
+      axios({
+        method: 'delete',
+        url: '/api/v1/auth/admin/product/media/delete',
+        withCredentials: true,
+        params: { mediaId }
+      }),
+    {
+      onSuccess: (data) => {
+        dispatch(setIsLoading(false));
+
+        queryClient.invalidateQueries(['product media']);
 
         onSuccess?.(data);
       },

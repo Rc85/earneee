@@ -1,6 +1,5 @@
 import {
   mdiAccount,
-  mdiFilter,
   mdiHandshake,
   mdiHome,
   mdiLogout,
@@ -131,18 +130,6 @@ const TopBar = ({ maxWidth }: Props) => {
                 </ListItemIcon>
 
                 <ListItemText primary='Products' />
-              </ListItemButton>
-            </ListItem>
-          )}
-
-          {user?.isAdmin && (
-            <ListItem disableGutters disablePadding>
-              <ListItemButton onClick={() => handleNavClick('/filters')}>
-                <ListItemIcon>
-                  <Icon path={mdiFilter} size={1} />
-                </ListItemIcon>
-
-                <ListItemText primary='Filters' />
               </ListItemButton>
             </ListItem>
           )}

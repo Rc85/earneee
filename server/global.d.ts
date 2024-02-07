@@ -9,6 +9,7 @@ interface ResponseLocals {
 declare module 'express' {
   export interface Request {
     rawBody?: any;
+    files: any;
     session: Session & {
       user?: { id: string; email: string };
     };
@@ -22,6 +23,7 @@ declare module 'express' {
 declare module 'http' {
   interface IncomingMessage {
     rawBody?: any;
+    files: any;
     session: Session & {
       user?: { id: string; email: string };
     };

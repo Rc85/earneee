@@ -42,7 +42,7 @@ exports.up = (pgm) => {
       status: {
         type: 'varchar',
         notNull: true,
-        default: 'enable'
+        default: 'enabled'
       },
       created_at: {
         type: 'timestamptz',

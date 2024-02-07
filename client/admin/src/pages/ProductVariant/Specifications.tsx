@@ -1,10 +1,9 @@
 import { Button, List } from '@mui/material';
-import { Section } from '../../../../_shared/components';
+import { Loading, Section } from '../../../../_shared/components';
 import { Icon } from '@mdi/react';
 import { mdiPlusBox } from '@mdi/js';
 import { useState } from 'react';
 import AddSpecification from './AddSpecification';
-import { ProductSpecificationsInterface } from '../../../../../_shared/types';
 import {
   DndContext,
   DragEndEvent,
@@ -57,7 +56,9 @@ const Specifications = () => {
     }
   };
 
-  return (
+  return isLoading ? (
+    <Loading />
+  ) : (
     <Section
       title='Specifications'
       titleVariant='h3'

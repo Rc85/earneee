@@ -2,6 +2,7 @@ import axios from 'axios';
 import { useQuery } from 'react-query';
 import {
   ProductBrandsInterface,
+  ProductMediaInterface,
   ProductOptionsInterface,
   ProductSpecificationsInterface,
   ProductVariantsInterface,
@@ -66,5 +67,16 @@ export const retrieveProductSpecifications = (options?: { variantId?: string }) 
         params: options,
         withCredentials: true
       })
+  );
+};
+
+export const retrieveProductMedia = (options?: { variantId?: string }) => {
+  return useQuery<{ data: { media: ProductMediaInterface[] } }>(['product media', options?.variantId], () =>
+    axios({
+      method: 'get',
+      url: '/api/v1/product/media/retrieve',
+      params: options,
+      withCredentials: true
+    })
   );
 };

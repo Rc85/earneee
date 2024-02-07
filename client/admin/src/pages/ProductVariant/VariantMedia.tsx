@@ -25,12 +25,18 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy
 } from '@dnd-kit/sortable';
+import {
+  retrieveProductMedia,
+  useAddProductMedia,
+  useSortProductMedia,
+  useUploadProductMedia
+} from '../../../../_shared/api';
+import { setIsLoading } from '../../../../_shared/redux/app';
+import { useDispatch } from 'react-redux';
 
 const VariantMedia = () => {
   const [status, setStatus] = useState('');
-  const [media, setMedia] = useState<ProductMediaInterface[]>([]);
   const [type, setType] = useState('image');
-  const { supabase } = useContext(SupabaseContext);
   const { enqueueSnackbar } = useSnackbar();
   const params = useParams();
   const { variantId, productId } = params;
@@ -39,87 +45,87 @@ const VariantMedia = () => {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
   const fileInputRef = useRef<any>(null);
+  const { isLoading, data: { data: { media } } = { data: {} } } = retrieveProductMedia({ variantId });
+  const dispatch = useDispatch();
 
-  useEffect(() => {
-    if (supabase) {
-      (async () => {
-        await retrieveMedia();
-      })();
-
-      const dbChanges = supabase
-        .channel('schema-db-changes')
-        .on('postgres_changes', { event: 'INSERT', schema: 'public' }, async (payload) => {
-          if (payload.table === 'product_media') {
-            await retrieveMedia();
-          }
-        })
-        .on('postgres_changes', { event: 'DELETE', schema: 'public' }, async (payload) => {
-          if (payload.table === 'product_media') {
-            await retrieveMedia();
-          }
-        });
-
-      dbChanges.subscribe();
-
-      return () => {
-        dbChanges.unsubscribe();
-      };
+  const handleSuccess = (response: any) => {
+    if (response.data.statusText) {
+      enqueueSnackbar(response.data.statusText, { variant: 'success' });
     }
-  }, []);
 
-  const retrieveMedia = async () => {
-    if (supabase) {
-      const media = await supabase
-        .from('product_media')
-        .select()
-        .eq('variant_id', variantId)
-        .order('ordinance');
+    fileInputRef.current.value = '';
 
-      if (media.data) {
-        setMedia(media.data);
-      }
-    }
+    setStatus('');
   };
 
+  const handleError = (err: any) => {
+    if (err.response.data.statusText) {
+      enqueueSnackbar(err.response.data.statusText, { variant: 'error' });
+    }
+
+    fileInputRef.current.value = '';
+
+    setStatus('');
+  };
+
+  const uploadProductMedia = useUploadProductMedia(handleSuccess, handleError);
+  const addProductMedia = useAddProductMedia(handleSuccess, handleError);
+  const sortProductMedia = useSortProductMedia();
+
   const handleAddMedia = (url: string, type: string, videoId: string) => {
-    if (supabase) {
-      setStatus('Loading');
+    setStatus('Loading');
 
-      const image = new Image();
+    console.log(videoId);
 
-      image.onload = async () => {
-        const { width, height } = image;
-        const ordinance = media.length;
-        const id = generateKey(1);
+    if (media) {
+      const id = generateKey(1);
 
-        const response = await supabase.from('product_media').insert({
+      if (type === 'image') {
+        const image = new Image();
+
+        image.onload = () => {
+          console.log('1');
+          const { width, height } = image;
+          const ordinance = media.length;
+
+          addProductMedia.mutate({
+            id,
+            url,
+            path: videoId || null,
+            height,
+            width,
+            ordinance,
+            type,
+            variantId: variantId!,
+            status: 'enabled',
+            createdAt: '',
+            updatedAt: ''
+          });
+        };
+
+        image.src = url;
+      } else {
+        addProductMedia.mutate({
           id,
           url,
-          path: videoId || null,
-          height,
-          width,
-          ordinance,
+          path: videoId,
+          height: 0,
+          width: 0,
+          ordinance: media.length,
           type,
-          variant_id: variantId
+          variantId: variantId!,
+          status: 'enabled',
+          createdAt: '',
+          updatedAt: ''
         });
-
-        setStatus('');
-
-        if (response.error) {
-          return enqueueSnackbar(response.error.message, { variant: 'error' });
-        }
-
-        enqueueSnackbar(response.statusText, { variant: 'success' });
-      };
-
-      image.src = url;
+      }
     }
   };
 
   const handleDragEnd = async (e: DragEndEvent) => {
     const { active, over } = e;
 
-    if (active.id !== over?.id) {
+    if (active.id !== over?.id && media) {
       const oldIndex = media.findIndex((media) => media.id === active.id);
       const newIndex = media.findIndex((media) => media.id === over?.id);
 
@@ -132,13 +138,7 @@ const VariantMedia = () => {
         media.ordinance = index + 1;
       }
 
-      if (supabase) {
-        const response = await supabase.from('product_media').upsert(sortedMedia);
-
-        if (!response.error) {
-          setMedia(sortedMedia);
-        }
-      }
+      sortProductMedia.mutate({ media: sortedMedia });
     }
   };
 
@@ -146,33 +146,33 @@ const VariantMedia = () => {
     if (e.target.files?.[0]) {
       const file = e.target.files[0];
 
-      if (supabase) {
-        setStatus('Loading');
+      if (file) {
+        if (type === 'image') {
+          const fileReader = new FileReader();
 
-        const response = await supabase.storage
-          .from('product_media')
-          .upload(`${productId}/${variantId}/${file.name}`, file);
+          fileReader.onload = (e: any) => {
+            const result = e.target?.result;
 
-        fileInputRef.current.value = '';
+            dispatch(setIsLoading(true));
 
-        if (response.error) {
-          return enqueueSnackbar(response.error.message, { variant: 'error' });
+            uploadProductMedia.mutate({ variantId: variantId!, image: result });
+          };
+
+          fileReader.readAsDataURL(file);
+        } else if (type === 'video') {
+          const formData = new FormData();
+
+          formData.set('media', file);
+          formData.set('variantId', variantId!);
+
+          dispatch(setIsLoading(true));
+
+          uploadProductMedia.mutate(formData);
         }
-
-        enqueueSnackbar('File uploaded', { variant: 'success' });
-
-        const id = generateKey(1);
-
-        await supabase.from('product_media').insert({
-          id,
-          url: `${import.meta.env.VITE_STORAGE_URL}product_media/${response.data.path}`,
-          path: response.data.path || null,
-          type,
-          variant_id: variantId,
-          ordinance: media.length
-        });
       }
     }
+
+    fileInputRef.current.value = '';
   };
 
   const handleUploadClick = (type: string) => {
@@ -228,8 +228,8 @@ const VariantMedia = () => {
       <input type='file' ref={fileInputRef} hidden onChange={handleFileChange} />
 
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={media} strategy={verticalListSortingStrategy}>
-          {media.length > 0 && (
+        <SortableContext items={media || []} strategy={verticalListSortingStrategy}>
+          {media && media.length > 0 && (
             <List disablePadding>
               {media.map((media) => (
                 <MediaRow key={media.id} media={media} />
