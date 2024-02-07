@@ -1,14 +1,12 @@
 import { Button, ButtonGroup, List } from '@mui/material';
-import { Modal, Section } from '../../../../_shared/components';
+import { Loading, Modal, Section } from '../../../../_shared/components';
 import { Icon } from '@mdi/react';
 import { mdiImage, mdiPlusBox, mdiUpload, mdiVideo } from '@mdi/js';
-import { ChangeEvent, useContext, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, useRef, useState } from 'react';
 import AddMedia from './AddMedia';
-import { SupabaseContext } from '../../../../_shared/components/SupabaseProvider/SupabaseProvider';
 import { generateKey } from '../../../../../_shared/utils';
 import { useSnackbar } from 'notistack';
 import { useParams } from 'react-router-dom';
-import { ProductMediaInterface } from '../../../../../_shared/types';
 import MediaRow from './MediaRow';
 import {
   DndContext,
@@ -39,7 +37,7 @@ const VariantMedia = () => {
   const [type, setType] = useState('image');
   const { enqueueSnackbar } = useSnackbar();
   const params = useParams();
-  const { variantId, productId } = params;
+  const { variantId } = params;
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -181,7 +179,9 @@ const VariantMedia = () => {
     fileInputRef.current?.click();
   };
 
-  return (
+  return isLoading ? (
+    <Loading />
+  ) : (
     <Section
       title='MEDIA'
       titleVariant='h3'
