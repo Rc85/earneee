@@ -1,9 +1,7 @@
 import { mdiMagnify } from '@mdi/js';
 import { Icon } from '@mdi/react';
 import { Box, TextField, Button } from '@mui/material';
-import { FormEvent, useContext, useEffect, useState } from 'react';
-import { SubcategoriesInterface } from '../../../../_shared/types';
-import { SupabaseContext } from '../../../../_shared/components/SupabaseProvider/SupabaseProvider';
+import { FormEvent, useEffect, useState } from 'react';
 
 interface Props {
   onChange: (filters: { filter?: string; search?: string }) => void;
@@ -12,30 +10,12 @@ interface Props {
 const SearchProducts = ({ onChange }: Props) => {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('');
-  const [subcategories, setSubcategories] = useState<SubcategoriesInterface[]>([]);
-  const { supabase } = useContext(SupabaseContext);
-
-  useEffect(() => {
-    (async () => {
-      await retrieveSubcategories();
-    })();
-  }, []);
 
   useEffect(() => {
     if (filter) {
       onChange({ filter, search });
     }
   }, [filter]);
-
-  const retrieveSubcategories = async () => {
-    if (supabase) {
-      const subcategories = await supabase.from('subcategories').select().order('name');
-
-      if (subcategories.data) {
-        setSubcategories(subcategories.data);
-      }
-    }
-  };
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -57,11 +37,11 @@ const SearchProducts = ({ onChange }: Props) => {
         onChange={(e) => setFilter(e.target.value)}
       >
         <option value=''></option>
-        {subcategories.map((subcategory) => (
-          <option key={subcategory.id} value={subcategory.id}>
-            {subcategory.name}
+        {/* {categories.map((category) => (
+          <option key={category.id} value={category.id}>
+            {category.name}
           </option>
-        ))}
+        ))} */}
       </TextField>
 
       <Box

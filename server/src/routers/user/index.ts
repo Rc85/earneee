@@ -40,4 +40,6 @@ router.get(
   response
 );
 
+router.post('/api/v1/password/reset', dbConnect, middleware(controllers.resetPassword), response);
+
 export default router;

@@ -2,18 +2,14 @@ import { Button } from '@mui/material';
 import { Loading, Section } from '../../../../_shared/components';
 import { Icon } from '@mdi/react';
 import { mdiPlusBox } from '@mdi/js';
-import { useContext, useEffect, useState } from 'react';
+import { useState } from 'react';
 import AddOption from './AddOption';
-import { ProductOptionsInterface } from '../../../../../_shared/types';
-import { SupabaseContext } from '../../../../_shared/components/SupabaseProvider/SupabaseProvider';
-import { useSnackbar } from 'notistack';
 import { useParams } from 'react-router-dom';
 import OptionRow from './OptionRow';
 import { retrieveProductOptions } from '../../../../_shared/api';
 
 const VariantOptions = () => {
   const [status, setStatus] = useState('');
-  const { enqueueSnackbar } = useSnackbar();
   const params = useParams();
   const { variantId } = params;
   const { isLoading, data: { data: { options } } = { data: {} } } = retrieveProductOptions({ variantId });

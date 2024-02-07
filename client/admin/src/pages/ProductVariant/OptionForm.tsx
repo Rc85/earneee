@@ -18,8 +18,6 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy
 } from '@dnd-kit/sortable';
-import { useContext } from 'react';
-import { SupabaseContext } from '../../../../_shared/components/SupabaseProvider/SupabaseProvider';
 
 interface Props {
   option: ProductOptionsInterface;
@@ -46,12 +44,11 @@ const OptionForm = ({
       coordinateGetter: sortableKeyboardCoordinates
     })
   );
-  const { supabase } = useContext(SupabaseContext);
 
   const handleDragEnd = async (e: DragEndEvent) => {
     const { active, over } = e;
 
-    if (supabase && active.id !== over?.id && option.selections) {
+    if (active.id !== over?.id && option.selections) {
       const oldIndex = option.selections.findIndex((selection) => selection.id === active.id);
       const newIndex = option.selections.findIndex((selection) => selection.id === over?.id);
       const sortedSelections = arrayMove(option.selections, oldIndex, newIndex);

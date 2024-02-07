@@ -1,17 +1,30 @@
 import { Alert, Box, CircularProgress, TextField } from '@mui/material';
 import { Section } from '../../../../_shared/components';
-import { ChangeEvent, FormEvent, useContext, useState } from 'react';
+import { ChangeEvent, FormEvent, useState } from 'react';
 import { LoadingButton } from '@mui/lab';
 import { Icon } from '@mdi/react';
 import { mdiArrowUpDropCircle } from '@mdi/js';
-import { SupabaseContext } from '../../../../_shared/components/SupabaseProvider/SupabaseProvider';
 import { useSnackbar } from 'notistack';
+import { useResetPassword } from '../../../../_shared/api';
 
 const ResetPassword = () => {
   const [status, setStatus] = useState('');
   const [email, setEmail] = useState('');
-  const { supabase } = useContext(SupabaseContext);
   const { enqueueSnackbar } = useSnackbar();
+
+  const handleSuccess = () => {
+    setStatus('Success');
+
+    setEmail('');
+  };
+
+  const handleError = (err: any) => {
+    if (err.response.data.statusText) {
+      enqueueSnackbar(err.response.data.statusText, { variant: 'error' });
+    }
+  };
+
+  const resetPassword = useResetPassword(handleSuccess, handleError);
 
   const handleEmailChange = async (e: ChangeEvent<HTMLInputElement>) => {
     setStatus('');
@@ -19,26 +32,10 @@ const ResetPassword = () => {
     setEmail(e.target.value);
   };
 
-  const handleSubmit = async (e?: FormEvent) => {
+  const handleSubmit = (e?: FormEvent) => {
     e?.preventDefault();
 
-    if (supabase) {
-      setStatus('Loading');
-
-      const response = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: 'http://localhost:5173/reset-password'
-      });
-
-      if (response.error) {
-        setStatus('');
-
-        return enqueueSnackbar(response.error.message, { variant: 'error' });
-      }
-
-      setStatus('Success');
-
-      setEmail('');
-    }
+    resetPassword.mutate({ email });
   };
 
   return (

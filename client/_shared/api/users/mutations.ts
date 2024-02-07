@@ -114,3 +114,29 @@ export const useChangePassword = (onSuccess?: (data: any) => void, onError?: (er
     }
   );
 };
+
+export const useResetPassword = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
+  const dispatch = useDispatch();
+
+  return useMutation(
+    (options: { email: string }) =>
+      axios({
+        method: 'post',
+        url: '/api/v1/password/reset',
+        withCredentials: true,
+        data: options
+      }),
+    {
+      onSuccess: (data) => {
+        dispatch(setIsLoading(false));
+
+        onSuccess?.(data);
+      },
+      onError: (err) => {
+        dispatch(setIsLoading(false));
+
+        onError?.(err);
+      }
+    }
+  );
+};
