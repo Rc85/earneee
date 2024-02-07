@@ -1,11 +1,11 @@
 import { db, generateOptionString } from '.';
-import { DatabaseRetrieveOptions } from '../../../_shared/types';
+import { DatabaseRetrieveOptions, UserProfilesInterface } from '../../../_shared/types';
 import { resultsToCamelCase } from '../../../_shared/utils';
 import { HttpException } from '../utils';
 
 export const user = {
   profile: {
-    retrieve: async (options?: DatabaseRetrieveOptions) => {
+    retrieve: async (options?: DatabaseRetrieveOptions): Promise<UserProfilesInterface[]> => {
       const database = options?.client || db;
       const statement = `SELECT
         up.id,

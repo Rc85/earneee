@@ -1,10 +1,10 @@
 import { db, generateOptionString } from '.';
-import { DatabaseRetrieveOptions } from '../../../_shared/types';
+import { CategoriesInterface, DatabaseRetrieveOptions } from '../../../_shared/types';
 import { resultsToCamelCase } from '../../../_shared/utils';
 import { HttpException } from '../utils';
 
 export const category = {
-  retrieve: async (options?: DatabaseRetrieveOptions) => {
+  retrieve: async (options?: DatabaseRetrieveOptions): Promise<CategoriesInterface[]> => {
     const database = options?.client || db;
     const statement = `SELECT
       id,

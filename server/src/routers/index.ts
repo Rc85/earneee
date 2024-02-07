@@ -5,6 +5,7 @@ import offerRouter from './offer';
 import productRouter from './product';
 import productBrandRouter from './product_brand';
 import productVariantRouter from './product_variant';
+import productOptionRouter from './product_option';
 
 export {
   affiliateRouter,
@@ -13,5 +14,6 @@ export {
   productVariantRouter,
   productBrandRouter,
   offerRouter,
+  productOptionRouter,
   categoryRouter
 };

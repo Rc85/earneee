@@ -2,6 +2,7 @@ import axios from 'axios';
 import { useQuery } from 'react-query';
 import {
   ProductBrandsInterface,
+  ProductOptionsInterface,
   ProductVariantsInterface,
   ProductsInterface
 } from '../../../../_shared/types';
@@ -32,11 +33,22 @@ export const retrieveProductBrands = (options?: { brandId: string; offset?: numb
   );
 };
 
-export const retrieveProductVariants = (options?: { variantId: string }) => {
+export const retrieveProductVariants = (options?: { variantId?: string }) => {
   return useQuery<{ data: { variants: ProductVariantsInterface[] } }>(['variants', options?.variantId], () =>
     axios({
       method: 'get',
       url: '/api/v1/product/variant/retrieve',
+      params: options,
+      withCredentials: true
+    })
+  );
+};
+
+export const retrieveProductOptions = (options?: { variantId?: string }) => {
+  return useQuery<{ data: { options: ProductOptionsInterface[] } }>(['options', options?.variantId], () =>
+    axios({
+      method: 'get',
+      url: '/api/v1/product/option/retrieve',
       params: options,
       withCredentials: true
     })

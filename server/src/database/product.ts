@@ -1,10 +1,16 @@
 import { db, generateOptionString } from '.';
-import { DatabaseRetrieveOptions } from '../../../_shared/types';
+import {
+  DatabaseRetrieveOptions,
+  ProductBrandsInterface,
+  ProductOptionsInterface,
+  ProductVariantsInterface,
+  ProductsInterface
+} from '../../../_shared/types';
 import { resultsToCamelCase } from '../../../_shared/utils';
 import { HttpException } from '../utils';
 
 export const product = {
-  retrieve: async (options?: DatabaseRetrieveOptions) => {
+  retrieve: async (options?: DatabaseRetrieveOptions): Promise<ProductsInterface[]> => {
     const database = options?.client || db;
     const statement = `WITH
     c AS (
@@ -47,7 +53,7 @@ export const product = {
       });
   },
   brand: {
-    retrieve: async (options?: DatabaseRetrieveOptions) => {
+    retrieve: async (options?: DatabaseRetrieveOptions): Promise<ProductBrandsInterface[]> => {
       const database = options?.client || db;
       const statement = `WITH
       pbu AS (
@@ -89,7 +95,7 @@ export const product = {
     }
   },
   variant: {
-    retrieve: async (options?: DatabaseRetrieveOptions) => {
+    retrieve: async (options?: DatabaseRetrieveOptions): Promise<ProductVariantsInterface[]> => {
       const database = options?.client || db;
       const statement = `WITH
       pm AS (
@@ -121,6 +127,49 @@ export const product = {
         FROM pm
         WHERE pm.variant_id = pv.id
       ) AS m ON TRUE
+      ${generateOptionString(options)}`;
+
+      return await database
+        .query(statement, options?.params)
+        .then((result: any) => {
+          return resultsToCamelCase(result.rows);
+        })
+        .catch((err: any) => {
+          console.log(statement);
+          console.log(err);
+
+          throw new HttpException(err);
+        });
+    }
+  },
+  option: {
+    retrieve: async (options?: DatabaseRetrieveOptions): Promise<ProductOptionsInterface[]> => {
+      const database = options?.client || db;
+      const statement = `WITH
+      s AS (
+        SELECT
+          s.id,
+          s.name,
+          s.price,
+          s.option_id,
+          s.status
+        FROM option_selections AS s
+        ORDER BY s.ordinance
+      )
+
+      SELECT
+        po.id,
+        po.name,
+        po.required,
+        po.variant_id,
+        po.status,
+        COALESCE(s.selections, '[]'::JSONB) AS selections
+      FROM product_options AS po
+      LEFT JOIN LATERAL (
+        SELECT JSONB_AGG(s.*) AS selections
+        FROM s
+        WHERE s.option_id = po.id
+      ) AS s ON TRUE
       ${generateOptionString(options)}`;
 
       return await database

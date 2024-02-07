@@ -14,13 +14,13 @@ import {
 import { OptionSelectionsInterface, ProductOptionsInterface } from '../../../../../_shared/types';
 import { Icon } from '@mdi/react';
 import { mdiChevronDown, mdiContentSave, mdiPencil, mdiRefresh, mdiTrashCan } from '@mdi/js';
-import { FormEvent, MouseEvent, useCallback, useContext, useEffect, useState } from 'react';
-import { SupabaseContext } from '../../../../_shared/components/SupabaseProvider/SupabaseProvider';
+import { FormEvent, MouseEvent, useCallback, useEffect, useState } from 'react';
 import { Modal } from '../../../../_shared/components';
 import { LoadingButton } from '@mui/lab';
 import { deepEqual, generateKey } from '../../../../../_shared/utils';
 import { useSnackbar } from 'notistack';
 import OptionForm from './OptionForm';
+import { useCreateProductOption, useDeleteProductOption } from '../../../../_shared/api';
 
 interface Props {
   option: ProductOptionsInterface;
@@ -29,12 +29,29 @@ interface Props {
 const OptionRow = ({ option }: Props) => {
   const theme = useTheme();
   const [status, setStatus] = useState('');
-  const { supabase } = useContext(SupabaseContext);
   const [form, setForm] = useState<ProductOptionsInterface>(JSON.parse(JSON.stringify(option)));
   const [initialState, setInitialState] = useState<ProductOptionsInterface>(
     JSON.parse(JSON.stringify(option))
   );
+  const [name, setName] = useState(form.name);
   const { enqueueSnackbar } = useSnackbar();
+
+  const handleSuccess = () => {
+    enqueueSnackbar('Option updated', { variant: 'success' });
+
+    setStatus('');
+  };
+
+  const handleError = (err: any) => {
+    if (err.response.data.statusText) {
+      enqueueSnackbar(err.response.data.statusText, { variant: 'error' });
+    }
+
+    setStatus('');
+  };
+
+  const updateProductOption = useCreateProductOption(handleSuccess, handleError);
+  const deleteProductOption = useDeleteProductOption(() => setStatus(''), handleError);
 
   useEffect(() => {
     setForm(JSON.parse(JSON.stringify(option)));
@@ -42,28 +59,16 @@ const OptionRow = ({ option }: Props) => {
     setInitialState(JSON.parse(JSON.stringify(option)));
   }, [option]);
 
-  const handleToggle = async (e: MouseEvent) => {
+  const handleToggle = (e: MouseEvent) => {
     e.stopPropagation();
 
-    if (supabase) {
-      setStatus('Loading');
-
-      const status = option.status === 'available' ? 'unavailable' : 'available';
-
-      await supabase.from('product_options').update({ status }).eq('id', option.id);
-
-      setStatus('');
-    }
+    setForm({ ...form, status: form.status === 'available' ? 'unavailable' : 'available' });
   };
 
-  const handleDelete = async () => {
-    if (supabase) {
-      setStatus('Loading');
+  const handleDelete = () => {
+    setStatus('Deleting');
 
-      await supabase.from('product_options').delete().eq('id', option.id);
-
-      setStatus('');
-    }
+    deleteProductOption.mutate(option.id);
   };
 
   const handleDeleteClick = (e: MouseEvent) => {
@@ -97,57 +102,12 @@ const OptionRow = ({ option }: Props) => {
     [option, form.selections]
   );
 
-  const handleSave = async (e: FormEvent) => {
+  const handleSave = (e: FormEvent) => {
     e.preventDefault();
 
-    if (supabase) {
-      setStatus('Loading');
+    setStatus('Loading');
 
-      const response = await supabase
-        .from('product_options')
-        .update({ required: form.required })
-        .eq('id', option.id);
-
-      if (response.error) {
-        setStatus('');
-
-        const message =
-          response.error.code === '23505' ? 'Selection names must be unique' : response.error.message;
-
-        return enqueueSnackbar(message, { variant: 'error' });
-      }
-
-      if (form.selections) {
-        const selections = [];
-
-        for (const index in form.selections) {
-          const i = parseInt(index);
-          const selection = form.selections[i];
-
-          selections.push({
-            id: selection.id,
-            name: selection.name,
-            price: selection.price,
-            ordinance: i + 1,
-            option_id: option.id,
-            status: selection.status
-          });
-        }
-
-        const response = await supabase.from('option_selections').upsert(selections);
-
-        setStatus('');
-
-        if (response.error) {
-          const message =
-            response.error.code === '23505' ? 'Selection names must be unique' : response.error.message;
-
-          return enqueueSnackbar(message, { variant: 'error' });
-        }
-      }
-
-      enqueueSnackbar('Saved', { variant: 'success' });
-    }
+    updateProductOption.mutate(form);
   };
 
   const handleAddSelectionClick = useCallback(() => {
@@ -156,12 +116,12 @@ const OptionRow = ({ option }: Props) => {
     selections.push({
       id: generateKey(1),
       name: '',
-      status: '',
+      status: 'available',
       price: 0,
       ordinance: form.selections ? form.selections.length : 1,
-      option_id: option.id,
-      created_at: '',
-      updated_at: ''
+      optionId: option.id,
+      createdAt: '',
+      updatedAt: ''
     });
 
     setForm({ ...form, selections });
@@ -180,22 +140,28 @@ const OptionRow = ({ option }: Props) => {
     [option, form.selections]
   );
 
-  const handleEditOption = async () => {
-    if (supabase) {
-      const response = await supabase.from('product_options').update({ name: form.name }).eq('id', option.id);
+  const handleEditOption = () => {
+    setForm({ ...form, name });
 
-      if (response.error) {
-        return enqueueSnackbar(response.error.message, { variant: 'error' });
-      }
-
-      setStatus('');
-    }
+    setStatus('');
   };
 
   const handleEditClick = (e: MouseEvent) => {
     e.stopPropagation();
 
     setStatus('Edit');
+  };
+
+  const handleCancelEdit = () => {
+    setStatus('');
+
+    setName(form.name);
+  };
+
+  const handleResetClick = () => {
+    setForm({ ...initialState });
+
+    setName(initialState.name);
   };
 
   return (
@@ -214,32 +180,30 @@ const OptionRow = ({ option }: Props) => {
         open={status === 'Edit'}
         title='Edit Option'
         submit={handleEditOption}
-        cancel={() => setStatus('')}
+        cancel={handleCancelEdit}
         disableBackdropClick
       >
-        <TextField
-          label='Name'
-          required
-          autoFocus
-          value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-        />
+        <TextField label='Name' required autoFocus value={name} onChange={(e) => setName(e.target.value)} />
       </Modal>
 
       <Accordion>
         <AccordionSummary expandIcon={<Icon path={mdiChevronDown} size={1} />}>
-          <Typography sx={{ flexGrow: 1 }}>{option.name}</Typography>
+          <Typography sx={{ flexGrow: 1 }}>{form.name}</Typography>
 
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <IconButton size='small' onClick={handleEditClick}>
               <Icon path={mdiPencil} size={1} color={theme.palette.info.main} />
             </IconButton>
 
-            <Switch color='success' checked={option.status === 'available'} onClick={handleToggle} />
+            <Switch color='success' checked={form.status === 'available'} onClick={handleToggle} />
 
-            <IconButton size='small' onClick={handleDeleteClick} sx={{ mx: 1 }}>
-              <Icon path={mdiTrashCan} size={1} color={theme.palette.error.main} />
-            </IconButton>
+            {status === 'Deleting' ? (
+              <CircularProgress size={20} sx={{ mx: 1 }} />
+            ) : (
+              <IconButton size='small' onClick={handleDeleteClick} sx={{ mx: 1 }}>
+                <Icon path={mdiTrashCan} size={1} color={theme.palette.error.main} />
+              </IconButton>
+            )}
           </Box>
         </AccordionSummary>
 
@@ -273,7 +237,7 @@ const OptionRow = ({ option }: Props) => {
               color='inherit'
               fullWidth
               startIcon={<Icon path={mdiRefresh} size={1} />}
-              onClick={() => setForm({ ...initialState })}
+              onClick={handleResetClick}
             >
               Reset
             </Button>

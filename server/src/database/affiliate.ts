@@ -1,11 +1,11 @@
 import { generateOptionString } from '.';
-import { DatabaseRetrieveOptions } from '../../../_shared/types';
+import { AffiliatesInterface, DatabaseRetrieveOptions } from '../../../_shared/types';
 import { HttpException } from '../utils';
 import { db } from '.';
 import { resultsToCamelCase } from '../../../_shared/utils';
 
 export const affiliate = {
-  retrieve: async (options?: DatabaseRetrieveOptions) => {
+  retrieve: async (options?: DatabaseRetrieveOptions): Promise<AffiliatesInterface[]> => {
     const database = options?.client || db;
     const statement = `WITH
     au AS (

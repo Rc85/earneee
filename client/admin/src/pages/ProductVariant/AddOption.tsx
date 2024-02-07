@@ -4,28 +4,55 @@ import { OptionSelectionsInterface, ProductOptionsInterface } from '../../../../
 import { generateKey } from '../../../../../_shared/utils';
 import { TextField } from '@mui/material';
 import OptionForm from './OptionForm';
+import { useSnackbar } from 'notistack';
+import { useCreateProductOption } from '../../../../_shared/api';
+import { useParams } from 'react-router-dom';
 
 interface Props {
   cancel: () => void;
-  submit: (option: ProductOptionsInterface) => void;
+  option?: ProductOptionsInterface;
 }
 
-const AddOption = ({ cancel, submit }: Props) => {
+const AddOption = ({ cancel, option }: Props) => {
+  const [status, setStatus] = useState('');
+  const params = useParams();
+  const { variantId } = params;
   const [form, setForm] = useState<ProductOptionsInterface>({
     id: generateKey(1),
     name: '',
     required: true,
-    variant_id: '',
+    variantId: variantId!,
     status: 'available',
-    created_at: '',
-    updated_at: '',
+    createdAt: '',
+    updatedAt: '',
     selections: []
   });
+  const { enqueueSnackbar } = useSnackbar();
+
+  const handleSuccess = () => {
+    if (option) {
+      enqueueSnackbar('Option updated', { variant: 'success' });
+    }
+
+    cancel();
+  };
+
+  const handleError = (err: any) => {
+    if (err.response.data.statusText) {
+      enqueueSnackbar(err.response.data.statusText, { variant: 'error' });
+    }
+
+    setStatus('');
+  };
+
+  const createProductOption = useCreateProductOption(handleSuccess, handleError);
 
   const handleSubmit = (e?: FormEvent) => {
     e?.preventDefault();
 
-    submit(form);
+    setStatus('Loading');
+
+    createProductOption.mutate(form);
   };
 
   const handleAddSelectionClick = () => {
@@ -33,11 +60,11 @@ const AddOption = ({ cancel, submit }: Props) => {
       id: generateKey(1),
       name: '',
       price: 0,
-      option_id: '',
+      optionId: form.id,
       ordinance: form.selections ? form.selections.length : 1,
       status: 'available',
-      created_at: '',
-      updated_at: ''
+      createdAt: '',
+      updatedAt: ''
     };
     const selections = form.selections ? [...form.selections] : [];
 
@@ -53,11 +80,9 @@ const AddOption = ({ cancel, submit }: Props) => {
 
       selection[field] = value as never;
 
-      console.log(selection);
-
       setForm({ ...form, selections });
     },
-    [form.selections]
+    [form]
   );
 
   const handleToggleSelection = useCallback(
@@ -70,7 +95,7 @@ const AddOption = ({ cancel, submit }: Props) => {
 
       setForm({ ...form, selections });
     },
-    [form.selections]
+    [form]
   );
 
   const handleDeleteSelection = useCallback(
@@ -83,7 +108,7 @@ const AddOption = ({ cancel, submit }: Props) => {
 
       setForm({ ...form, selections });
     },
-    [form.selections]
+    [form]
   );
 
   return (
@@ -94,6 +119,7 @@ const AddOption = ({ cancel, submit }: Props) => {
       cancel={cancel}
       disableBackdropClick
       component='form'
+      loading={status === 'Loading'}
     >
       <TextField
         label='Name'

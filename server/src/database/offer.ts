@@ -1,10 +1,10 @@
 import { db, generateOptionString } from '.';
-import { DatabaseRetrieveOptions } from '../../../_shared/types';
+import { DatabaseRetrieveOptions, OffersInterface } from '../../../_shared/types';
 import { resultsToCamelCase } from '../../../_shared/utils';
 import { HttpException } from '../utils';
 
 export const offer = {
-  retrieve: async (options?: DatabaseRetrieveOptions) => {
+  retrieve: async (options?: DatabaseRetrieveOptions): Promise<OffersInterface[]> => {
     const database = options?.client || db;
     const statement = `SELECT
       id,

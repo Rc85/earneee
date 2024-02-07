@@ -46,6 +46,7 @@ app.use(routers.offerRouter);
 app.use(routers.productRouter);
 app.use(routers.productBrandRouter);
 app.use(routers.productVariantRouter);
+app.use(routers.productOptionRouter);
 
 app.use(middlewares.errorHandler);
 

@@ -21,6 +21,11 @@ exports.up = (pgm) => {
         onUpdate: 'cascade',
         onDelete: 'cascade'
       },
+      required: {
+        type: 'boolean',
+        notNull: true,
+        default: false
+      },
       status: {
         type: 'varchar',
         notNull: true,

@@ -12,60 +12,21 @@ import {
   Link
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import { useContext, useEffect, useState } from 'react';
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
-import { ProductVariantsInterface, ProductsInterface } from '../../../../../_shared/types';
-import { SupabaseContext } from '../../../../_shared/components/SupabaseProvider/SupabaseProvider';
 import VariantMedia from './VariantMedia';
 import EditVariant from './EditVariant';
 import VariantOptions from './VariantOptions';
 import Specifications from './Specifications';
+import { retrieveProductVariants, retrieveProducts } from '../../../../_shared/api';
 
 const ProductVariant = () => {
   const params = useParams();
   const { productId, variantId } = params;
-  const [product, setProduct] = useState<ProductsInterface>();
-  const [variant, setVariant] = useState<ProductVariantsInterface>();
-  const { supabase } = useContext(SupabaseContext);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (supabase) {
-      (async () => {
-        const product = await supabase.from('products').select().eq('id', productId);
-
-        if (product.data) {
-          setProduct(product.data[0]);
-        }
-
-        await retrieveVariant();
-
-        const dbChanges = supabase
-          .channel('schema-db-changes')
-          .on('postgres_changes', { event: '*', schema: 'public' }, async (payload) => {
-            if (payload.table === 'product_variants') {
-              await retrieveVariant();
-            }
-          });
-
-        dbChanges.subscribe();
-
-        return () => {
-          dbChanges.unsubscribe();
-        };
-      })();
-    }
-  }, []);
-
-  const retrieveVariant = async () => {
-    if (supabase) {
-      const variant = await supabase.from('product_variants').select().eq('id', variantId);
-
-      if (variant.data) {
-        setVariant(variant.data[0]);
-      }
-    }
-  };
+  const { data: { data: { products } } = { data: {} } } = retrieveProducts({ productId });
+  const { data: { data: { variants } } = { data: {} } } = retrieveProductVariants({ variantId });
+  const product = products?.[0];
+  const variant = variants?.[0];
 
   return (
     <Box sx={{ display: 'flex', flexGrow: 1 }}>
@@ -131,7 +92,7 @@ const ProductVariant = () => {
           <Typography>{variant?.name}</Typography>
         </Breadcrumbs>
 
-        <Outlet context={{ variant }} />
+        <Outlet />
       </Box>
     </Box>
   );
