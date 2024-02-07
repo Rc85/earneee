@@ -2,10 +2,9 @@ import { Button, List } from '@mui/material';
 import { Section } from '../../../../_shared/components';
 import { Icon } from '@mdi/react';
 import { mdiPlusBox } from '@mdi/js';
-import { useContext, useEffect, useState } from 'react';
+import { useState } from 'react';
 import AddSpecification from './AddSpecification';
-import { ProductSpecificationsInterface } from '../../../../_shared/types';
-import { SupabaseContext } from '../../../../_shared/components/SupabaseProvider/SupabaseProvider';
+import { ProductSpecificationsInterface } from '../../../../../_shared/types';
 import {
   DndContext,
   DragEndEvent,
@@ -22,52 +21,26 @@ import {
   verticalListSortingStrategy
 } from '@dnd-kit/sortable';
 import SpecificationRow from './SpecificationRow';
+import { retrieveProductSpecifications, useSortProductSpecifications } from '../../../../_shared/api';
+import { useParams } from 'react-router-dom';
 
 const Specifications = () => {
   const [status, setStatus] = useState('');
-  const [specifications, setSpecifications] = useState<ProductSpecificationsInterface[]>([]);
-  const { supabase } = useContext(SupabaseContext);
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
-
-  useEffect(() => {
-    (async () => {
-      await retrieveSpecifications();
-
-      if (supabase) {
-        const dbChanges = supabase
-          .channel('schema-db-changes')
-          .on('postgres_changes', { event: '*', schema: 'public' }, async (payload) => {
-            if (payload.table === 'product_specifications') {
-              await retrieveSpecifications();
-            }
-          });
-
-        dbChanges.subscribe();
-
-        return () => {
-          dbChanges.unsubscribe();
-        };
-      }
-    })();
-  }, []);
-
-  const retrieveSpecifications = async () => {
-    if (supabase) {
-      const response = await supabase.from('product_specifications').select().order('ordinance, name');
-
-      if (response.data) {
-        setSpecifications(response.data);
-      }
-    }
-  };
+  const params = useParams();
+  const { variantId } = params;
+  const { isLoading, data: { data: { specifications } } = { data: {} } } = retrieveProductSpecifications({
+    variantId
+  });
+  const sortProductSpecifications = useSortProductSpecifications();
 
   const handleDragEnd = async (e: DragEndEvent) => {
     const { active, over } = e;
 
-    if (active.id !== over?.id) {
+    if (active.id !== over?.id && specifications) {
       const oldIndex = specifications.findIndex((spec) => spec.id === active.id);
       const newIndex = specifications.findIndex((spec) => spec.id === over?.id);
 
@@ -80,9 +53,7 @@ const Specifications = () => {
         spec.ordinance = index + 1;
       }
 
-      if (supabase) {
-        await supabase.from('product_specifications').upsert(sortedSpecs);
-      }
+      sortProductSpecifications.mutate({ specifications: sortedSpecs });
     }
   };
 
@@ -103,9 +74,9 @@ const Specifications = () => {
       {status === 'Add Specification' && <AddSpecification cancel={() => setStatus('')} />}
 
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={specifications} strategy={verticalListSortingStrategy}>
+        <SortableContext items={specifications || []} strategy={verticalListSortingStrategy}>
           <List disablePadding>
-            {specifications.map((spec) => (
+            {specifications?.map((spec) => (
               <SpecificationRow key={spec.id} specification={spec} />
             ))}
           </List>

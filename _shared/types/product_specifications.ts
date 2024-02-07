@@ -1,7 +1,7 @@
 export interface ProductSpecificationsInterface {
   id: string;
   name: string;
-  values: string;
+  value: string;
   variantId: string;
   ordinance: number | null;
   createdAt: string;

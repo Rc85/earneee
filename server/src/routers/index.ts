@@ -6,6 +6,7 @@ import productRouter from './product';
 import productBrandRouter from './product_brand';
 import productVariantRouter from './product_variant';
 import productOptionRouter from './product_option';
+import productSpecificationRouter from './product_specification';
 
 export {
   affiliateRouter,
@@ -13,6 +14,7 @@ export {
   productRouter,
   productVariantRouter,
   productBrandRouter,
+  productSpecificationRouter,
   offerRouter,
   productOptionRouter,
   categoryRouter

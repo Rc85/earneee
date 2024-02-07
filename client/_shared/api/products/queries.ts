@@ -3,6 +3,7 @@ import { useQuery } from 'react-query';
 import {
   ProductBrandsInterface,
   ProductOptionsInterface,
+  ProductSpecificationsInterface,
   ProductVariantsInterface,
   ProductsInterface
 } from '../../../../_shared/types';
@@ -52,5 +53,18 @@ export const retrieveProductOptions = (options?: { variantId?: string }) => {
       params: options,
       withCredentials: true
     })
+  );
+};
+
+export const retrieveProductSpecifications = (options?: { variantId?: string }) => {
+  return useQuery<{ data: { specifications: ProductSpecificationsInterface[] } }>(
+    ['specifications', options?.variantId],
+    () =>
+      axios({
+        method: 'get',
+        url: '/api/v1/product/specification/retrieve',
+        params: options,
+        withCredentials: true
+      })
   );
 };

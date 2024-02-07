@@ -6,13 +6,16 @@ import {
   ListItemText,
   useTheme
 } from '@mui/material';
-import { ProductSpecificationsInterface } from '../../../../_shared/types';
+import { ProductSpecificationsInterface } from '../../../../../_shared/types';
 import { Icon } from '@mdi/react';
-import { mdiTrashCan } from '@mdi/js';
+import { mdiDragHorizontalVariant, mdiTrashCan } from '@mdi/js';
 import { useContext, useState } from 'react';
 import { Modal } from '../../../../_shared/components';
 import { SupabaseContext } from '../../../../_shared/components/SupabaseProvider/SupabaseProvider';
 import AddSpecification from './AddSpecification';
+import { useDeleteProductSpecification } from '../../../../_shared/api';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface Props {
   specification: ProductSpecificationsInterface;
@@ -21,30 +24,36 @@ interface Props {
 const SpecificationRow = ({ specification }: Props) => {
   const [status, setStatus] = useState('');
   const theme = useTheme();
-  const { supabase } = useContext(SupabaseContext);
+  const deleteProductSpecification = useDeleteProductSpecification(
+    () => setStatus(''),
+    () => setStatus('')
+  );
+  const { attributes, listeners, transform, transition, setNodeRef } = useSortable({ id: specification.id });
 
-  const handleSubmit = async () => {
-    if (supabase) {
-      setStatus('Deleting');
+  const style = { transform: CSS.Transform.toString(transform), transition };
 
-      await supabase.from('product_specifications').delete().eq('id', specification.id);
+  const handleDelete = () => {
+    setStatus('Deleting');
 
-      setStatus('');
-    }
+    deleteProductSpecification.mutate(specification.id);
   };
 
   return (
-    <ListItem disableGutters disablePadding divider>
+    <ListItem disableGutters disablePadding divider ref={setNodeRef} {...attributes} style={style}>
       <Modal
         open={status === 'Confirm Delete'}
         title='Are you sure you want to delete this spec?'
-        submit={handleSubmit}
+        submit={handleDelete}
         cancel={() => setStatus('')}
         submitText='Yes'
         cancelText='No'
       />
 
       {status === 'Edit' && <AddSpecification cancel={() => setStatus('')} specification={specification} />}
+
+      <IconButton size='small' {...listeners}>
+        <Icon path={mdiDragHorizontalVariant} size={1} />
+      </IconButton>
 
       <ListItemButton onClick={() => setStatus('Edit')} sx={{ mr: 1 }}>
         <ListItemText primary={specification.name} />

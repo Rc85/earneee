@@ -2,12 +2,12 @@ import { TextField } from '@mui/material';
 import { Modal, RichTextEditor } from '../../../../_shared/components';
 import { ProductSpecificationsInterface } from '../../../../../_shared/types';
 import { useEditor } from '@tiptap/react';
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { editorExtensions } from '../../../../_shared/constants';
 import { generateKey } from '../../../../../_shared/utils';
-import { SupabaseContext } from '../../../../_shared/components/SupabaseProvider/SupabaseProvider';
 import { useSnackbar } from 'notistack';
 import { useParams } from 'react-router-dom';
+import { useCreateProductSpecification } from '../../../../_shared/api';
 
 interface Props {
   cancel: () => void;
@@ -24,40 +24,47 @@ const AddSpecification = ({ cancel, specification }: Props) => {
     specification || {
       id: generateKey(1),
       name: '',
-      values: '',
-      variant_id: variantId!,
+      value: '',
+      variantId: variantId!,
       ordinance: null,
-      created_at: new Date().toISOString(),
-      updated_at: null
+      createdAt: new Date().toISOString(),
+      updatedAt: null
     }
   );
   const editor = useEditor(
     {
-      content: specification?.values || undefined,
+      content: specification?.value || undefined,
       extensions: editorExtensions,
       onUpdate: ({ editor }) => {
-        setForm({ ...form, values: editor.getHTML() });
+        setForm({ ...form, value: editor.getHTML() });
       }
     },
     [specification]
   );
-  const { supabase } = useContext(SupabaseContext);
   const { enqueueSnackbar } = useSnackbar();
 
-  const handleSubmit = async () => {
-    if (supabase) {
-      setStatus('Loading');
-
-      const response = await supabase.from('product_specifications').upsert(form);
-
-      setStatus('');
-
-      if (response.error) {
-        return enqueueSnackbar(response.error.message, { variant: 'error' });
-      }
-
-      cancel();
+  const handleSuccess = () => {
+    if (specification) {
+      enqueueSnackbar('Specification updated', { variant: 'success' });
     }
+
+    cancel();
+  };
+
+  const handleError = (err: any) => {
+    if (err.response.data.statusText) {
+      enqueueSnackbar(err.response.data.statusText, { variant: 'error' });
+    }
+
+    setStatus('');
+  };
+
+  const createProductSpecification = useCreateProductSpecification(handleSuccess, handleError);
+
+  const handleSubmit = () => {
+    setStatus('Loading');
+
+    createProductSpecification.mutate(form);
   };
 
   return (

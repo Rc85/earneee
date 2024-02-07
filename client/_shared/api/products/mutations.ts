@@ -5,6 +5,7 @@ import { setIsLoading } from '../../redux/app';
 import {
   ProductBrandsInterface,
   ProductOptionsInterface,
+  ProductSpecificationsInterface,
   ProductVariantsInterface,
   ProductsInterface
 } from '../../../../_shared/types';
@@ -258,6 +259,102 @@ export const useCreateProductOption = (onSuccess?: (data: any) => void, onError?
         dispatch(setIsLoading(false));
 
         queryClient.invalidateQueries(['options']);
+
+        onSuccess?.(data);
+      },
+      onError: (err) => {
+        dispatch(setIsLoading(false));
+
+        onError?.(err);
+      }
+    }
+  );
+};
+
+export const useCreateProductSpecification = (
+  onSuccess?: (data: any) => void,
+  onError?: (err: any) => void
+) => {
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    (options: ProductSpecificationsInterface) =>
+      axios({
+        method: 'post',
+        url: '/api/v1/auth/admin/product/specification/create',
+        withCredentials: true,
+        data: options
+      }),
+    {
+      onSuccess: (data) => {
+        dispatch(setIsLoading(false));
+
+        queryClient.invalidateQueries(['specifications']);
+
+        onSuccess?.(data);
+      },
+      onError: (err) => {
+        dispatch(setIsLoading(false));
+
+        onError?.(err);
+      }
+    }
+  );
+};
+
+export const useDeleteProductSpecification = (
+  onSuccess?: (data: any) => void,
+  onError?: (err: any) => void
+) => {
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    (specificationId: string) =>
+      axios({
+        method: 'delete',
+        url: '/api/v1/auth/admin/product/specification/delete',
+        withCredentials: true,
+        params: { specificationId }
+      }),
+    {
+      onSuccess: (data) => {
+        dispatch(setIsLoading(false));
+
+        queryClient.invalidateQueries(['specifications']);
+
+        onSuccess?.(data);
+      },
+      onError: (err) => {
+        dispatch(setIsLoading(false));
+
+        onError?.(err);
+      }
+    }
+  );
+};
+
+export const useSortProductSpecifications = (
+  onSuccess?: (data: any) => void,
+  onError?: (err: any) => void
+) => {
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    (options: { specifications: ProductSpecificationsInterface[] }) =>
+      axios({
+        method: 'put',
+        url: '/api/v1/auth/admin/product/specification/sort',
+        withCredentials: true,
+        data: options
+      }),
+    {
+      onSuccess: (data) => {
+        dispatch(setIsLoading(false));
+
+        queryClient.invalidateQueries(['specifications']);
 
         onSuccess?.(data);
       },
