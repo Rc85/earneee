@@ -1,17 +1,22 @@
+'use client';
+
 import '../index.css';
 import { Footer, ThemeRegistry, TopBar } from '../components';
 import { Box, Container, LinearProgress } from '@mui/material';
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { SnackbarProvider } from 'notistack';
+import { Provider } from 'react-redux';
+import { store } from '../../_shared/redux/store';
+import axios from 'axios';
 
-const defaultUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
-
-export const metadata = {
-  metadataBase: new URL(defaultUrl),
-  title: 'Next.js and Supabase Starter Kit',
-  description: 'The fastest way to build apps with Next.js and Supabase'
-};
+axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL;
 
 const RootLayout = async ({ children }: { children: React.ReactNode }) => {
+  const [queryClient] = useState(
+    () => new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false } } })
+  );
+
   return (
     <html lang='en'>
       <head>
@@ -26,23 +31,29 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
       </head>
 
       <body>
-        <ThemeRegistry>
-          <TopBar />
+        <Provider store={store}>
+          <QueryClientProvider client={queryClient}>
+            <SnackbarProvider>
+              <ThemeRegistry>
+                <TopBar />
 
-          <Container maxWidth='xl' sx={{ display: 'flex', flexGrow: 1 }}>
-            <Suspense
-              fallback={
-                <Box sx={{ flexGrow: 1 }}>
-                  <LinearProgress />
-                </Box>
-              }
-            >
-              {children}
-            </Suspense>
-          </Container>
+                <Container maxWidth='xl' sx={{ display: 'flex', flexGrow: 1 }}>
+                  <Suspense
+                    fallback={
+                      <Box sx={{ flexGrow: 1 }}>
+                        <LinearProgress />
+                      </Box>
+                    }
+                  >
+                    {children}
+                  </Suspense>
+                </Container>
 
-          <Footer />
-        </ThemeRegistry>
+                <Footer />
+              </ThemeRegistry>
+            </SnackbarProvider>
+          </QueryClientProvider>
+        </Provider>
       </body>
     </html>
   );

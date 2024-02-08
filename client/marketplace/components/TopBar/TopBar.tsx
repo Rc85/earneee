@@ -16,41 +16,21 @@ import { SnackbarProvider } from 'notistack';
 import Link from 'next/link';
 import Icon from '@mdi/react';
 import { mdiAccountCircle, mdiEmail, mdiLogoutVariant, mdiMenu } from '@mdi/js';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Categories from '../Categories/Categories';
 import { brandName } from '../../../_shared/constants';
-import { createClient } from '../../utils/supabase/client';
-import { User } from '@supabase/supabase-js';
 import { usePathname } from 'next/navigation';
+import { authenticate, useLogout } from '../../../_shared/api';
 
 const TopBar = () => {
-  const [status, setStatus] = useState('Loading');
   const [openDrawer, setOpenDrawer] = useState(false);
-  const supabase = createClient();
-  const [user, setUser] = useState<User | null>(null);
   const pathname = usePathname();
   const theme = useTheme();
+  const { isLoading, data: { data: { user } } = { data: {} } } = authenticate('marketplace');
+  const logout = useLogout();
 
-  useEffect(() => {
-    const {
-      data: { subscription }
-    } = supabase.auth.onAuthStateChange((e, session) => {
-      if (session) {
-        setUser(session.user);
-      } else {
-        setUser(null);
-      }
-
-      setStatus('');
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
+  const handleLogout = () => {
+    logout.mutate('marketplace');
   };
 
   return (
@@ -70,7 +50,7 @@ const TopBar = () => {
 
         <Search />
 
-        {status === 'Loading' ? (
+        {isLoading ? (
           <CircularProgress size={20} />
         ) : user ? (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>

@@ -7,9 +7,11 @@ import {
   Alert,
   Box,
   Button,
+  Checkbox,
   CircularProgress,
   Container,
   Divider,
+  FormControlLabel,
   Link,
   Paper,
   Snackbar,
@@ -17,19 +19,44 @@ import {
   Typography
 } from '@mui/material';
 import { FormEvent, useState } from 'react';
-import { createClient } from '../../utils/supabase/client';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useSnackbar } from 'notistack';
+import { useLogin } from '../../../_shared/api';
 
 export default function Login() {
   const [status, setStatus] = useState('');
-  const supabase = createClient();
-  const [form, setForm] = useState({ email: '', password: '' });
+  const [form, setForm] = useState<{
+    email: string;
+    password: string;
+    remember: boolean;
+    application: 'admin' | 'marketplace';
+  }>({
+    email: '',
+    password: '',
+    remember: false,
+    application: 'marketplace'
+  });
   const [error, setError] = useState('');
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect');
   const router = useRouter();
+  const { enqueueSnackbar } = useSnackbar();
 
-  const handleLogin = async (e: FormEvent) => {
+  const handleSuccess = () => {
+    router.push(redirect || '/');
+  };
+
+  const handleError = (err: any) => {
+    if (err.response.data.statusText) {
+      enqueueSnackbar(err.response.data.statusText, { variant: 'error' });
+    }
+
+    setStatus('');
+  };
+
+  const login = useLogin(handleSuccess, handleError);
+
+  const handleLogin = (e: FormEvent) => {
     e.preventDefault();
 
     if (!form.email) {
@@ -40,17 +67,7 @@ export default function Login() {
 
     setStatus('Loading');
 
-    const response = await supabase.auth.signInWithPassword(form);
-
-    if (response.error) {
-      setError(response.error.message);
-
-      setStatus('');
-
-      return;
-    }
-
-    router.push(redirect || '/');
+    login.mutate(form);
   };
 
   const handleSnackbarClose = (_: React.SyntheticEvent | Event, reason?: string) => {
@@ -72,7 +89,7 @@ export default function Login() {
       <Paper variant='outlined' sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
         <Typography variant='h3'>Login</Typography>
 
-        <Box
+        {/* <Box
           sx={{
             display: 'flex',
             alignItems: 'center',
@@ -118,7 +135,7 @@ export default function Login() {
           startIcon={<Icon path={mdiTwitter} size={1} color='#1DA1F2' />}
         >
           Twitter
-        </Button>
+        </Button> */}
 
         <Box
           sx={{
@@ -153,6 +170,12 @@ export default function Login() {
             label='Password'
             required
             onChange={(e) => setForm({ ...form, password: e.target.value })}
+          />
+
+          <FormControlLabel
+            label='Remember me'
+            control={<Checkbox color='info' />}
+            onChange={() => setForm({ ...form, remember: !form.remember })}
           />
 
           <LoadingButton

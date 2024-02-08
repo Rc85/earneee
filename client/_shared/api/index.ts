@@ -1,13 +1,13 @@
 import axios from 'axios';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 
 export const authenticate = (application: 'admin' | 'marketplace') => {
   const url = application === 'marketplace' ? '/api/v1/auth/user' : '/api/v1/auth/admin';
 
-  return useQuery<{ data: { user: { id: string; email: string; isAdmin: boolean } } }>(
-    ['authenticate', application],
-    () => axios({ method: 'post', url, withCredentials: true })
-  );
+  return useQuery<{ data: { user: { id: string; email: string; isAdmin: boolean } } }>({
+    queryKey: ['authenticate', application],
+    queryFn: () => axios({ method: 'post', url, withCredentials: true })
+  });
 };
 
 export * from './users/mutations';

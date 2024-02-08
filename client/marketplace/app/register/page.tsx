@@ -16,15 +16,40 @@ import {
   Typography,
   useTheme
 } from '@mui/material';
-import { FormEvent, useState } from 'react';
-import { createClient } from '../../utils/supabase/client';
+import { FormEvent, useRef, useState } from 'react';
+import { useCreateUser } from '../../../_shared/api';
+import { useSnackbar } from 'notistack';
+import Recaptcha from 'react-google-recaptcha';
+import { countries } from '../../../../_shared';
 
 const Register = () => {
   const [status, setStatus] = useState('');
-  const [form, setForm] = useState({ email: '', password: '', confirm: '', agreed: false });
+  const [form, setForm] = useState({
+    email: '',
+    password: '',
+    confirmPassword: '',
+    agreed: false,
+    country: 'CA',
+    key: ''
+  });
   const [error, setError] = useState('');
-  const supabase = createClient();
   const theme = useTheme();
+  const { enqueueSnackbar } = useSnackbar();
+  const recaptchaRef = useRef<Recaptcha>(null);
+
+  const handleSuccess = () => {
+    setStatus('Success');
+  };
+
+  const handleError = (err: any) => {
+    if (err.response.data.statusText) {
+      enqueueSnackbar(err.response.data.statusText, { variant: 'error' });
+    }
+
+    setStatus('');
+  };
+
+  const createUser = useCreateUser(handleSuccess, handleError);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -33,7 +58,7 @@ const Register = () => {
       return setError('Email required');
     } else if (!form.password) {
       return setError('Password required');
-    } else if (form.password !== form.confirm) {
+    } else if (form.password !== form.confirmPassword) {
       return setError('Passwords do not match');
     } else if (form.password.length < 8) {
       return setError('Password is too short');
@@ -43,19 +68,13 @@ const Register = () => {
 
     setStatus('Loading');
 
-    const response = await supabase.auth.signUp({
-      email: form.email,
-      password: form.password,
-      options: { emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/register/success` }
-    });
+    const key = await recaptchaRef.current?.executeAsync();
 
-    if (response.error) {
-      setStatus('');
+    if (key) {
+      form.key = key;
 
-      return setError(response.error.message);
+      createUser.mutate(form);
     }
-
-    setStatus('Success');
   };
 
   const handleOnClose = (_: any, reason: string) => {
@@ -93,6 +112,7 @@ const Register = () => {
               type='email'
               label='Email'
               onChange={(e) => setForm({ ...form, email: e.target.value })}
+              required
             />
 
             <TextField
@@ -100,13 +120,30 @@ const Register = () => {
               label='Password'
               placeholder='At least 8 characters'
               onChange={(e) => setForm({ ...form, password: e.target.value })}
+              required
             />
 
             <TextField
               type='password'
               label='Confirm Password'
-              onChange={(e) => setForm({ ...form, confirm: e.target.value })}
+              onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
+              required
             />
+
+            <TextField
+              label='Country'
+              required
+              select
+              SelectProps={{ native: true }}
+              onChange={(e) => setForm({ ...form, country: e.target.value })}
+              value={form.country}
+            >
+              {countries.map((country) => (
+                <option key={country.code} value={country.code}>
+                  {country.name}
+                </option>
+              ))}
+            </TextField>
 
             <FormControlLabel
               label='I have read and agree to the Terms of Service and Privacy Policy'
@@ -114,6 +151,8 @@ const Register = () => {
               onChange={() => setForm({ ...form, agreed: !form.agreed })}
               checked={form.agreed}
             />
+
+            <Recaptcha ref={recaptchaRef} sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_KEY!} size='invisible' />
 
             <LoadingButton
               type='submit'

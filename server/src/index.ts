@@ -31,11 +31,9 @@ app.use(
   })
 );
 
-app.use(
-  /^\/api\/v1\/auth\/user.*/,
-  middlewares.marketplaceSession,
-  middlewares.authenticateMiddleware('user')
-);
+app.use('/api/v1/auth/user', middlewares.marketplaceSession);
+
+app.use(/^\/api\/v1\/auth\/user\/(?!login).*/, middlewares.authenticateMiddleware('user'));
 
 app.use(/^\/api\/v1\/auth\/admin.*/, middlewares.adminSession, middlewares.authenticateMiddleware('admin'));
 

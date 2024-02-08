@@ -1,5 +1,7 @@
+'use server';
+
 import Section from '../../../_shared/components/Section/Section';
-import { ProductVariantsInterface } from '../../../_shared/types';
+import { ProductVariantsInterface } from '../../../../_shared/types';
 import { createClient } from '../../utils/supabase/server';
 import { Box } from '@mui/material';
 import { cookies } from 'next/headers';
