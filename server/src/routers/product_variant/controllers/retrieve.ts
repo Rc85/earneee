@@ -25,11 +25,11 @@ export const retrieveVariant = async (req: Request, resp: Response, next: NextFu
     where.push(`p.product->>'category_id' = $${params.length}`);
   }
 
-  /* if (country) {
-    params.push(country);
+  if (country) {
+    params.push(`[{"country": "${country}"}]`);
 
-    where.push(`pu.urls->>'country' = $${params.length}`);
-  } */
+    where.push(`pu.urls @> $${params.length}`);
+  }
 
   const variants = await database.product.variant.retrieve({
     where: where.join(' AND '),

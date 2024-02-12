@@ -1,4 +1,4 @@
-import { mdiDetails, mdiFormatListBulleted, mdiImage, mdiPencil } from '@mdi/js';
+import { mdiDetails, mdiFormatListBulleted, mdiImage, mdiPencil, mdiWeb } from '@mdi/js';
 import { Icon } from '@mdi/react';
 import {
   Box,
@@ -18,6 +18,7 @@ import EditVariant from './EditVariant';
 import VariantOptions from './VariantOptions';
 import Specifications from './Specifications';
 import { retrieveProductVariants, retrieveProducts } from '../../../../_shared/api';
+import ProductUrls from './ProductUrls';
 
 const ProductVariant = () => {
   const params = useParams();
@@ -46,6 +47,16 @@ const ProductVariant = () => {
               </ListItemIcon>
 
               <ListItemText primary='Edit' />
+            </ListItemButton>
+          </ListItem>
+
+          <ListItem disablePadding disableGutters>
+            <ListItemButton onClick={() => navigate(`/product/${productId}/variant/${variantId}/urls`)}>
+              <ListItemIcon>
+                <Icon path={mdiWeb} size={1} />
+              </ListItemIcon>
+
+              <ListItemText primary='URLS' />
             </ListItemButton>
           </ListItem>
 
@@ -102,5 +113,6 @@ ProductVariant.Edit = EditVariant;
 ProductVariant.Media = VariantMedia;
 ProductVariant.Options = VariantOptions;
 ProductVariant.Specifications = Specifications;
+ProductVariant.URLS = ProductUrls;
 
 export default ProductVariant;

@@ -5,6 +5,7 @@ import {
   ProductMediaInterface,
   ProductOptionsInterface,
   ProductSpecificationsInterface,
+  ProductUrlsInterface,
   ProductVariantsInterface,
   ProductsInterface
 } from '../../../../_shared/types';
@@ -109,6 +110,19 @@ export const retrieveMarketplaceProducts = (options?: { categoryId?: number; off
       axios({
         method: 'get',
         url: '/api/v1/marketplace/product/retrieve',
+        params: options,
+        withCredentials: true
+      })
+  });
+};
+
+export const retrieveProductUrls = (options?: { variantId?: string }) => {
+  return useQuery<{ data: { urls: ProductUrlsInterface[] } }>({
+    queryKey: ['product url', options?.variantId],
+    queryFn: () =>
+      axios({
+        method: 'get',
+        url: '/api/v1/product/url/retrieve',
         params: options,
         withCredentials: true
       })

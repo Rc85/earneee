@@ -174,6 +174,15 @@ const App = () => {
                           </AuthenticatedRoute>
                         }
                       />
+
+                      <Route
+                        path='/product/:productId/variant/:variantId/urls'
+                        element={
+                          <AuthenticatedRoute>
+                            <ProductVariant.URLS />
+                          </AuthenticatedRoute>
+                        }
+                      />
                     </Route>
 
                     <Route path='/affiliates' element={<Outlet />}>
