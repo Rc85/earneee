@@ -1,7 +1,7 @@
 'use client';
 import { Avatar, Box, Button, Chip, Divider, Paper, Typography } from '@mui/material';
 import Gallery from '../../../components/Gallery/Gallery';
-import { ProductVariantsInterface, ProductsInterface } from '../../../../_shared/types';
+import { ProductVariantsInterface, ProductsInterface } from '../../../../../_shared/types';
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 
@@ -80,15 +80,13 @@ const Main = ({ product }: Props) => {
                 <Typography>Sold by</Typography>
 
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  {product.affiliate?.logo_url && (
-                    <Avatar variant='square' src={product.affiliate.logo_url} />
-                  )}
+                  {product.affiliate?.logoUrl && <Avatar variant='square' src={product.affiliate.logoUrl} />}
 
                   <Typography sx={{ ml: 1 }}>{product.affiliate?.name}</Typography>
                 </Box>
               </Box>
 
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+              {/* <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                 <Button
                   variant='contained'
                   onClick={() =>
@@ -97,7 +95,7 @@ const Main = ({ product }: Props) => {
                 >
                   Buy Now
                 </Button>
-              </Box>
+              </Box> */}
             </Box>
           </Box>
         )}

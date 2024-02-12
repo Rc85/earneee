@@ -5,16 +5,21 @@ export const retrieveCategories = async (req: Request, resp: Response, next: Nex
   const { client } = resp.locals;
   const where = [];
   const params = [];
+  const { parentId, level } = req.query;
 
-  if (req.query.parentId) {
-    params.push(req.query.parentId);
+  if (parentId) {
+    params.push(parentId);
 
     where.push(`c.parent_id = $1`);
   } else {
     where.push(`c.parent_id IS NULL`);
   }
 
-  const categories = await database.category.retrieve({
+  if (level && ['2', '3'].includes(level.toString())) {
+    where.push(`(JSONB_ARRAY_LENGTH(c1.subcategories) > 0 OR p.product > 0)`);
+  }
+
+  const categories = await database.category.retrieve[(level?.toString() as '1' | '2' | '3') || '1']({
     where: where.join(' AND '),
     params,
     orderBy: 'c.ordinance',

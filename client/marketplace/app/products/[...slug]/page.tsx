@@ -1,9 +1,7 @@
 import Section from '../../../../_shared/components/Section/Section';
-import { CategoriesInterface } from '../../../../_shared/types';
+import { CategoriesInterface } from '../../../../../_shared/types';
 import Link from 'next/link';
 import { Box, Breadcrumbs } from '@mui/material';
-import { cookies } from 'next/headers';
-import { createClient } from '../../../utils/supabase/server';
 import { notFound } from 'next/navigation';
 import Main from './main';
 
@@ -12,8 +10,6 @@ interface Props {
 }
 
 const CategoryContainer = async ({ params: { slug } }: Props) => {
-  const cookieStore = cookies();
-  const supabase = createClient(cookieStore);
   const categoryId = slug[0] ? parseInt(slug[0]) : undefined;
   const subcategoryId = slug[1] ? parseInt(slug[1]) : undefined;
   const groupId = slug[2] ? parseInt(slug[2]) : undefined;
@@ -21,35 +17,26 @@ const CategoryContainer = async ({ params: { slug } }: Props) => {
   let category: CategoriesInterface | undefined = undefined;
   let subcategory: CategoriesInterface | undefined = undefined;
   let group: CategoriesInterface | undefined = undefined;
-
-  if (groupId) {
-    const response = await supabase
-      .from('categories')
-      .select()
-      .eq('id', groupId)
-      .returns<CategoriesInterface[]>();
-
-    group = response.data?.[0];
-  }
-
-  if (subcategoryId) {
-    const response = await supabase
-      .from('categories')
-      .select()
-      .eq('id', subcategoryId)
-      .returns<CategoriesInterface[]>();
-
-    subcategory = response.data?.[0];
-  }
+  let url = '';
 
   if (categoryId) {
-    const response = await supabase
-      .from('categories')
-      .select()
-      .eq('id', categoryId)
-      .returns<CategoriesInterface[]>();
+    url = `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/category/retrieve?categoryId=${categoryId}`;
+  } else if (subcategoryId) {
+    url = `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/category/retrieve?subcategoryId=${subcategoryId}`;
+  } else if (groupId) {
+    url = `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/category/retrieve?groupId=${groupId}`;
+  }
 
-    category = response.data?.[0];
+  const res = await fetch(url, { next: { revalidate: 300 }, credentials: 'include' });
+  const data = await res.json();
+  const categories = data.categories;
+
+  if (categoryId) {
+    category = categories[0];
+  } else if (subcategoryId) {
+    subcategory = categories[0];
+  } else if (groupId) {
+    group = categories[0];
   }
 
   const name = group?.name || subcategory?.name || category?.name;

@@ -1,9 +1,7 @@
-import { cookies } from 'next/headers';
 import Section from '../../../../_shared/components/Section/Section';
-import { createClient } from '../../../utils/supabase/server';
-import { Box, Breadcrumbs, CircularProgress } from '@mui/material';
+import { Box, Breadcrumbs, CircularProgress, Typography } from '@mui/material';
 import Link from 'next/link';
-import { ProductsInterface } from '../../../../_shared/types';
+import { ProductsInterface } from '../../../../../_shared/types';
 import Main from './main';
 
 interface Props {
@@ -11,10 +9,12 @@ interface Props {
 }
 
 const Product = async ({ params: { id } }: Props) => {
-  const cookieStore = cookies();
-  const supabase = createClient(cookieStore);
-  const response = await supabase.functions.invoke('retrieve-product', { body: { productId: id } });
-  const product: ProductsInterface = response.data?.product?.[0];
+  const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/marketplace/product/${id}`, {
+    next: { revalidate: 300, tags: ['product', id] },
+    credentials: 'include'
+  });
+  const data = await res.json();
+  const product: ProductsInterface = data.product;
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -28,6 +28,8 @@ const Product = async ({ params: { id } }: Props) => {
             </Link>
           );
         })}
+
+        <Typography>{product?.name}</Typography>
       </Breadcrumbs>
 
       <Section title={product?.name} titleVariant='h3' maxWidth='xl' disableGutters>

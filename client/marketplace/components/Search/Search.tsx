@@ -3,27 +3,15 @@
 import { mdiMagnify } from '@mdi/js';
 import Icon from '@mdi/react';
 import { Box, InputBase, IconButton } from '@mui/material';
-import { createClient } from '../../utils/supabase/client';
-import { FormEvent, useEffect, useState } from 'react';
-import { CategoriesInterface } from '../../../_shared/types';
+import { FormEvent, useState } from 'react';
 import { grey } from '@mui/material/colors';
 import { enqueueSnackbar } from 'notistack';
+import { retrieveCategories } from '../../../_shared/api';
 
 const Search = () => {
-  const supabase = createClient();
   const [searchValue, setSearchValue] = useState('');
-  const [categories, setCategories] = useState<CategoriesInterface[]>([]);
+  const { data: { data: { categories } } = { data: {} } } = retrieveCategories();
   const [selectedCategory, setSelectedCategory] = useState('');
-
-  useEffect(() => {
-    (async () => {
-      const response = await supabase.functions.invoke('retrieve-filters', { body: { depth: 1 } });
-
-      if (response.data.categories) {
-        setCategories(response.data.categories);
-      }
-    })();
-  }, []);
 
   const handleSubmit = (e?: FormEvent) => {
     e?.preventDefault();
@@ -70,7 +58,7 @@ const Search = () => {
       >
         <option value=''>All categories</option>
 
-        {categories.map((category) => (
+        {categories?.map((category) => (
           <option key={category.id} value={category.id}>
             {category.name}
           </option>

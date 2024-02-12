@@ -1,7 +1,7 @@
 'use client';
 
 import Icon from '@mdi/react';
-import { OffersInterface } from '../../../_shared/types';
+import { OffersInterface } from '../../../../_shared/types';
 import { mdiInformationOutline } from '@mdi/js';
 import { Box, IconButton, Link, Typography } from '@mui/material';
 import { useState } from 'react';
@@ -17,7 +17,7 @@ const Offer = ({ offer }: Props) => {
   return (
     <Box key={offer.id} sx={{ mb: 1, position: 'relative' }}>
       <Link href={offer.url}>
-        <img src={offer.logo_url} />
+        <img src={offer.logoUrl} style={{ maxWidth: '100%' }} />
       </Link>
 
       <Modal open={status === 'Details'} title='Details' cancel={() => setStatus('')} cancelText='Close'>

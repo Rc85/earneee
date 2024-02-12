@@ -58,9 +58,13 @@ const Footer = () => {
         >
           <Typography sx={{ fontWeight: 500, mb: 2 }}>Website</Typography>
 
-          <Typography sx={{ mb: 2 }}>Create Account</Typography>
+          <Typography sx={{ mb: 2 }}>
+            <Link href='/register'>Create Account</Link>
+          </Typography>
 
-          <Typography sx={{ mb: 2 }}>Login</Typography>
+          <Typography sx={{ mb: 2 }}>
+            <Link href='/login'>Login</Link>
+          </Typography>
 
           <Typography>About</Typography>
         </Box>

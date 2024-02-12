@@ -35,9 +35,24 @@ export const retrieveProductBrands = (options?: { brandId: string; offset?: numb
   });
 };
 
-export const retrieveProductVariants = (options?: { variantId?: string }) => {
+export const retrieveProductVariants = (options?: {
+  variantId?: string;
+  featured?: boolean;
+  type?: 'new' | 'popular';
+  categoryId?: number;
+  subcategoryId?: number;
+  groupId?: number;
+}) => {
   return useQuery<{ data: { variants: ProductVariantsInterface[] } }>({
-    queryKey: ['variants', options?.variantId],
+    queryKey: [
+      'variants',
+      options?.variantId,
+      options?.featured,
+      options?.type,
+      options?.categoryId,
+      options?.subcategoryId,
+      options?.groupId
+    ],
     queryFn: () =>
       axios({
         method: 'get',
@@ -81,6 +96,19 @@ export const retrieveProductMedia = (options?: { variantId?: string }) => {
       axios({
         method: 'get',
         url: '/api/v1/product/media/retrieve',
+        params: options,
+        withCredentials: true
+      })
+  });
+};
+
+export const retrieveMarketplaceProducts = (options?: { categoryId?: number; offset?: number }) => {
+  return useQuery<{ data: { variants: ProductVariantsInterface[]; count: number } }>({
+    queryKey: ['marketplace products', options?.categoryId, options?.offset],
+    queryFn: () =>
+      axios({
+        method: 'get',
+        url: '/api/v1/marketplace/product/retrieve',
         params: options,
         withCredentials: true
       })

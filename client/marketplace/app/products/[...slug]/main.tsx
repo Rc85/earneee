@@ -11,10 +11,9 @@ import {
   Paper,
   Typography
 } from '@mui/material';
-import { useEffect, useState } from 'react';
-import { CategoriesInterface, ProductVariantsInterface } from '../../../../_shared/types';
-import { createClient } from '../../../utils/supabase/client';
+import { useState } from 'react';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
+import { retrieveCategories, retrieveMarketplaceProducts } from '../../../../_shared/api';
 
 interface Props {
   categoryId: number | undefined;
@@ -23,54 +22,24 @@ interface Props {
 }
 
 const Main = ({ categoryId, subcategoryId, groupId }: Props) => {
-  const [status, setStatus] = useState('Loading');
   const [page, setPage] = useState(0);
-  const [count, setCount] = useState(0);
-  const [categories, setCategories] = useState<CategoriesInterface[]>([]);
+  const id = groupId || subcategoryId || categoryId;
+  const { data: { data: { categories } } = { data: {} } } = retrieveCategories({
+    parentId: id
+  });
+  const { isLoading, data: { data: { variants = [], count = 0 } } = { data: {} } } =
+    retrieveMarketplaceProducts({
+      categoryId: id,
+      offset: page * 20
+    });
   //const [appliedFilters, setAppliedFilters] = useState({});
-  const [variants, setVariants] = useState<ProductVariantsInterface[]>([]);
-  const supabase = createClient();
-  const categoryTypes = categories.filter((category) => category.type);
+  const categoryTypes = categories?.filter((category) => category.type) || [];
   const categoryTypeLabels = [...new Set(categoryTypes.map((category) => category.type))];
-
-  useEffect(() => {
-    (async () => {
-      setStatus('Loading');
-
-      await retrieveVariants();
-
-      await retrieveCategories();
-
-      setStatus('');
-    })();
-  }, []);
-
-  const retrieveVariants = async () => {
-    const response = await supabase.functions.invoke('retrieve-categories-with-products', {
-      body: { groupId, subcategoryId, categoryId, offset: page * 30 }
-    });
-
-    if (response.data) {
-      setCount(response.data.count);
-
-      setVariants(response.data.products);
-    }
-  };
-
-  const retrieveCategories = async () => {
-    const response = await supabase.functions.invoke('retrieve-filters', {
-      body: { groupId, subcategoryId, categoryId }
-    });
-
-    if (response.data.categories) {
-      setCategories(response.data.categories);
-    }
-  };
 
   return (
     <Box sx={{ display: 'flex' }}>
       <Box sx={{ flexGrow: 1, mr: 2 }}>
-        {status === 'Loading' ? (
+        {isLoading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <CircularProgress />
           </Box>
@@ -86,10 +55,10 @@ const Main = ({ categoryId, subcategoryId, groupId }: Props) => {
             </Box>
 
             <Grid2 container spacing={1}>
-              {variants.map((variant) => (
+              {variants?.map((variant) => (
                 <Grid2 key={variant.id} xs={12} sm={6} md={4} xl={3}>
                   <Paper variant='outlined' className='product-card'>
-                    <Box component='a' href={`/product/${variant.product_id}?variant=${variant.id}`}>
+                    <Box component='a' href={`/product/${variant.product?.id}?variant=${variant.id}`}>
                       <Box
                         sx={{
                           width: '100%',
@@ -144,12 +113,12 @@ const Main = ({ categoryId, subcategoryId, groupId }: Props) => {
       </Box>
 
       <Box sx={{ width: '25%', minWidth: '200px', maxWidth: '300px', flexShrink: 0 }}>
-        {categories.filter((category) => !category.type).length > 0 && (
+        {(categories || [])?.filter((category) => !category.type).length > 0 && (
           <Box sx={{ mb: 2 }}>
             <Typography sx={{ fontWeight: 500, mb: 1 }}>Categories</Typography>
 
             {categories
-              .filter((category) => !category.type)
+              ?.filter((category) => !category.type)
               .map((category) => {
                 const url = subcategoryId
                   ? `/products/${categoryId}/${subcategoryId}/${category.id}`

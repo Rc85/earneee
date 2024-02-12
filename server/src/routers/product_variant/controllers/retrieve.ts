@@ -5,18 +5,36 @@ export const retrieveVariant = async (req: Request, resp: Response, next: NextFu
   const { client } = resp.locals;
   const where = [];
   const params = [];
-  const { variantId } = req.query;
+  const { categoryId, subcategoryId, groupId, type, variantId, featured, country = 'CA' } = req.query;
 
   if (variantId) {
     params.push(variantId);
 
-    where.push(`pv.id = $1`);
+    where.push(`pv.id = $${params.length}`);
   }
+
+  if (featured) {
+    where.push(`pv.featured IS TRUE`);
+  }
+
+  const id = categoryId || subcategoryId || groupId || undefined;
+
+  if (id) {
+    params.push(id);
+
+    where.push(`p.product->>'category_id' = $${params.length}`);
+  }
+
+  /* if (country) {
+    params.push(country);
+
+    where.push(`pu.urls->>'country' = $${params.length}`);
+  } */
 
   const variants = await database.product.variant.retrieve({
     where: where.join(' AND '),
     params,
-    orderBy: 'pv.ordinance',
+    orderBy: type === 'new' ? 'pv.created_at DESC' : 'pv.ordinance',
     client
   });
 

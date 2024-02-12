@@ -10,35 +10,21 @@ import {
   ListItemIcon,
   ListItemText
 } from '@mui/material';
-import { createClient } from '../../utils/supabase/client';
-import { useEffect, useState } from 'react';
-import { CategoriesInterface } from '../../../_shared/types';
+import { useState } from 'react';
+import { CategoriesInterface } from '../../../../_shared/types';
 import { useRouter } from 'next/navigation';
 import { mdiChevronRight, mdiChevronLeft } from '@mdi/js';
 import Icon from '@mdi/react';
+import { retrieveCategories } from '../../../_shared/api';
 
 interface Props {
   onClick: () => void;
 }
 
 const Categories = ({ onClick }: Props) => {
-  const [status, setStatus] = useState('Loading');
-  const supabase = createClient();
-  const [categories, setCategories] = useState<CategoriesInterface[]>([]);
+  const { data: { data: { categories } } = { data: {} } } = retrieveCategories({ level: 3 });
   const [selectedCategories, setSelectedCategories] = useState<CategoriesInterface[]>([]);
   const router = useRouter();
-
-  useEffect(() => {
-    (async () => {
-      const response = await supabase.functions.invoke('retrieve-categories-menu', { method: 'GET' });
-
-      setStatus('');
-
-      if (response.data.categories) {
-        setCategories(response.data.categories);
-      }
-    })();
-  }, []);
 
   const handleCategoryClick = (category: CategoriesInterface) => {
     const categories = [...selectedCategories];
@@ -96,7 +82,7 @@ const Categories = ({ onClick }: Props) => {
               <ListItemButton sx={{ flexShrink: 1 }}>Main</ListItemButton>
             </ListItem>
 
-            {categories.map((category) => (
+            {categories?.map((category) => (
               <ListItem key={category.id} disableGutters divider sx={{ width: '100%', pr: 1 }}>
                 <ListItemButton
                   sx={{ flexShrink: 1 }}
@@ -137,7 +123,7 @@ const Categories = ({ onClick }: Props) => {
               </ListItemButton>
             </ListItem>
 
-            {categories[0]?.subcategories?.map((category) => (
+            {categories?.[0]?.subcategories?.map((category) => (
               <ListItem key={category.id} disableGutters divider sx={{ width: '100%', pr: 1 }}>
                 <ListItemButton
                   sx={{ flexShrink: 1 }}
@@ -178,7 +164,7 @@ const Categories = ({ onClick }: Props) => {
               </ListItemButton>
             </ListItem>
 
-            {categories[0]?.subcategories?.[0]?.subcategories?.map((category) => (
+            {categories?.[0]?.subcategories?.[0]?.subcategories?.map((category) => (
               <ListItem key={category.id} disableGutters divider sx={{ width: '100%' }}>
                 <ListItemButton
                   sx={{ flexShrink: 1 }}

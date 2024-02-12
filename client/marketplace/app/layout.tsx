@@ -9,10 +9,12 @@ import { SnackbarProvider } from 'notistack';
 import { Provider } from 'react-redux';
 import { store } from '../../_shared/redux/store';
 import axios from 'axios';
+import { brandName } from '../../_shared/constants';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL;
 
-const RootLayout = async ({ children }: { children: React.ReactNode }) => {
+const RootLayout = ({ children }: { children: React.ReactNode }) => {
   const [queryClient] = useState(
     () => new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false } } })
   );
@@ -20,6 +22,8 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
   return (
     <html lang='en'>
       <head>
+        <title>{brandName}</title>
+
         <link
           rel='stylesheet'
           href='https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap'
@@ -52,6 +56,8 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
                 <Footer />
               </ThemeRegistry>
             </SnackbarProvider>
+
+            <ReactQueryDevtools initialIsOpen={false} />
           </QueryClientProvider>
         </Provider>
       </body>

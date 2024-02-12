@@ -4,7 +4,7 @@ import Icon from '@mdi/react';
 import { Box, Button, IconButton, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { MouseEvent, useEffect, useState } from 'react';
-import { ProductVariantsInterface } from '../../../_shared/types';
+import { ProductVariantsInterface } from '../../../../_shared/types';
 
 let carouselInterval: NodeJS.Timer | undefined | void = undefined;
 
@@ -12,7 +12,7 @@ interface Props {
   variants: ProductVariantsInterface[];
 }
 
-const CarouselContainer = ({ variants }: Props) => {
+const Carousel = ({ variants }: Props) => {
   const [imageIndex, setImageIndex] = useState(0);
   const [carouselTimer, setCarouselTimer] = useState(5);
 
@@ -134,7 +134,7 @@ const CarouselContainer = ({ variants }: Props) => {
                   }).format(variant.price)}
                 </Typography>
 
-                <Button onClick={(e) => handleBuyNowClick(e, variant.url)}>Buy Now</Button>
+                {/* <Button onClick={(e) => handleBuyNowClick(e, variant.url)}>Buy Now</Button> */}
               </Box>
             </Box>
           </Box>
@@ -191,4 +191,4 @@ const CarouselContainer = ({ variants }: Props) => {
   );
 };
 
-export default CarouselContainer;
+export default Carousel;

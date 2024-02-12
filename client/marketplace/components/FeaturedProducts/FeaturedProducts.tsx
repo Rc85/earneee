@@ -1,42 +1,20 @@
 'use server';
 
-import Section from '../../../_shared/components/Section/Section';
 import { ProductVariantsInterface } from '../../../../_shared/types';
-import { createClient } from '../../utils/supabase/server';
-import { Box } from '@mui/material';
-import { cookies } from 'next/headers';
-import Product from './Product';
+import Carousel from './Carousel';
 
-interface Props {
-  categoryId?: string;
-  subcategoryId?: string;
-  groupId?: string;
-  type: 'new' | 'popular';
-}
-
-const FeaturedProducts = async ({ categoryId, subcategoryId, groupId, type }: Props) => {
-  const cookieStore = cookies();
-  const supabase = createClient(cookieStore);
-
-  const response = await supabase.functions.invoke('retrieve-featured-products', {
-    body: { categoryId, groupId, subcategoryId, type }
-  });
-
-  const variants: ProductVariantsInterface[] = response.data?.products || [];
-
-  return (
-    <Section
-      title={type === 'new' ? 'NEW PRODUCTS' : 'POPULAR PRODUCTS'}
-      titleVariant='h4'
-      containerStyle={{ mb: 3 }}
-    >
-      <Box sx={{ display: 'flex', overflowX: 'auto', flexWrap: 'nowrap', py: 1 }}>
-        {variants?.map((variant, i) => (
-          <Product key={variant.id} variant={variant} isLast={i === variants.length - 1} />
-        ))}
-      </Box>
-    </Section>
+const FeaturedProducts = async () => {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/product/variant/retrieve?scope=marketplace`,
+    {
+      next: { revalidate: 300, tags: ['featured products'] },
+      credentials: 'include'
+    }
   );
+  const data = await res.json();
+  const variants: ProductVariantsInterface[] = data.variants;
+
+  return <Carousel variants={variants} />;
 };
 
 export default FeaturedProducts;

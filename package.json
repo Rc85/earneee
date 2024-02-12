@@ -63,6 +63,7 @@
     "supabase": "^1.115.4"
   },
   "devDependencies": {
+    "@tanstack/react-query-devtools": "^5.18.1",
     "@types/bcrypt": "^5.0.2",
     "@types/cors": "^2.8.17",
     "@types/dompurify": "^3.0.5",

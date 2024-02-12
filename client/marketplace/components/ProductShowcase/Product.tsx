@@ -1,6 +1,6 @@
 'use client';
 
-import { ProductVariantsInterface } from '../../../_shared/types';
+import { ProductVariantsInterface } from '../../../../_shared/types';
 import { Paper, Box, Typography, Divider, Button } from '@mui/material';
 
 interface Props {

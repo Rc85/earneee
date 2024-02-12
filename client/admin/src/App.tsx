@@ -20,7 +20,7 @@ import {
   ResetPassword
 } from './pages';
 import axios from 'axios';
-import { QueryClientProvider, QueryClient } from 'react-query';
+import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 
 axios.defaults.baseURL = import.meta.env.VITE_SERVER_URL;
 

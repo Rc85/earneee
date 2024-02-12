@@ -18,7 +18,7 @@ export const login = async (req: Request, resp: Response, next: NextFunction) =>
       // send email
     }
 
-    req.session.user = { id: user.id, email: user.email, isAdmin: user.isAdmin };
+    req.session.user = { id: user.id, email: user.email, isAdmin: user.isAdmin, country: user.country };
 
     const expireAt = remember ? new Date('2100-12-31') : new Date(new Date().getTime() + 60000 * 60 * 24);
 

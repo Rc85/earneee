@@ -110,6 +110,21 @@ export const product = {
           pm.status
         FROM product_media AS pm
         ORDER BY pm.ordinance
+      ),
+      p AS (
+        SELECT
+          p.id,
+          p.name,
+          p.category_id
+        FROM products AS p
+      ),
+      pu AS (
+        SELECT
+          pu.id,
+          pu.url,
+          pu.variant_id,
+          pu.country
+        FROM product_urls AS pu
       )
 
       SELECT
@@ -120,13 +135,25 @@ export const product = {
         pv.featured,
         pv.product_id,
         pv.status,
-        COALESCE(m.media, '[]'::JSONB) AS media
+        p.product,
+        COALESCE(m.media, '[]'::JSONB) AS media,
+        COALESCE(pu.urls, '[]'::JSONB) AS urls
       FROM product_variants AS pv
       LEFT JOIN LATERAL (
         SELECT JSONB_AGG(pm.*) AS media
         FROM pm
         WHERE pm.variant_id = pv.id
       ) AS m ON TRUE
+      LEFT JOIN LATERAL (
+        SELECT TO_JSONB(p.*) AS product
+        FROM p
+        WHERE p.id = pv.product_id
+      ) AS p ON TRUE
+      LEFT JOIN LATERAL (
+        SELECT JSONB_AGG(pu.*) AS urls
+        FROM pu
+        WHERE pu.variant_id = pv.id
+      ) AS pu ON TRUE
       ${generateOptionString(options)}`;
 
       return await database

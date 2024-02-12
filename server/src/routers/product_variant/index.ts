@@ -29,4 +29,18 @@ router.delete(
   response
 );
 
+router.get(
+  '/api/v1/marketplace/product/retrieve',
+  dbConnect,
+  middleware(controllers.retrieveMarketplaceProducts),
+  response
+);
+
+router.get(
+  '/api/v1/marketplace/product/:id',
+  dbConnect,
+  middleware(controllers.retrieveMarketplaceProduct),
+  response
+);
+
 export default router;
