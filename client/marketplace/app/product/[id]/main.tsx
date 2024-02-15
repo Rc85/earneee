@@ -1,9 +1,25 @@
 'use client';
-import { Avatar, Box, Button, Chip, Divider, Paper, Typography } from '@mui/material';
+import {
+  Avatar,
+  Box,
+  Button,
+  Checkbox,
+  Chip,
+  Divider,
+  FormControlLabel,
+  ListItemText,
+  Paper,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableRow,
+  Typography
+} from '@mui/material';
 import Gallery from '../../../components/Gallery/Gallery';
 import { ProductVariantsInterface, ProductsInterface } from '../../../../../_shared/types';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
 
 interface Props {
   product: ProductsInterface;
@@ -19,12 +35,51 @@ const Main = ({ product }: Props) => {
   return (
     <Box sx={{ display: 'flex' }}>
       <Box sx={{ flexGrow: 1 }}>
-        <Gallery images={selectedVariant?.media || []} />
+        <Gallery media={selectedVariant?.media || []} />
 
         <Divider sx={{ my: 1 }} />
 
         {product.description && (
           <div className='product-description' dangerouslySetInnerHTML={{ __html: product.description }} />
+        )}
+
+        {selectedVariant?.specifications?.length && (
+          <>
+            <Divider sx={{ my: 1 }} />
+
+            <Typography variant='h6'>Specifications</Typography>
+
+            <Grid2
+              container
+              sx={{
+                '--Grid-borderWidth': '1px',
+                borderTop: 'var(--Grid-borderWidth) solid',
+                borderLeft: 'var(--Grid-borderWidth) solid',
+                borderColor: 'divider',
+                '& > div': {
+                  borderRight: 'var(--Grid-borderWidth) solid',
+                  borderBottom: 'var(--Grid-borderWidth) solid',
+                  borderColor: 'divider'
+                },
+                mb: 3
+              }}
+            >
+              {selectedVariant.specifications.map((specification) => (
+                <Fragment key={specification.name}>
+                  <Grid2 xs={4}>
+                    <Typography sx={{ margin: 2 }}>{specification.name}</Typography>
+                  </Grid2>
+
+                  <Grid2 xs={8}>
+                    <div
+                      style={{ margin: '16px' }}
+                      dangerouslySetInnerHTML={{ __html: specification.value }}
+                    />
+                  </Grid2>
+                </Fragment>
+              ))}
+            </Grid2>
+          </>
         )}
       </Box>
 
@@ -60,8 +115,8 @@ const Main = ({ product }: Props) => {
                 {variant.status === 'available' ? (
                   Intl.NumberFormat('en-US', {
                     style: 'currency',
-                    currency: 'CAD',
-                    currencyDisplay: 'narrowSymbol'
+                    currency: variant.currency,
+                    currencyDisplay: 'code'
                   }).format(variant.price)
                 ) : (
                   <Chip size='small' color='error' label='Unavailable' />
@@ -71,40 +126,88 @@ const Main = ({ product }: Props) => {
           </Paper>
         ))}
 
-        {Boolean(product.affiliate && selectedVariant?.status === 'available') && (
-          <Box>
-            <Divider sx={{ my: 1 }} />
-
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        {Boolean(selectedVariant?.status === 'available' && selectedVariant?.urls?.[0]?.url) && (
+          <>
+            {selectedVariant?.status === 'available' && (
               <Box>
-                <Typography>Sold by</Typography>
+                <Divider sx={{ my: 1 }} />
 
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  {product.affiliate?.logoUrl && <Avatar variant='square' src={product.affiliate.logoUrl} />}
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Box>
+                    {Boolean(product.affiliate) && (
+                      <>
+                        <Typography>Sold by</Typography>
 
-                  <Typography sx={{ ml: 1 }}>{product.affiliate?.name}</Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          {product.affiliate?.logoUrl && (
+                            <Avatar variant='square' src={product.affiliate.logoUrl} />
+                          )}
+
+                          <Typography sx={{ ml: 1 }}>{product.affiliate?.name}</Typography>
+                        </Box>
+                      </>
+                    )}
+                  </Box>
+
+                  {selectedVariant?.urls?.[0]?.url && (
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                      <Button
+                        variant='contained'
+                        onClick={() => window.open(selectedVariant.urls?.[0]?.url, '_blank')}
+                      >
+                        Buy Now
+                      </Button>
+                    </Box>
+                  )}
                 </Box>
               </Box>
+            )}
 
-              {/* <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <Button
-                  variant='contained'
-                  onClick={() =>
-                    selectedVariant?.url ? window.open(selectedVariant.url, '_blank') : undefined
-                  }
-                >
-                  Buy Now
-                </Button>
-              </Box> */}
-            </Box>
-          </Box>
+            <Divider sx={{ my: 1 }} />
+          </>
         )}
-
-        <Divider sx={{ my: 1 }} />
 
         {selectedVariant?.description && (
           <div dangerouslySetInnerHTML={{ __html: selectedVariant.description }} />
         )}
+
+        {selectedVariant?.options?.length &&
+          selectedVariant.options.map((option) => (
+            <Box key={option.id}>
+              <Typography variant='h6'>
+                {option.name} {option.required && <Typography color='red'>Required</Typography>}
+              </Typography>
+
+              {option.selections?.map((selection) => (
+                <Box key={selection.id}>
+                  {product?.type === 'affiliate' ? (
+                    <ListItemText
+                      primary={selection.name}
+                      secondary={`+${Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: selectedVariant.currency,
+                        currencyDisplay: 'code'
+                      }).format(selection.price)}`}
+                    />
+                  ) : (
+                    <FormControlLabel
+                      label={
+                        <ListItemText
+                          primary={selection.name}
+                          secondary={`+${Intl.NumberFormat('en-US', {
+                            style: 'currency',
+                            currency: selectedVariant.currency,
+                            currencyDisplay: 'code'
+                          }).format(selection.price)}`}
+                        />
+                      }
+                      control={<Checkbox color='info' />}
+                    />
+                  )}
+                </Box>
+              ))}
+            </Box>
+          ))}
       </Box>
     </Box>
   );

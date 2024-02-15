@@ -38,6 +38,7 @@ const VariantForm = ({ variant }: Props) => {
     id: generateKey(1),
     name: '',
     price: 0,
+    currency: 'cad',
     ordinance: 0,
     description: null,
     featured: false,
@@ -103,12 +104,31 @@ const VariantForm = ({ variant }: Props) => {
         autoFocus
       />
 
-      <TextField
-        label='Price'
-        onChange={(e) => setForm({ ...form, price: e.target.value as unknown as number })}
-        value={form.price}
-        InputProps={{ startAdornment: <InputAdornment position='start'>$</InputAdornment> }}
-      />
+      <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+        <TextField
+          label='Price'
+          onChange={(e) => setForm({ ...form, price: e.target.value as unknown as number })}
+          value={form.price}
+          InputProps={{ startAdornment: <InputAdornment position='start'>$</InputAdornment> }}
+          sx={{ mr: 1 }}
+        />
+
+        <TextField
+          label='Currency'
+          select
+          SelectProps={{ native: true }}
+          sx={{ minWidth: '25%' }}
+          onChange={(e) => setForm({ ...form, currency: e.target.value })}
+          value={form.currency}
+          fullWidth={false}
+        >
+          <option value='aud'>Australian Dollar</option>
+          <option value='cad'>Canadian Dollar</option>
+          <option value='eur'>Euro</option>
+          <option value='gbp'>Pound</option>
+          <option value='usd'>US Dollar</option>
+        </TextField>
+      </Box>
 
       <RichTextEditor editor={editor} sx={editorStyle} />
 

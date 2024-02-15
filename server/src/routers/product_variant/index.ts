@@ -30,14 +30,14 @@ router.delete(
 );
 
 router.get(
-  '/api/v1/marketplace/product/retrieve',
+  '/api/v1/auth/marketplace/product/retrieve',
   dbConnect,
   middleware(controllers.retrieveMarketplaceProducts),
   response
 );
 
 router.get(
-  '/api/v1/marketplace/product/:id',
+  '/api/v1/auth/marketplace/product/:id',
   dbConnect,
   middleware(controllers.retrieveMarketplaceProduct),
   response

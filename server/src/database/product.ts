@@ -132,6 +132,7 @@ export const product = {
         pv.name,
         pv.description,
         pv.price,
+        pv.currency,
         pv.featured,
         pv.product_id,
         pv.status,

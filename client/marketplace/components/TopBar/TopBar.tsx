@@ -28,6 +28,15 @@ const TopBar = () => {
   const theme = useTheme();
   const { isLoading, data: { data: { user } } = { data: {} } } = authenticate('marketplace');
   const logout = useLogout();
+  /* const [selectedCountry, setSelectedCountry] = useState('CA');
+  const dispatch = useDispatch();
+  const { country } = useAppSelector((state) => state.App);
+
+  useEffect(() => {
+    if (user) {
+      setSelectedCountry(user.country);
+    }
+  }, [user]); */
 
   const handleLogout = () => {
     logout.mutate('marketplace');
@@ -49,6 +58,37 @@ const TopBar = () => {
         </Typography>
 
         <Search />
+
+        {/* <TextField
+          select
+          sx={{ mb: '0 !important', width: 75, mr: 1 }}
+          value={country}
+          onChange={(e) => dispatch(setCountry(e.target.value))}
+          SelectProps={{
+            renderValue: () => (
+              <img
+                src={`${process.env.NEXT_PUBLIC_STORAGE_URL}/images/countries/${country.toLowerCase()}.png`}
+                style={{ width: '20px' }}
+              />
+            ),
+            MenuProps: { keepMounted: true }
+          }}
+        >
+          {[
+            { code: 'CA', name: 'Canada' },
+            { code: 'US', name: 'United States' }
+          ].map((country) => (
+            <MenuItem key={country.code} value={country.code} sx={{ display: 'flex', alignItems: 'center' }}>
+              <img
+                src={`${
+                  process.env.NEXT_PUBLIC_STORAGE_URL
+                }/images/countries/${country.code.toLowerCase()}.png`}
+                style={{ width: '20px', marginRight: '5px' }}
+              />
+              {country.name}
+            </MenuItem>
+          ))}
+        </TextField> */}
 
         {isLoading ? (
           <CircularProgress size={20} />

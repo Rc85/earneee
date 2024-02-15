@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 export const authenticate = (application: 'admin' | 'marketplace') => {
   const url = application === 'marketplace' ? '/api/v1/auth/user' : '/api/v1/auth/admin';
 
-  return useQuery<{ data: { user: { id: string; email: string; isAdmin: boolean } } }>({
+  return useQuery<{ data: { user: { id: string; email: string; isAdmin: boolean; country: string } } }>({
     queryKey: ['authenticate', application],
     queryFn: () => axios({ method: 'post', url, withCredentials: true })
   });

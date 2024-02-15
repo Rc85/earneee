@@ -21,7 +21,7 @@ const Footer = () => {
         }}
       >
         <img
-          src={`${process.env.NEXT_PUBLIC_STORAGE_URL}images/subscribe.png`}
+          src={`${process.env.NEXT_PUBLIC_STORAGE_URL}/images/subscribe.png`}
           style={{ width: 300, maxWidth: '100%' }}
         />
 

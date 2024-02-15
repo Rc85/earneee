@@ -23,6 +23,8 @@ export const validateCreateVariant = async (req: Request, resp: Response, next: 
     return next(new HttpException(400, `Featured must be true or false`));
   } else if (!['available', 'unavailable'].includes(status)) {
     return next(new HttpException(400, `Invalid status`));
+  } else if (!validations.currencyCheck.test(req.body.currency)) {
+    return next(new HttpException(400, `Invalid currency`));
   }
 
   return next();

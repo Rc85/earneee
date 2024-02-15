@@ -5,7 +5,7 @@ export const retrieveVariant = async (req: Request, resp: Response, next: NextFu
   const { client } = resp.locals;
   const where = [];
   const params = [];
-  const { categoryId, subcategoryId, groupId, type, variantId, featured, country = 'CA' } = req.query;
+  const { categoryId, subcategoryId, groupId, type, variantId, featured } = req.query;
 
   if (variantId) {
     params.push(variantId);
@@ -23,12 +23,6 @@ export const retrieveVariant = async (req: Request, resp: Response, next: NextFu
     params.push(id);
 
     where.push(`p.product->>'category_id' = $${params.length}`);
-  }
-
-  if (country) {
-    params.push(`[{"country": "${country}"}]`);
-
-    where.push(`pu.urls @> $${params.length}`);
   }
 
   const variants = await database.product.variant.retrieve({

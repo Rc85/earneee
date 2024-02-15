@@ -1,4 +1,4 @@
-import { ProductSpecificationsInterface } from '.';
+import { ProductSpecificationsInterface, ProductUrlsInterface } from '.';
 import { ProductMediaInterface } from './product_media';
 import { ProductOptionsInterface } from './product_options';
 import { ProductsInterface } from './products';
@@ -7,6 +7,7 @@ export interface ProductVariantsInterface {
   id: string;
   name: string;
   price: number;
+  currency: string;
   productId: string;
   featured: boolean;
   description: string | null;
@@ -18,4 +19,5 @@ export interface ProductVariantsInterface {
   media?: ProductMediaInterface[];
   product?: ProductsInterface;
   specifications?: ProductSpecificationsInterface[];
+  urls?: ProductUrlsInterface[];
 }

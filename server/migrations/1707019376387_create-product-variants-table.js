@@ -19,6 +19,11 @@ exports.up = (pgm) => {
         default: 0,
         notNull: true
       },
+      currency: {
+        type: 'varchar',
+        default: 'cdn',
+        notNull: true
+      },
       description: {
         type: 'varchar'
       },

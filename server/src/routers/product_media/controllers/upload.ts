@@ -10,9 +10,6 @@ export const uploadProductMedia = async (req: Request, resp: Response, next: Nex
   const file = req.files?.[0];
   const { image, variantId } = req.body;
 
-  console.log(req.files);
-  console.log(req.body);
-
   if (image) {
     const base64 = image.split(',')[1];
     const id = generateKey(1);

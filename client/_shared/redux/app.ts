@@ -5,11 +5,13 @@ import { User } from '@supabase/supabase-js';
 interface AppState {
   user: User | null;
   isLoading: boolean;
+  country: string;
 }
 
 const initialState: AppState = {
   user: null,
-  isLoading: false
+  isLoading: false,
+  country: 'CA'
 };
 
 const appSlice = createSlice({
@@ -21,10 +23,13 @@ const appSlice = createSlice({
     },
     setIsLoading(state, loading: PayloadAction<boolean>) {
       state.isLoading = loading.payload;
+    },
+    setCountry(state, country: PayloadAction<string>) {
+      state.country = country.payload;
     }
   }
 });
 
-export const { setUser, setIsLoading } = appSlice.actions;
+export const { setUser, setIsLoading, setCountry } = appSlice.actions;
 
 export default appSlice.reducer;

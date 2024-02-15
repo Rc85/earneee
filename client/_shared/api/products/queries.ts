@@ -109,7 +109,7 @@ export const retrieveMarketplaceProducts = (options?: { categoryId?: number; off
     queryFn: () =>
       axios({
         method: 'get',
-        url: '/api/v1/marketplace/product/retrieve',
+        url: '/api/v1/auth/marketplace/product/retrieve',
         params: options,
         withCredentials: true
       })
