@@ -4,7 +4,6 @@ import { mdiLoginVariant } from '@mdi/js';
 import Icon from '@mdi/react';
 import { LoadingButton } from '@mui/lab';
 import {
-  Alert,
   Box,
   Button,
   Checkbox,
@@ -14,7 +13,6 @@ import {
   FormControlLabel,
   Link,
   Paper,
-  Snackbar,
   TextField,
   Typography
 } from '@mui/material';
@@ -37,7 +35,6 @@ export default function Login() {
     remember: false,
     application: 'marketplace'
   });
-  const [error, setError] = useState('');
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect');
   const router = useRouter();
@@ -64,22 +61,14 @@ export default function Login() {
     e.preventDefault();
 
     if (!form.email) {
-      return setError('Email required');
+      return enqueueSnackbar('Email required', { variant: 'error' });
     } else if (!form.password) {
-      return setError('Password required');
+      return enqueueSnackbar('Password required', { variant: 'error' });
     }
 
     setStatus('Loading');
 
     login.mutate(form);
-  };
-
-  const handleSnackbarClose = (_: React.SyntheticEvent | Event, reason?: string) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-
-    setError('');
   };
 
   return isLoading ? (
@@ -101,12 +90,6 @@ export default function Login() {
     </Container>
   ) : (
     <Container maxWidth='sm'>
-      <Snackbar open={Boolean(error)} onClose={handleSnackbarClose} autoHideDuration={6000}>
-        <Alert severity='error' variant='filled'>
-          {error}
-        </Alert>
-      </Snackbar>
-
       <Paper variant='outlined' sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
         <Typography variant='h3'>Login</Typography>
 
@@ -193,14 +176,16 @@ export default function Login() {
             onChange={(e) => setForm({ ...form, password: e.target.value })}
           />
 
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
             <FormControlLabel
               label='Remember me'
               control={<Checkbox color='info' />}
               onChange={() => setForm({ ...form, remember: !form.remember })}
             />
 
-            <Button color='error'>Reset Password</Button>
+            <Button color='error' onClick={() => router.push('/reset-password')}>
+              Reset Password
+            </Button>
           </Box>
 
           <LoadingButton

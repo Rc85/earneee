@@ -117,10 +117,12 @@ const Footer = () => {
 
           <Box sx={{ display: 'flex' }}>
             <Typography color='white' sx={{ mr: 5 }}>
-              Terms of Service
+              <Link href='/tos'>Terms of Service</Link>
             </Typography>
 
-            <Typography color='white'>Privacy Policy</Typography>
+            <Typography color='white'>
+              <Link href='/privacy'>Privacy Policy</Link>
+            </Typography>
           </Box>
         </Box>
       </Container>

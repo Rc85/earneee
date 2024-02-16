@@ -4,14 +4,12 @@ import { mdiCheckCircle, mdiPlusBox } from '@mdi/js';
 import Icon from '@mdi/react';
 import { LoadingButton } from '@mui/lab';
 import {
-  Alert,
   Box,
   Checkbox,
   CircularProgress,
   Container,
   FormControlLabel,
   Paper,
-  Snackbar,
   TextField,
   Typography,
   useTheme
@@ -33,7 +31,6 @@ const Register = () => {
     country: 'CA',
     key: ''
   });
-  const [error, setError] = useState('');
   const theme = useTheme();
   const { enqueueSnackbar } = useSnackbar();
   const recaptchaRef = useRef<Recaptcha>(null);
@@ -59,15 +56,15 @@ const Register = () => {
     e.preventDefault();
 
     if (!form.email) {
-      return setError('Email required');
+      return enqueueSnackbar('Email required', { variant: 'error' });
     } else if (!form.password) {
-      return setError('Password required');
+      return enqueueSnackbar('Password required', { variant: 'error' });
     } else if (form.password !== form.confirmPassword) {
-      return setError('Passwords do not match');
+      return enqueueSnackbar('Passwords do not match', { variant: 'error' });
     } else if (form.password.length < 8) {
-      return setError('Password is too short');
+      return enqueueSnackbar('Password is too short', { variant: 'error' });
     } else if (!form.agreed) {
-      return setError('You must read and agree with our terms and policy');
+      return enqueueSnackbar('You must read and agree with our terms and policy', { variant: 'error' });
     }
 
     setStatus('Loading');
@@ -79,14 +76,6 @@ const Register = () => {
 
       createUser.mutate(form);
     }
-  };
-
-  const handleOnClose = (_: any, reason: string) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-
-    setError('');
   };
 
   return isLoading ? (
@@ -108,12 +97,6 @@ const Register = () => {
     </Container>
   ) : (
     <Container maxWidth='sm'>
-      <Snackbar open={Boolean(error)} autoHideDuration={6000} onClose={handleOnClose}>
-        <Alert severity='error' variant='filled'>
-          {error}
-        </Alert>
-      </Snackbar>
-
       <Paper variant='outlined' sx={{ p: 2 }}>
         {status === 'Success' ? (
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
