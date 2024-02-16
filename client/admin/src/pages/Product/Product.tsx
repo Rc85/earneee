@@ -23,7 +23,8 @@ const Product = () => {
   const navigate = useNavigate();
   const params = useParams();
   const { productId } = params;
-  const { isLoading, data: { data: { products } } = { data: {} } } = retrieveProducts({ productId });
+  const { isLoading, data } = retrieveProducts({ productId });
+  const { products } = data || {};
   const product = products?.[0];
 
   return isLoading ? (

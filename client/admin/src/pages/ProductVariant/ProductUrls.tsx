@@ -12,7 +12,8 @@ const ProductUrls = () => {
   const [status, setStatus] = useState('');
   const params = useParams();
   const { variantId } = params;
-  const { isLoading, data: { data: { urls } } = { data: {} } } = retrieveProductUrls({ variantId });
+  const { isLoading, data } = retrieveProductUrls({ variantId });
+  const { urls } = data || {};
 
   return isLoading ? (
     <Loading />

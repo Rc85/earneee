@@ -7,14 +7,17 @@ export const retrieveCategories = (options?: {
   parentId?: number | null;
   level?: number;
 }) => {
-  return useQuery<{ data: { categories: CategoriesInterface[] } }>({
+  return useQuery<{ categories: CategoriesInterface[] }>({
     queryKey: ['categories', options?.categoryId, options?.parentId, options?.level],
-    queryFn: () =>
-      axios({
+    queryFn: async () => {
+      const { data } = await axios({
         method: 'get',
         url: '/api/v1/category/retrieve',
         params: options,
         withCredentials: true
-      })
+      });
+
+      return data;
+    }
   });
 };

@@ -24,8 +24,10 @@ const ProductVariant = () => {
   const params = useParams();
   const { productId, variantId } = params;
   const navigate = useNavigate();
-  const { data: { data: { products } } = { data: {} } } = retrieveProducts({ productId });
-  const { data: { data: { variants } } = { data: {} } } = retrieveProductVariants({ variantId });
+  const p = retrieveProducts({ productId });
+  const pv = retrieveProductVariants({ variantId });
+  const { products } = p.data || {};
+  const { variants } = pv.data || {};
   const product = products?.[0];
   const variant = variants?.[0];
 

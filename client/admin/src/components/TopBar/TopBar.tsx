@@ -1,4 +1,5 @@
 import {
+  mdiAccessPoint,
   mdiAccount,
   mdiHandshake,
   mdiHome,
@@ -36,7 +37,8 @@ interface Props {
 }
 
 const TopBar = ({ maxWidth }: Props) => {
-  const { data: { data: { user } } = { data: {} } } = authenticate('admin');
+  const { data } = authenticate('admin');
+  const { user } = data || {};
   const [openDrawer, setOpenDrawer] = useState(false);
   const { isLoading } = useAppSelector((state) => state.App);
   const navigate = useNavigate();
@@ -166,6 +168,18 @@ const TopBar = ({ maxWidth }: Props) => {
                 </ListItemIcon>
 
                 <ListItemText primary='Account' />
+              </ListItemButton>
+            </ListItem>
+          )}
+
+          {user?.isAdmin && (
+            <ListItem disableGutters disablePadding>
+              <ListItemButton onClick={() => handleNavClick('/statuses')}>
+                <ListItemIcon>
+                  <Icon path={mdiAccessPoint} size={1} />
+                </ListItemIcon>
+
+                <ListItemText primary='Statuses' />
               </ListItemButton>
             </ListItem>
           )}

@@ -11,7 +11,8 @@ import { useState } from 'react';
 const ProductBrands = () => {
   const navigate = useNavigate();
   const [page, setPage] = useState(0);
-  const { isLoading, data: { data: { brands, count = 0 } } = { data: {} } } = retrieveProductBrands();
+  const { isLoading, data } = retrieveProductBrands();
+  const { brands, count = 0 } = data || {};
 
   return isLoading ? (
     <Loading />

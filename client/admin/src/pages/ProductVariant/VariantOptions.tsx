@@ -12,7 +12,8 @@ const VariantOptions = () => {
   const [status, setStatus] = useState('');
   const params = useParams();
   const { variantId } = params;
-  const { isLoading, data: { data: { options } } = { data: {} } } = retrieveProductOptions({ variantId });
+  const { isLoading, data } = retrieveProductOptions({ variantId });
+  const { options } = data || {};
 
   return isLoading ? (
     <Loading />

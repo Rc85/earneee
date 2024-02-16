@@ -12,7 +12,8 @@ import { useState } from 'react';
 const Products = () => {
   const navigate = useNavigate();
   const [page, setPage] = useState(0);
-  const { isLoading, data: { data: { products, count = 0 } } = { data: {} } } = retrieveProducts();
+  const { isLoading, data } = retrieveProducts();
+  const { products, count = 0 } = data || {};
 
   const handleCreateClick = () => {
     navigate('/products/create');

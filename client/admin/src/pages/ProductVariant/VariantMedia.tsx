@@ -43,7 +43,8 @@ const VariantMedia = () => {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
   const fileInputRef = useRef<any>(null);
-  const { isLoading, data: { data: { media } } = { data: {} } } = retrieveProductMedia({ variantId });
+  const { isLoading, data } = retrieveProductMedia({ variantId });
+  const { media } = data || {};
   const dispatch = useDispatch();
 
   const handleSuccess = (response: any) => {

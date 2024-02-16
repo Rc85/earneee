@@ -8,9 +8,10 @@ const AddAffiliate = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const affiliateId = location.state?.affiliateId;
-  const { isLoading, data: { data: { affiliates } } = { data: { affiliates: undefined } } } = affiliateId
+  const { isLoading, data } = affiliateId
     ? retrieveAffiliates({ affiliateId })
-    : { isLoading: false };
+    : { isLoading: false, data: {} };
+  const { affiliates } = data || {};
   const affiliate = affiliates?.[0];
 
   return isLoading ? (

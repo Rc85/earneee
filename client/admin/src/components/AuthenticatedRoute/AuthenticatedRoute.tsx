@@ -10,7 +10,8 @@ interface Props {
 }
 
 const AuthenticatedRoute = ({ children }: Props) => {
-  const { isLoading, data: { data: { user } } = { data: {} } } = authenticate('admin');
+  const { isLoading, data } = authenticate('admin');
+  const { user } = data || {};
   const theme = useTheme();
 
   if (isLoading) {

@@ -8,9 +8,8 @@ const CreateOffer = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const offerId = location.state?.offerId;
-  const { isLoading, data: { data: { offers } } = { data: { offers: undefined } } } = offerId
-    ? retrieveOffers({ offerId })
-    : { isLoading: false };
+  const { isLoading, data } = offerId ? retrieveOffers({ offerId }) : { isLoading: false, data: {} };
+  const { offers } = data || {};
   const offer = offers?.[0];
 
   return isLoading ? (

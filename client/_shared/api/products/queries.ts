@@ -11,28 +11,34 @@ import {
 } from '../../../../_shared/types';
 
 export const retrieveProducts = (options?: { productId?: string; offset?: number }) => {
-  return useQuery<{ data: { products: ProductsInterface[]; count: number } }>({
+  return useQuery<{ products: ProductsInterface[]; count: number }>({
     queryKey: ['products', options?.productId, options?.offset],
-    queryFn: () =>
-      axios({
+    queryFn: async () => {
+      const { data } = await axios({
         method: 'get',
         url: '/api/v1/product/retrieve',
         params: options,
         withCredentials: true
-      })
+      });
+
+      return data;
+    }
   });
 };
 
 export const retrieveProductBrands = (options?: { brandId: string; offset?: number }) => {
-  return useQuery<{ data: { brands: ProductBrandsInterface[]; count: number } }>({
+  return useQuery<{ brands: ProductBrandsInterface[]; count: number }>({
     queryKey: ['brands', options?.brandId, options?.offset],
-    queryFn: () =>
-      axios({
+    queryFn: async () => {
+      const { data } = await axios({
         method: 'get',
         url: '/api/v1/product/brand/retrieve',
         params: options,
         withCredentials: true
-      })
+      });
+
+      return data;
+    }
   });
 };
 
@@ -44,7 +50,7 @@ export const retrieveProductVariants = (options?: {
   subcategoryId?: number;
   groupId?: number;
 }) => {
-  return useQuery<{ data: { variants: ProductVariantsInterface[] } }>({
+  return useQuery<{ variants: ProductVariantsInterface[] }>({
     queryKey: [
       'variants',
       options?.variantId,
@@ -54,77 +60,95 @@ export const retrieveProductVariants = (options?: {
       options?.subcategoryId,
       options?.groupId
     ],
-    queryFn: () =>
-      axios({
+    queryFn: async () => {
+      const { data } = await axios({
         method: 'get',
         url: '/api/v1/product/variant/retrieve',
         params: options,
         withCredentials: true
-      })
+      });
+
+      return data;
+    }
   });
 };
 
 export const retrieveProductOptions = (options?: { variantId?: string }) => {
-  return useQuery<{ data: { options: ProductOptionsInterface[] } }>({
+  return useQuery<{ options: ProductOptionsInterface[] }>({
     queryKey: ['options', options?.variantId],
-    queryFn: () =>
-      axios({
+    queryFn: async () => {
+      const { data } = await axios({
         method: 'get',
         url: '/api/v1/product/option/retrieve',
         params: options,
         withCredentials: true
-      })
+      });
+
+      return data;
+    }
   });
 };
 
 export const retrieveProductSpecifications = (options?: { variantId?: string }) => {
-  return useQuery<{ data: { specifications: ProductSpecificationsInterface[] } }>({
+  return useQuery<{ specifications: ProductSpecificationsInterface[] }>({
     queryKey: ['specifications', options?.variantId],
-    queryFn: () =>
-      axios({
+    queryFn: async () => {
+      const { data } = await axios({
         method: 'get',
         url: '/api/v1/product/specification/retrieve',
         params: options,
         withCredentials: true
-      })
+      });
+
+      return data;
+    }
   });
 };
 
 export const retrieveProductMedia = (options?: { variantId?: string }) => {
-  return useQuery<{ data: { media: ProductMediaInterface[] } }>({
+  return useQuery<{ media: ProductMediaInterface[] }>({
     queryKey: ['product media', options?.variantId],
-    queryFn: () =>
-      axios({
+    queryFn: async () => {
+      const { data } = await axios({
         method: 'get',
         url: '/api/v1/product/media/retrieve',
         params: options,
         withCredentials: true
-      })
+      });
+
+      return data;
+    }
   });
 };
 
 export const retrieveMarketplaceProducts = (options?: { categoryId?: number; offset?: number }) => {
-  return useQuery<{ data: { variants: ProductVariantsInterface[]; count: number } }>({
+  return useQuery<{ variants: ProductVariantsInterface[]; count: number }>({
     queryKey: ['marketplace products', options?.categoryId, options?.offset],
-    queryFn: () =>
-      axios({
+    queryFn: async () => {
+      const { data } = await axios({
         method: 'get',
         url: '/api/v1/auth/marketplace/product/retrieve',
         params: options,
         withCredentials: true
-      })
+      });
+
+      return data;
+    }
   });
 };
 
 export const retrieveProductUrls = (options?: { variantId?: string }) => {
-  return useQuery<{ data: { urls: ProductUrlsInterface[] } }>({
+  return useQuery<{ urls: ProductUrlsInterface[] }>({
     queryKey: ['product url', options?.variantId],
-    queryFn: () =>
-      axios({
+    queryFn: async () => {
+      const { data } = await axios({
         method: 'get',
         url: '/api/v1/product/url/retrieve',
         params: options,
         withCredentials: true
-      })
+      });
+
+      return data;
+    }
   });
 };

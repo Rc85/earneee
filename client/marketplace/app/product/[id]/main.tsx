@@ -9,10 +9,6 @@ import {
   FormControlLabel,
   ListItemText,
   Paper,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableRow,
   Typography
 } from '@mui/material';
 import Gallery from '../../../components/Gallery/Gallery';

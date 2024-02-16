@@ -31,9 +31,10 @@ const Specifications = () => {
   );
   const params = useParams();
   const { variantId } = params;
-  const { isLoading, data: { data: { specifications } } = { data: {} } } = retrieveProductSpecifications({
+  const { isLoading, data } = retrieveProductSpecifications({
     variantId
   });
+  const { specifications } = data || {};
   const sortProductSpecifications = useSortProductSpecifications();
 
   const handleDragEnd = async (e: DragEndEvent) => {

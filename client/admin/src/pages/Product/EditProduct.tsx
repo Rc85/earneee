@@ -6,7 +6,8 @@ import { retrieveProducts } from '../../../../_shared/api';
 const EditProduct = () => {
   const params = useParams();
   const { productId } = params;
-  const { data: { data: { products } } = { data: {} } } = retrieveProducts({ productId });
+  const { data } = retrieveProducts({ productId });
+  const { products } = data || {};
   const product = products?.[0];
 
   return (

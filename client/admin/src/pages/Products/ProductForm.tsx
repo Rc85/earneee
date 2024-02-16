@@ -51,11 +51,14 @@ const ProductForm = ({ product }: Props) => {
   const { enqueueSnackbar } = useSnackbar();
   const [selectedCategories, setSelectedCategories] = useState<CategoriesInterface[]>([]);
   const navigate = useNavigate();
-  const { data: { data: { brands } } = { data: {} } } = retrieveProductBrands();
-  const { data: { data: { affiliates } } = { data: {} } } = retrieveAffiliates();
-  const { data: { data: { categories } } = { data: {} } } = retrieveCategories({
+  const b = retrieveProductBrands();
+  const a = retrieveAffiliates();
+  const c = retrieveCategories({
     parentId: selectedCategories[selectedCategories.length - 1]?.id || null
   });
+  const { brands } = b.data || {};
+  const { affiliates } = a.data || {};
+  const { categories } = c.data || {};
 
   useEffect(() => {
     if (product) {

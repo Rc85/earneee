@@ -10,9 +10,10 @@ import { retrieveAffiliates } from '../../../../_shared/api';
 
 const Affiliates = () => {
   const [page, setPage] = useState(0);
-  const { isLoading, data: { data: { affiliates = [], count = 0 } } = { data: {} } } = retrieveAffiliates({
+  const { isLoading, data } = retrieveAffiliates({
     offset: page * 20
   });
+  const { affiliates, count = 0 } = data || {};
   const navigate = useNavigate();
 
   return isLoading ? (

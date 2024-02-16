@@ -17,7 +17,8 @@ import {
   ProductBrands,
   ProductVariant,
   Products,
-  ResetPassword
+  ResetPassword,
+  Statuses
 } from './pages';
 import axios from 'axios';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
@@ -244,6 +245,15 @@ const App = () => {
                         }
                       />
                     </Route>
+
+                    <Route
+                      path='/statuses'
+                      element={
+                        <AuthenticatedRoute>
+                          <Statuses />
+                        </AuthenticatedRoute>
+                      }
+                    />
                   </Routes>
                 </Box>
               </BrowserRouter>

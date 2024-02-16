@@ -6,7 +6,8 @@ import { retrieveProductVariants } from '../../../../_shared/api';
 const EditVariant = () => {
   const params = useParams();
   const { variantId } = params;
-  const { data: { data: { variants } } = { data: {} } } = retrieveProductVariants({ variantId });
+  const { data } = retrieveProductVariants({ variantId });
+  const { variants } = data || {};
   const variant = variants?.[0];
 
   return (

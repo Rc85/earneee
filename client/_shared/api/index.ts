@@ -4,9 +4,13 @@ import { useQuery } from '@tanstack/react-query';
 export const authenticate = (application: 'admin' | 'marketplace') => {
   const url = application === 'marketplace' ? '/api/v1/auth/user' : '/api/v1/auth/admin';
 
-  return useQuery<{ data: { user: { id: string; email: string; isAdmin: boolean; country: string } } }>({
+  return useQuery<{ user: { id: string; email: string; isAdmin: boolean; country: string } }>({
     queryKey: ['authenticate', application],
-    queryFn: () => axios({ method: 'post', url, withCredentials: true })
+    queryFn: async () => {
+      const { data } = await axios({ method: 'post', url, withCredentials: true });
+
+      return data;
+    }
   });
 };
 
@@ -20,3 +24,5 @@ export * from './offers/queries';
 export * from './products/queries';
 export * from './users/queries';
 export * from './products/mutations';
+export * from './statuses/queries';
+export * from './statuses/mutations';

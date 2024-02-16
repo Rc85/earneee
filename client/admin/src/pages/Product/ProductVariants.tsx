@@ -23,7 +23,8 @@ const ProductVariants = () => {
     useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
-  const { isLoading, data: { data: { variants } } = { data: {} } } = retrieveProductVariants();
+  const { isLoading, data } = retrieveProductVariants();
+  const { variants } = data || {};
   const sortVariants = useSortProductVariants();
 
   const handleDragEnd = (e: DragEndEvent) => {

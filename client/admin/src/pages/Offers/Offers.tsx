@@ -24,7 +24,8 @@ import { retrieveOffers, useSortOffers } from '../../../../_shared/api';
 
 const Offers = () => {
   const navigate = useNavigate();
-  const { isLoading, data: { data: { offers } } = { data: {} } } = retrieveOffers();
+  const { isLoading, data } = retrieveOffers();
+  const { offers } = data || {};
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })

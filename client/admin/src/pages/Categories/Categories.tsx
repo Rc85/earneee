@@ -27,9 +27,10 @@ const Categories = () => {
   const [status, setStatus] = useState('');
   const params = useParams();
   const { parentId } = params;
-  const { isLoading, data: { data: { categories } } = { data: {} } } = retrieveCategories({
+  const { isLoading, data } = retrieveCategories({
     parentId: parentId ? parseInt(parentId) : undefined
   });
+  const { categories } = data || {};
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })

@@ -15,9 +15,8 @@ import { countries } from '../../../../../_shared';
 const CreateBrand = () => {
   const location = useLocation();
   const brandId = location.state?.brandId;
-  const { isLoading, data: { data: { brands } } = { data: { brands: [] } } } = brandId
-    ? retrieveProductBrands({ brandId })
-    : { isLoading: false };
+  const { isLoading, data } = brandId ? retrieveProductBrands({ brandId }) : { isLoading: false, data: {} };
+  const { brands } = data || {};
   const brand = brands?.[0];
   const theme = useTheme();
   const fileInputRef = useRef<any>();
@@ -37,7 +36,8 @@ const CreateBrand = () => {
   const [form, setForm] = useState<ProductBrandsInterface>({ ...initial });
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
-  const { data: { data: { userProfiles } } = { data: {} } } = retrieveUserProfiles();
+  const user = retrieveUserProfiles();
+  const { userProfiles } = user.data || {};
 
   useEffect(() => {
     if (brand) {
