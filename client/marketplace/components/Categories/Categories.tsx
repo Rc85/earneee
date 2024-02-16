@@ -22,7 +22,8 @@ interface Props {
 }
 
 const Categories = ({ onClick }: Props) => {
-  const { data: { data: { categories } } = { data: {} } } = retrieveCategories({ level: 3 });
+  const { data } = retrieveCategories({ level: 3 });
+  const { categories } = data || {};
   const [selectedCategories, setSelectedCategories] = useState<CategoriesInterface[]>([]);
   const router = useRouter();
 

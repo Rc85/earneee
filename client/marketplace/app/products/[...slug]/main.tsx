@@ -24,14 +24,16 @@ interface Props {
 const Main = ({ categoryId, subcategoryId, groupId }: Props) => {
   const [page, setPage] = useState(0);
   const id = groupId || subcategoryId || categoryId;
-  const { data: { data: { categories } } = { data: {} } } = retrieveCategories({
+  const { data } = retrieveCategories({
     parentId: id
   });
-  const { isLoading, data: { data: { variants = [], count = 0 } } = { data: {} } } =
-    retrieveMarketplaceProducts({
-      categoryId: id,
-      offset: page * 20
-    });
+  const { categories } = data || {};
+  const p = retrieveMarketplaceProducts({
+    categoryId: id,
+    offset: page * 20
+  });
+  const { isLoading } = p;
+  const { variants, count = 0 } = p.data || {};
   //const [appliedFilters, setAppliedFilters] = useState({});
   const categoryTypes = categories?.filter((category) => category.type) || [];
   const categoryTypeLabels = [...new Set(categoryTypes.map((category) => category.type))];

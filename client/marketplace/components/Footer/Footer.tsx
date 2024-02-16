@@ -1,138 +1,129 @@
 'use client';
 
-import { Box, Button, Container, Divider, Link, TextField, Typography, useTheme } from '@mui/material';
+import { Box, Container, Divider, Link, Typography } from '@mui/material';
 import { brandName } from '../../../_shared/constants';
 import Icon from '@mdi/react';
-import { mdiFacebook, mdiInstagram, mdiSend, mdiTwitter } from '@mdi/js';
+import { mdiFacebook, mdiInstagram, mdiTwitter } from '@mdi/js';
+import { retrieveStatuses } from '../../../_shared/api';
 
 const Footer = () => {
-  const theme = useTheme();
+  const { data } = retrieveStatuses();
+  const { statuses } = data || {};
+  const loginStatus = statuses?.find((status) => status.name === 'login');
+  const registrationStatus = statuses?.find((status) => status.name === 'registration');
 
   return (
-    <Container maxWidth='xl'>
-      <Box
-        sx={{
-          borderRadius: '5px',
-          backgroundImage: `linear-gradient(270deg, ${theme.palette.primary.light}, ${theme.palette.primary.main})`,
-          width: '100%',
-          p: 5,
-          display: 'flex',
-          alignItems: 'center'
-        }}
-      >
-        <img
-          src={`${process.env.NEXT_PUBLIC_STORAGE_URL}/images/subscribe.png`}
-          style={{ width: 300, maxWidth: '100%' }}
-        />
-
-        <Box sx={{ pl: 10 }}>
-          <Box sx={{ mb: 3 }}>
-            <Typography variant='h4' color='white'>
-              Subscribe to our newsletter to get updates on trending products, latest discounts, and more.
+    <Container maxWidth={false} sx={{ backgroundColor: 'black' }}>
+      <Container maxWidth='xl'>
+        <Box sx={{ display: 'flex' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              p: 2,
+              width: '20%'
+            }}
+          >
+            <Typography color='white' sx={{ fontWeight: 500, mb: 2 }}>
+              Website
             </Typography>
+
+            {registrationStatus?.online && (
+              <Typography color='white' sx={{ mb: 2 }}>
+                <Link href='/register'>Create Account</Link>
+              </Typography>
+            )}
+
+            {loginStatus?.online && (
+              <Typography color='white' sx={{ mb: 2 }}>
+                <Link href='/login'>Login</Link>
+              </Typography>
+            )}
+
+            <Typography color='white'>About</Typography>
           </Box>
 
-          <Box sx={{ display: 'flex' }}>
-            <TextField label='Email' required color='info' sx={{ mr: 1, mb: '0px !important' }} />
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              p: 2,
+              width: '20%'
+            }}
+          >
+            <Typography color='white' sx={{ fontWeight: 500, mb: 2 }}>
+              Partnership
+            </Typography>
 
-            <Button color='info' variant='contained' startIcon={<Icon path={mdiSend} size={1} />}>
-              Subscribe
-            </Button>
+            <Typography color='white' sx={{ mb: 2 }}>
+              Sell on {brandName}
+            </Typography>
+
+            <Typography color='white' sx={{ mb: 2 }}>
+              Advertise on {brandName}
+            </Typography>
+
+            <Typography color='white'>Affiliate With Us</Typography>
           </Box>
 
-          <Typography variant='caption' color='GrayText'>
-            Upon subscribing, you agree to us sending you emails regarding news and updates. You may
-            unsubscribe anytime.
-          </Typography>
-        </Box>
-      </Box>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              p: 2,
+              width: '20%'
+            }}
+          >
+            <Typography color='white' sx={{ fontWeight: 500, mb: 2 }}>
+              Support
+            </Typography>
 
-      <Box maxWidth='xl' sx={{ display: 'flex' }}>
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            p: 2,
-            width: '20%'
-          }}
-        >
-          <Typography sx={{ fontWeight: 500, mb: 2 }}>Website</Typography>
+            <Typography color='white' sx={{ mb: 2 }}>
+              FAQ
+            </Typography>
 
-          <Typography sx={{ mb: 2 }}>
-            <Link href='/register'>Create Account</Link>
-          </Typography>
+            <Typography color='white'>Contact Us</Typography>
+          </Box>
 
-          <Typography sx={{ mb: 2 }}>
-            <Link href='/login'>Login</Link>
-          </Typography>
+          <Box sx={{ p: 2, width: '40%', display: 'flex', justifyContent: 'flex-end' }}>
+            <Box>
+              <Typography color='white' sx={{ fontWeight: 500, mb: 2 }}>
+                Follow Us
+              </Typography>
 
-          <Typography>About</Typography>
-        </Box>
+              <Box sx={{ display: 'flex' }}>
+                <Link href='https://facebook.com' sx={{ mr: 4 }}>
+                  <Icon path={mdiFacebook} size={1} color='#1877F2' />
+                </Link>
 
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            p: 2,
-            width: '20%'
-          }}
-        >
-          <Typography sx={{ fontWeight: 500, mb: 2 }}>Partnership</Typography>
+                <Link href='https://twitter.com' sx={{ mr: 4 }}>
+                  <Icon path={mdiTwitter} size={1} color='#1DA1F2' />
+                </Link>
 
-          <Typography sx={{ mb: 2 }}>Sell on {brandName}</Typography>
-
-          <Typography sx={{ mb: 2 }}>Advertise on {brandName}</Typography>
-
-          <Typography>Affiliate With Us</Typography>
-        </Box>
-
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            p: 2,
-            width: '20%'
-          }}
-        >
-          <Typography sx={{ fontWeight: 500, mb: 2 }}>Support</Typography>
-
-          <Typography sx={{ mb: 2 }}>FAQ</Typography>
-
-          <Typography>Contact Us</Typography>
-        </Box>
-
-        <Box sx={{ p: 2, width: '40%', display: 'flex', justifyContent: 'flex-end' }}>
-          <Box>
-            <Typography sx={{ fontWeight: 500, mb: 2 }}>Follow Us</Typography>
-
-            <Box sx={{ display: 'flex' }}>
-              <Link href='https://facebook.com' sx={{ mr: 4 }}>
-                <Icon path={mdiFacebook} size={1} color='#1877F2' />
-              </Link>
-
-              <Link href='https://twitter.com' sx={{ mr: 4 }}>
-                <Icon path={mdiTwitter} size={1} color='#1DA1F2' />
-              </Link>
-
-              <Link href='https://instagram.com'>
-                <Icon path={mdiInstagram} size={1} />
-              </Link>
+                <Link href='https://instagram.com'>
+                  <Icon path={mdiInstagram} size={1} />
+                </Link>
+              </Box>
             </Box>
           </Box>
         </Box>
-      </Box>
 
-      <Divider sx={{ my: 2 }} />
+        <Divider sx={{ my: 2 }} />
 
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 2 }}>
-        <Typography variant='body2'>Copyright &copy; 2004 {brandName}. All rights reserved.</Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 2 }}>
+          <Typography color='white' variant='body2'>
+            Copyright &copy; 2004 {brandName}. All rights reserved.
+          </Typography>
 
-        <Box sx={{ display: 'flex' }}>
-          <Typography sx={{ mr: 5 }}>Terms of Service</Typography>
+          <Box sx={{ display: 'flex' }}>
+            <Typography color='white' sx={{ mr: 5 }}>
+              Terms of Service
+            </Typography>
 
-          <Typography>Privacy Policy</Typography>
+            <Typography color='white'>Privacy Policy</Typography>
+          </Box>
         </Box>
-      </Box>
+      </Container>
     </Container>
   );
 };

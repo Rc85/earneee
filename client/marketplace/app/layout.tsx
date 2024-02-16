@@ -2,8 +2,8 @@
 
 import '../index.css';
 import { Footer, ThemeRegistry, TopBar } from '../components';
-import { Box, Container, LinearProgress } from '@mui/material';
-import { Suspense, useState } from 'react';
+import { Box, Container, LinearProgress, Typography } from '@mui/material';
+import { Suspense, useEffect, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SnackbarProvider } from 'notistack';
 import { Provider } from 'react-redux';
@@ -11,6 +11,8 @@ import { store } from '../../_shared/redux/store';
 import axios from 'axios';
 import { brandName } from '../../_shared/constants';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { StatusesInterface } from '../../../_shared/types';
+import { Loading } from '../../_shared/components';
 
 axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL;
 
@@ -18,6 +20,22 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
   const [queryClient] = useState(
     () => new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false } } })
   );
+  const [status, setStatus] = useState('Loading');
+
+  useEffect(() => {
+    (async () => {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/statuses/retrieve`);
+      const data = await response.json();
+      const statuses: StatusesInterface[] = data.statuses;
+      const marketplaceStatus = statuses.find((status) => status.name === 'marketplace');
+
+      if (!marketplaceStatus?.online) {
+        setStatus('Offline');
+      } else {
+        setStatus('');
+      }
+    })();
+  }, []);
 
   return (
     <html lang='en'>
@@ -35,31 +53,54 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
       </head>
 
       <body>
-        <Provider store={store}>
-          <QueryClientProvider client={queryClient}>
-            <SnackbarProvider>
-              <ThemeRegistry>
-                <TopBar />
+        {status === 'Loading' ? (
+          <Loading />
+        ) : status === 'Offline' ? (
+          <Container
+            maxWidth='md'
+            sx={{
+              flexGrow: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}
+          >
+            <Typography variant='h3' sx={{ fontWeight: 900, mb: 5, textAlign: 'center' }}>
+              Offline
+            </Typography>
 
-                <Container maxWidth='xl' sx={{ display: 'flex', flexGrow: 1 }}>
-                  <Suspense
-                    fallback={
-                      <Box sx={{ flexGrow: 1 }}>
-                        <LinearProgress />
-                      </Box>
-                    }
-                  >
-                    {children}
-                  </Suspense>
-                </Container>
+            <Typography>
+              {brandName} is running some maintenance and will be back online as soon as possible.
+            </Typography>
+          </Container>
+        ) : (
+          <Provider store={store}>
+            <QueryClientProvider client={queryClient}>
+              <SnackbarProvider>
+                <ThemeRegistry>
+                  <TopBar />
 
-                <Footer />
-              </ThemeRegistry>
-            </SnackbarProvider>
+                  <Container maxWidth='xl' sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+                    <Suspense
+                      fallback={
+                        <Box sx={{ flexGrow: 1 }}>
+                          <LinearProgress />
+                        </Box>
+                      }
+                    >
+                      {children}
+                    </Suspense>
+                  </Container>
 
-            <ReactQueryDevtools initialIsOpen={false} />
-          </QueryClientProvider>
-        </Provider>
+                  <Footer />
+                </ThemeRegistry>
+              </SnackbarProvider>
+
+              <ReactQueryDevtools initialIsOpen={false} />
+            </QueryClientProvider>
+          </Provider>
+        )}
       </body>
     </html>
   );

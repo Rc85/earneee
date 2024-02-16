@@ -21,13 +21,19 @@ import Categories from '../Categories/Categories';
 import { brandName } from '../../../_shared/constants';
 import { usePathname } from 'next/navigation';
 import { authenticate, useLogout } from '../../../_shared/api';
+import { retrieveStatuses } from '../../../_shared/api/statuses/queries';
 
 const TopBar = () => {
   const [openDrawer, setOpenDrawer] = useState(false);
   const pathname = usePathname();
   const theme = useTheme();
-  const { isLoading, data: { data: { user } } = { data: {} } } = authenticate('marketplace');
+  const { isLoading, data } = authenticate('marketplace');
+  const { user } = data || {};
   const logout = useLogout();
+  const s = retrieveStatuses();
+  const { statuses } = s.data || {};
+  const loginStatus = statuses?.find((status) => status.name === 'login');
+  const registrationStatus = statuses?.find((status) => status.name === 'registration');
   /* const [selectedCountry, setSelectedCountry] = useState('CA');
   const dispatch = useDispatch();
   const { country } = useAppSelector((state) => state.App);
@@ -114,8 +120,11 @@ const TopBar = () => {
           </Box>
         ) : (
           <Box>
-            <Link href={`/login?redirect=${pathname}`}>Login</Link> |{' '}
-            <Link href='/register'>Create Account</Link>
+            {loginStatus?.online && <Link href={`/login?redirect=${pathname}`}>Login</Link>}
+            {loginStatus?.online && registrationStatus?.online && (
+              <Typography component='span'> | </Typography>
+            )}
+            {registrationStatus?.online && <Link href='/register'>Create Account</Link>}
           </Box>
         )}
       </Container>

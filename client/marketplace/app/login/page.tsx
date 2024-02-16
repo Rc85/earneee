@@ -1,6 +1,6 @@
 'use client';
 
-import { mdiFacebook, mdiLoginVariant, mdiTwitter } from '@mdi/js';
+import { mdiLoginVariant } from '@mdi/js';
 import Icon from '@mdi/react';
 import { LoadingButton } from '@mui/lab';
 import {
@@ -21,7 +21,8 @@ import {
 import { FormEvent, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSnackbar } from 'notistack';
-import { useLogin } from '../../../_shared/api';
+import { retrieveStatuses, useLogin } from '../../../_shared/api';
+import { Loading } from '../../../_shared/components';
 
 export default function Login() {
   const [status, setStatus] = useState('');
@@ -41,6 +42,9 @@ export default function Login() {
   const redirect = searchParams.get('redirect');
   const router = useRouter();
   const { enqueueSnackbar } = useSnackbar();
+  const { isLoading, data } = retrieveStatuses();
+  const { statuses } = data || {};
+  const loginStatus = statuses?.find((status) => status.name === 'login');
 
   const handleSuccess = () => {
     router.push(redirect || '/');
@@ -78,7 +82,24 @@ export default function Login() {
     setError('');
   };
 
-  return (
+  return isLoading ? (
+    <Loading />
+  ) : !loginStatus?.online ? (
+    <Container
+      maxWidth='md'
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        flexGrow: 1
+      }}
+    >
+      <Typography variant='h3'>Offline</Typography>
+
+      <Typography>The login server is currently offline. Please check back later.</Typography>
+    </Container>
+  ) : (
     <Container maxWidth='sm'>
       <Snackbar open={Boolean(error)} onClose={handleSnackbarClose} autoHideDuration={6000}>
         <Alert severity='error' variant='filled'>
@@ -172,11 +193,15 @@ export default function Login() {
             onChange={(e) => setForm({ ...form, password: e.target.value })}
           />
 
-          <FormControlLabel
-            label='Remember me'
-            control={<Checkbox color='info' />}
-            onChange={() => setForm({ ...form, remember: !form.remember })}
-          />
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <FormControlLabel
+              label='Remember me'
+              control={<Checkbox color='info' />}
+              onChange={() => setForm({ ...form, remember: !form.remember })}
+            />
+
+            <Button color='error'>Reset Password</Button>
+          </Box>
 
           <LoadingButton
             type='submit'

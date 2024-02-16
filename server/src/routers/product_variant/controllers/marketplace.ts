@@ -28,7 +28,8 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
       SELECT
         pr.id,
         pr.name,
-        pr.type
+        pr.type,
+        pr.category_id
       FROM products AS pr
     )
 
@@ -43,9 +44,9 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
       pr.product
     FROM product_variants AS pv
     LEFT JOIN LATERAL (
-      SELECT TO_JSONB(p.*) AS product
+      SELECT TO_JSONB(pr.*) AS product
       FROM pr
-      WHERE p.id = pv.product_id
+      WHERE pr.id = pv.product_id
     ) AS pr ON TRUE
     WHERE (pr.product->>'category_id')::INT IN (SELECT id FROM p)
     OFFSET ${offset}
@@ -56,37 +57,37 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
 
   const count = await database.query(
     `WITH RECURSIVE
-  p AS (
-    SELECT
-      id,
-      name,
-      parent_id
-    FROM categories
-    where ${groupId ? `id = $1` : subcategoryId ? `id = $1` : `id = $1`}
-    UNION ALL
-    SELECT
-      c.id,
-      c.name,
-      c.parent_id
-    FROM categories AS c
-    JOIN p ON p.id = c.parent_id
-  )
+    p AS (
+      SELECT
+        id,
+        name,
+        parent_id
+      FROM categories
+      where ${groupId ? `id = $1` : subcategoryId ? `id = $1` : `id = $1`}
+      UNION ALL
+      SELECT
+        c.id,
+        c.name,
+        c.parent_id
+      FROM categories AS c
+      JOIN p ON p.id = c.parent_id
+    )
 
-  SELECT
-    pv.id,
-    pv.name,
-    pv.price,
-    pv.description,
-    pv.product_id,
-    pv.status,
-    pr.product
-  FROM product_variants AS pv
-  LEFT JOIN LATERAL (
-    SELECT TO_JSONB(p.*) AS product
-    FROM products AS p
-    WHERE p.id = pv.product_id
-  ) AS pr ON TRUE
-  WHERE (pr.product->>'category_id')::INT IN (SELECT id FROM p)`,
+    SELECT
+      pv.id,
+      pv.name,
+      pv.price,
+      pv.description,
+      pv.product_id,
+      pv.status,
+      pr.product
+    FROM product_variants AS pv
+    LEFT JOIN LATERAL (
+      SELECT TO_JSONB(p.*) AS product
+      FROM products AS p
+      WHERE p.id = pv.product_id
+    ) AS pr ON TRUE
+    WHERE (pr.product->>'category_id')::INT IN (SELECT id FROM p)`,
     [id],
     client
   );

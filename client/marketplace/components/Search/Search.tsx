@@ -10,7 +10,8 @@ import { retrieveCategories } from '../../../_shared/api';
 
 const Search = () => {
   const [searchValue, setSearchValue] = useState('');
-  const { data: { data: { categories } } = { data: {} } } = retrieveCategories();
+  const { data } = retrieveCategories();
+  const { categories } = data || {};
   const [selectedCategory, setSelectedCategory] = useState('');
 
   const handleSubmit = (e?: FormEvent) => {

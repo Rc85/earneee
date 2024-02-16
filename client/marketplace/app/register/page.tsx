@@ -17,10 +17,11 @@ import {
   useTheme
 } from '@mui/material';
 import { FormEvent, useRef, useState } from 'react';
-import { useCreateUser } from '../../../_shared/api';
+import { retrieveStatuses, useCreateUser } from '../../../_shared/api';
 import { useSnackbar } from 'notistack';
 import Recaptcha from 'react-google-recaptcha';
 import { countries } from '../../../../_shared';
+import { Loading } from '../../../_shared/components';
 
 const Register = () => {
   const [status, setStatus] = useState('');
@@ -36,6 +37,9 @@ const Register = () => {
   const theme = useTheme();
   const { enqueueSnackbar } = useSnackbar();
   const recaptchaRef = useRef<Recaptcha>(null);
+  const { isLoading, data } = retrieveStatuses();
+  const { statuses } = data || {};
+  const registrationStatus = statuses?.find((status) => status.name === 'registration');
 
   const handleSuccess = () => {
     setStatus('Success');
@@ -85,7 +89,24 @@ const Register = () => {
     setError('');
   };
 
-  return (
+  return isLoading ? (
+    <Loading />
+  ) : !registrationStatus?.online ? (
+    <Container
+      maxWidth='md'
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        flexGrow: 1
+      }}
+    >
+      <Typography variant='h3'>Disabled</Typography>
+
+      <Typography>Registration is currently disabled. Please check back later.</Typography>
+    </Container>
+  ) : (
     <Container maxWidth='sm'>
       <Snackbar open={Boolean(error)} autoHideDuration={6000} onClose={handleOnClose}>
         <Alert severity='error' variant='filled'>
