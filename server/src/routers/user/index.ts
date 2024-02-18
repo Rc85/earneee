@@ -42,4 +42,13 @@ router.get(
 
 router.post('/api/v1/password/reset', dbConnect, middleware(controllers.resetPassword), response);
 
+router.post(
+  '/api/v1/contact',
+  dbConnect,
+  middleware(recaptcha),
+  middleware(controllers.validateContact),
+  middleware(controllers.contact),
+  response
+);
+
 export default router;

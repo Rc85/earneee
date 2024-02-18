@@ -83,3 +83,21 @@ export const validateChangePassword = async (req: Request, resp: Response, next:
 
   return next();
 };
+
+export const validateContact = (req: Request, _: Response, next: NextFunction) => {
+  const { name, email, message } = req.body;
+
+  if (!name || validations.blankCheck.test(name)) {
+    return next(new HttpException(400, `Name required`));
+  } else if (!email || validations.blankCheck.test(email)) {
+    return next(new HttpException(400, `Email required`));
+  } else if (!validations.emailCheck.test(email)) {
+    return next(new HttpException(400, 'Invalid email'));
+  } else if (!message || validations.blankCheck.test(message)) {
+    return next(new HttpException(400, `Message required`));
+  } else if (message.length > 5000) {
+    return next(new HttpException(400, `Message is too long`));
+  }
+
+  return next();
+};
