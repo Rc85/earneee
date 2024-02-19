@@ -6,5 +6,6 @@ export { changePassword } from './change-password';
 export { retrieveUserProfiles, retrieveUsers } from './retrieve';
 export { resetPassword } from './reset-password';
 export { contact } from './contact';
+export { updateUser } from './update';
 
 export * from './validate';

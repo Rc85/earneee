@@ -3,6 +3,7 @@ import { HttpException, validations } from '../../../utils';
 import { database } from '../../../database';
 import bcrypt from 'bcrypt';
 import { UsersInterface } from '../../../../../_shared/types';
+import dayjs from 'dayjs';
 
 export const validateCreateUser = (req: Request, _: Response, next: NextFunction) => {
   if (!req.body.email || validations.blankCheck.test(req.body.email)) {
@@ -97,6 +98,18 @@ export const validateContact = (req: Request, _: Response, next: NextFunction) =
     return next(new HttpException(400, `Message required`));
   } else if (message.length > 5000) {
     return next(new HttpException(400, `Message is too long`));
+  }
+
+  return next();
+};
+
+export const validateUpdateUser = (req: Request, _: Response, next: NextFunction) => {
+  if (req.body.bannedUntil && !dayjs(req.body.bannedUntil).isValid()) {
+    return next(new HttpException(400, `Invalid date`));
+  } else if (req.body.reason && req.body.reason.length > 1000) {
+    return next(new HttpException(400, `Reason is too long`));
+  } else if (req.body.status && !['active', 'terminated', 'suspended'].includes(req.body.status)) {
+    return next(new HttpException(400, `Invalid status`));
   }
 
   return next();

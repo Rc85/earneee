@@ -15,3 +15,4 @@ export type { ProductUrlsInterface } from './product_urls';
 export type { UsersInterface } from './users';
 export type { DatabaseCreateOptions, DatabaseQueryOptions, DatabaseRetrieveOptions } from './database';
 export type { StatusesInterface } from './statuses';
+export type { UserBansInterface } from './user_bans';

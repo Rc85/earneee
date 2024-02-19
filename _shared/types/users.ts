@@ -1,4 +1,4 @@
-import { UserProfilesInterface } from '.';
+import { UserBansInterface, UserProfilesInterface } from '.';
 
 export interface UsersInterface {
   id: string;
@@ -6,8 +6,8 @@ export interface UsersInterface {
   password: string;
   isAdmin: boolean;
   status: string;
-  bannedUntil: string | null;
   createdAt: string;
   updatedAt: string | null;
   profile?: UserProfilesInterface;
+  ban?: UserBansInterface;
 }

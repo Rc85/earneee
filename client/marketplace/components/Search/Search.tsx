@@ -4,7 +4,6 @@ import { mdiMagnify } from '@mdi/js';
 import Icon from '@mdi/react';
 import { Box, InputBase, IconButton } from '@mui/material';
 import { FormEvent, useState } from 'react';
-import { grey } from '@mui/material/colors';
 import { enqueueSnackbar } from 'notistack';
 import { retrieveCategories } from '../../../_shared/api';
 

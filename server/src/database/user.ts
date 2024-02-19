@@ -1,10 +1,10 @@
 import { db, generateOptionString } from '.';
-import { DatabaseRetrieveOptions, UserProfilesInterface } from '../../../_shared/types';
+import { DatabaseRetrieveOptions, UserProfilesInterface, UsersInterface } from '../../../_shared/types';
 import { resultsToCamelCase } from '../../../_shared/utils';
 import { HttpException } from '../utils';
 
 export const user = {
-  retrieve: async (options?: DatabaseRetrieveOptions) => {
+  retrieve: async (options?: DatabaseRetrieveOptions): Promise<UsersInterface[]> => {
     const database = options?.client || db;
     const statement = `WITH
     up AS (
@@ -20,6 +20,17 @@ export const user = {
         up.postal_code,
         up.logo_url
       FROM user_profiles AS up
+    ),
+    ub AS (
+      SELECT
+        ub.id,
+        ub.user_id,
+        ub.banned_until,
+        ub.reason
+      FROM user_bans AS ub
+      WHERE ub.banned_until > NOW()
+      ORDER BY ub.banned_until DESC
+      LIMIT 1
     )
 
     SELECT
@@ -28,13 +39,19 @@ export const user = {
       u.is_admin,
       u.status,
       u.created_at,
-      up.profile
+      up.profile,
+      ub.ban
     FROM users AS u
     LEFT JOIN LATERAL (
       SELECT TO_JSONB(up.*) AS profile
       FROM up
       WHERE up.id = u.id
     ) AS up ON true
+    LEFT JOIN LATERAL (
+      SELECT TO_JSONB(ub.*) AS ban
+      FROM ub
+      WHERE ub.user_id = u.id
+    ) AS ub ON true
     ${generateOptionString(options)}`;
 
     return await database

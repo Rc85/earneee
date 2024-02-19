@@ -13,10 +13,38 @@ export const useCreateUser = (onSuccess?: (data: any) => void, onError?: (err: a
       confirmPassword: string;
       key: string;
       agreed: boolean;
-    }) => axios({ method: 'post', url: '/api/v1/user/create', withCredentials: true, data: options }),
+    }) => axios({ method: 'post', url: '/api/v1/user', withCredentials: true, data: options }),
 
     onSuccess: (data) => {
       dispatch(setIsLoading(false));
+
+      onSuccess?.(data);
+    },
+    onError: (err) => {
+      dispatch(setIsLoading(false));
+
+      onError?.(err);
+    }
+  });
+};
+
+export const useUpdateUser = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (options: {
+      id: string;
+      status?: string;
+      bannedUntil?: string;
+      reason?: string;
+      unban?: boolean;
+    }) => axios({ method: 'put', url: '/api/v1/user', withCredentials: true, data: options }),
+
+    onSuccess: (data) => {
+      dispatch(setIsLoading(false));
+
+      queryClient.invalidateQueries({ queryKey: ['users'] });
 
       onSuccess?.(data);
     },

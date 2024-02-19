@@ -5,11 +5,19 @@ import * as controllers from './controllers';
 const router = Router();
 
 router.post(
-  '/api/v1/user/create',
+  '/api/v1/user',
   middleware(recaptcha),
   dbConnect,
   middleware(controllers.validateCreateUser),
   middleware(controllers.createUser),
+  response
+);
+
+router.put(
+  '/api/v1/user',
+  dbConnect,
+  middleware(controllers.validateUpdateUser),
+  middleware(controllers.updateUser),
   response
 );
 
