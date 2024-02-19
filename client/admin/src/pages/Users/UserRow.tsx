@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import { UsersInterface } from '../../../../../_shared/types';
 import Icon from '@mdi/react';
-import { mdiCancel, mdiRestore } from '@mdi/js';
+import { mdiCancel, mdiRestore, mdiShieldAccount, mdiShieldRemove } from '@mdi/js';
 import { FormEvent, useState } from 'react';
 import { useSnackbar } from 'notistack';
 import { useUpdateUser } from '../../../../_shared/api';
@@ -69,6 +69,12 @@ const UserRow = ({ user }: Props) => {
     updateUser.mutate({ id: user.id, unban: true });
   };
 
+  const handleSetUserAdmin = (isAdmin: boolean) => {
+    dispatch(setIsLoading(true));
+
+    updateUser.mutate({ id: user.id, isAdmin });
+  };
+
   return (
     <ListItem divider disableGutters>
       <Modal
@@ -103,6 +109,16 @@ const UserRow = ({ user }: Props) => {
           }
         />
       </ListItemButton>
+
+      {!user.isAdmin ? (
+        <IconButton size='small' sx={{ mr: 1 }} onClick={() => handleSetUserAdmin(true)}>
+          <Icon path={mdiShieldAccount} size={1} />
+        </IconButton>
+      ) : (
+        <IconButton size='small' sx={{ mr: 1 }} onClick={() => handleSetUserAdmin(false)}>
+          <Icon path={mdiShieldRemove} size={1} />
+        </IconButton>
+      )}
 
       {!user.ban ? (
         <IconButton size='small' sx={{ mr: 1 }} onClick={() => setStatus('Ban')}>

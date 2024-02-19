@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 
 export const updateUser = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
-  const { id, bannedUntil, reason, status, unban } = req.body;
+  const { id, bannedUntil, reason, status, unban, isAdmin } = req.body;
 
   if (reason && bannedUntil) {
     await database.create('user_bans', ['user_id', 'banned_until', 'reason'], [id, bannedUntil, reason], {
@@ -28,8 +28,23 @@ export const updateUser = async (req: Request, resp: Response, next: NextFunctio
     }
   }
 
-  if (status) {
-    await database.update('users', ['status'], { where: `id = $2`, params: [status, id], client });
+  if (status || typeof isAdmin === 'boolean') {
+    const columns = [];
+    const params = [];
+
+    if (status) {
+      params.push(status);
+      columns.push(`status = $${params.length}`);
+    }
+
+    if (typeof isAdmin === 'boolean') {
+      params.push(isAdmin);
+      columns.push(`is_admin = $${params.length}`);
+    }
+
+    params.push(id);
+
+    await database.update('users', columns.join(', '), { where: `id = $${params.length}`, params, client });
   }
 
   return next();

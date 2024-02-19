@@ -39,7 +39,7 @@ export const validateLogin = async (req: Request, resp: Response, next: NextFunc
     client
   });
 
-  if (user.length === 0) {
+  if (user.length === 0 || user[0].status === 'terminated') {
     return next(new HttpException(400, `Incorrect password`));
   }
 

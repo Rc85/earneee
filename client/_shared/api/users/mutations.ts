@@ -38,6 +38,7 @@ export const useUpdateUser = (onSuccess?: (data: any) => void, onError?: (err: a
       status?: string;
       bannedUntil?: string;
       reason?: string;
+      isAdmin?: boolean;
       unban?: boolean;
     }) => axios({ method: 'put', url: '/api/v1/user', withCredentials: true, data: options }),
 
