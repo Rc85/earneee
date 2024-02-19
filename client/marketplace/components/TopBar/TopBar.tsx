@@ -15,7 +15,7 @@ import {
 import Search from '../Search/Search';
 import { SnackbarProvider } from 'notistack';
 import Icon from '@mdi/react';
-import { mdiAccountCircle, mdiEmail, mdiLogoutVariant, mdiMenu } from '@mdi/js';
+import { mdiAccountCircle, mdiEmail, mdiLogin, mdiLogoutVariant, mdiMenu } from '@mdi/js';
 import { useState } from 'react';
 import Categories from '../Categories/Categories';
 import { brandName } from '../../../_shared/constants';
@@ -130,11 +130,22 @@ const TopBar = () => {
             </Box>
           ) : (
             <Box>
-              {loginStatus?.online && <Link href={`/login?redirect=${pathname}`}>Login</Link>}
+              {loginStatus?.online && (
+                <Link
+                  href={`/login?redirect=${pathname}`}
+                  sx={{ color: 'black', display: 'flex', alignItems: 'center' }}
+                >
+                  <Icon path={mdiLogin} size={1} style={{ marginRight: '5px' }} /> Login
+                </Link>
+              )}
               {loginStatus?.online && registrationStatus?.online && (
                 <Typography component='span'> | </Typography>
               )}
-              {registrationStatus?.online && <Link href='/register'>Create Account</Link>}
+              {registrationStatus?.online && (
+                <Link href='/register' sx={{ color: 'black' }}>
+                  Create Account
+                </Link>
+              )}
             </Box>
           )}
         </Container>

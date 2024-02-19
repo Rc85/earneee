@@ -51,6 +51,16 @@ export const validateLogin = async (req: Request, resp: Response, next: NextFunc
     return next(new HttpException(400, `Login origin not recognized`));
   }
 
+  const ban = await database.retrieve('user_bans', {
+    where: 'user_id = $1 AND banned_until > NOW()',
+    params: [user[0].id],
+    client
+  });
+
+  if (ban.length) {
+    return next(new HttpException(400, `Account is banned`));
+  }
+
   resp.locals.user = user[0];
 
   return next();
