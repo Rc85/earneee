@@ -30,3 +30,24 @@ export const retrieveUserProfiles = async (req: Request, resp: Response, next: N
 
   return next();
 };
+
+export const retrieveUsers = async (req: Request, resp: Response, next: NextFunction) => {
+  const { client } = resp.locals;
+  const offset = req.query.offset?.toString() || '0';
+  const limit = req.query.limit?.toString() || undefined;
+  const emails = ['admin@earneee.com', 'roger@earneee.com'];
+
+  const users = await database.user.retrieve({
+    where: 'NOT email = ANY($1)',
+    params: [emails],
+    offset,
+    limit,
+    orderBy: 'email',
+    client
+  });
+  const count = await database.count('users', { client });
+
+  resp.locals.response = { data: { users, count } };
+
+  return next();
+};

@@ -11,6 +11,7 @@ import Affiliates from './Affiliates/Affiliates';
 import Offers from './Offers/Offers';
 import ProductBrands from './ProductBrands/ProductBrands';
 import Statuses from './Statuses/Statuses';
+import Users from './Users/Users';
 
 export {
   Account,
@@ -25,5 +26,6 @@ export {
   Products,
   ProductVariant,
   ResetPassword,
-  Statuses
+  Statuses,
+  Users
 };

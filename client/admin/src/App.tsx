@@ -6,20 +6,7 @@ import { SnackbarProvider } from 'notistack';
 import { Provider } from 'react-redux';
 import { store } from '../../_shared/redux/store';
 import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
-import {
-  Account,
-  Affiliates,
-  Categories,
-  CreateAccount,
-  Main,
-  Offers,
-  Product,
-  ProductBrands,
-  ProductVariant,
-  Products,
-  ResetPassword,
-  Statuses
-} from './pages';
+import * as Pages from './pages';
 import axios from 'axios';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 
@@ -49,7 +36,7 @@ const App = () => {
                       path='/'
                       element={
                         <AuthenticatedRoute>
-                          <Main />
+                          <Pages.Main />
                         </AuthenticatedRoute>
                       }
                     />
@@ -58,20 +45,20 @@ const App = () => {
                       path='/categories/:parentId?'
                       element={
                         <AuthenticatedRoute>
-                          <Categories />
+                          <Pages.Categories />
                         </AuthenticatedRoute>
                       }
                     />
 
-                    <Route path='/register' element={<CreateAccount />} />
+                    <Route path='/register' element={<Pages.CreateAccount />} />
 
-                    <Route path='/reset-password' element={<ResetPassword />} />
+                    <Route path='/reset-password' element={<Pages.ResetPassword />} />
 
                     <Route
                       path='/account'
                       element={
                         <AuthenticatedRoute>
-                          <Account />
+                          <Pages.Account />
                         </AuthenticatedRoute>
                       }
                     />
@@ -81,7 +68,7 @@ const App = () => {
                         path='/products'
                         element={
                           <AuthenticatedRoute>
-                            <Products />
+                            <Pages.Products />
                           </AuthenticatedRoute>
                         }
                       />
@@ -90,7 +77,7 @@ const App = () => {
                         path='/products/create'
                         element={
                           <AuthenticatedRoute>
-                            <Products.Create />
+                            <Pages.Products.Create />
                           </AuthenticatedRoute>
                         }
                       />
@@ -100,7 +87,7 @@ const App = () => {
                       path='/product/:productId'
                       element={
                         <AuthenticatedRoute>
-                          <Product />
+                          <Pages.Product />
                         </AuthenticatedRoute>
                       }
                     >
@@ -108,7 +95,7 @@ const App = () => {
                         path='/product/:productId'
                         element={
                           <AuthenticatedRoute>
-                            <Product.Edit />
+                            <Pages.Product.Edit />
                           </AuthenticatedRoute>
                         }
                       />
@@ -117,7 +104,7 @@ const App = () => {
                         path='/product/:productId/variants'
                         element={
                           <AuthenticatedRoute>
-                            <Product.Variants />
+                            <Pages.Product.Variants />
                           </AuthenticatedRoute>
                         }
                       />
@@ -126,7 +113,7 @@ const App = () => {
                         path='/product/:productId/variants/add'
                         element={
                           <AuthenticatedRoute>
-                            <Product.AddVariant />
+                            <Pages.Product.AddVariant />
                           </AuthenticatedRoute>
                         }
                       />
@@ -136,7 +123,7 @@ const App = () => {
                       path='/product/:productId/variant/:variantId'
                       element={
                         <AuthenticatedRoute>
-                          <ProductVariant />
+                          <Pages.ProductVariant />
                         </AuthenticatedRoute>
                       }
                     >
@@ -144,7 +131,7 @@ const App = () => {
                         path='/product/:productId/variant/:variantId'
                         element={
                           <AuthenticatedRoute>
-                            <ProductVariant.Edit />
+                            <Pages.ProductVariant.Edit />
                           </AuthenticatedRoute>
                         }
                       />
@@ -153,7 +140,7 @@ const App = () => {
                         path='/product/:productId/variant/:variantId/media'
                         element={
                           <AuthenticatedRoute>
-                            <ProductVariant.Media />
+                            <Pages.ProductVariant.Media />
                           </AuthenticatedRoute>
                         }
                       />
@@ -162,7 +149,7 @@ const App = () => {
                         path='/product/:productId/variant/:variantId/options'
                         element={
                           <AuthenticatedRoute>
-                            <ProductVariant.Options />
+                            <Pages.ProductVariant.Options />
                           </AuthenticatedRoute>
                         }
                       />
@@ -171,7 +158,7 @@ const App = () => {
                         path='/product/:productId/variant/:variantId/specifications'
                         element={
                           <AuthenticatedRoute>
-                            <ProductVariant.Specifications />
+                            <Pages.ProductVariant.Specifications />
                           </AuthenticatedRoute>
                         }
                       />
@@ -180,7 +167,7 @@ const App = () => {
                         path='/product/:productId/variant/:variantId/urls'
                         element={
                           <AuthenticatedRoute>
-                            <ProductVariant.URLS />
+                            <Pages.ProductVariant.URLS />
                           </AuthenticatedRoute>
                         }
                       />
@@ -191,7 +178,7 @@ const App = () => {
                         path='/affiliates'
                         element={
                           <AuthenticatedRoute>
-                            <Affiliates />
+                            <Pages.Affiliates />
                           </AuthenticatedRoute>
                         }
                       />
@@ -200,7 +187,7 @@ const App = () => {
                         path='/affiliates/add'
                         element={
                           <AuthenticatedRoute>
-                            <Affiliates.Add />
+                            <Pages.Affiliates.Add />
                           </AuthenticatedRoute>
                         }
                       />
@@ -211,7 +198,7 @@ const App = () => {
                         path='/offers'
                         element={
                           <AuthenticatedRoute>
-                            <Offers />
+                            <Pages.Offers />
                           </AuthenticatedRoute>
                         }
                       />
@@ -220,7 +207,7 @@ const App = () => {
                         path='/offers/create'
                         element={
                           <AuthenticatedRoute>
-                            <Offers.Create />
+                            <Pages.Offers.Create />
                           </AuthenticatedRoute>
                         }
                       />
@@ -231,7 +218,7 @@ const App = () => {
                         path='/brand'
                         element={
                           <AuthenticatedRoute>
-                            <ProductBrands />
+                            <Pages.ProductBrands />
                           </AuthenticatedRoute>
                         }
                       />
@@ -240,7 +227,7 @@ const App = () => {
                         path='/brand/create'
                         element={
                           <AuthenticatedRoute>
-                            <ProductBrands.Create />
+                            <Pages.ProductBrands.Create />
                           </AuthenticatedRoute>
                         }
                       />
@@ -250,7 +237,16 @@ const App = () => {
                       path='/statuses'
                       element={
                         <AuthenticatedRoute>
-                          <Statuses />
+                          <Pages.Statuses />
+                        </AuthenticatedRoute>
+                      }
+                    />
+
+                    <Route
+                      path='/users'
+                      element={
+                        <AuthenticatedRoute>
+                          <Pages.Users />
                         </AuthenticatedRoute>
                       }
                     />

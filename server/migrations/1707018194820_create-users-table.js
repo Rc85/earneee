@@ -30,6 +30,9 @@ exports.up = (pgm) => {
         notNull: true,
         default: false
       },
+      banned_until: {
+        type: 'timestamptz'
+      },
       created_at: {
         type: 'timestamptz',
         default: pgm.func('now()'),

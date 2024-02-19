@@ -9,11 +9,11 @@ import {
   Button,
   CircularProgress,
   useTheme,
-  Badge
+  Badge,
+  Link
 } from '@mui/material';
 import Search from '../Search/Search';
 import { SnackbarProvider } from 'notistack';
-import Link from 'next/link';
 import Icon from '@mdi/react';
 import { mdiAccountCircle, mdiEmail, mdiLogoutVariant, mdiMenu } from '@mdi/js';
 import { useState } from 'react';
@@ -49,86 +49,97 @@ const TopBar = () => {
   };
 
   return (
-    <SnackbarProvider>
-      <Drawer ModalProps={{ keepMounted: true }} open={openDrawer} onClose={() => setOpenDrawer(false)}>
-        <Categories onClick={() => setOpenDrawer(false)} />
-      </Drawer>
+    <Box sx={{ backgroundColor: theme.palette.primary.main, mb: 3 }}>
+      <SnackbarProvider>
+        <Drawer ModalProps={{ keepMounted: true }} open={openDrawer} onClose={() => setOpenDrawer(false)}>
+          <Categories onClick={() => setOpenDrawer(false)} />
+        </Drawer>
 
-      <Container maxWidth='xl' sx={{ py: 2, display: 'flex', alignItems: 'center' }}>
-        <IconButton size='small' sx={{ mr: 1 }} onClick={() => setOpenDrawer(!openDrawer)}>
-          <Icon path={mdiMenu} size={2} />
-        </IconButton>
+        <Container maxWidth='xl' sx={{ py: 2, display: 'flex', alignItems: 'center' }}>
+          <IconButton size='small' sx={{ mr: 1 }} onClick={() => setOpenDrawer(!openDrawer)} color='inherit'>
+            <Icon path={mdiMenu} size={2} />
+          </IconButton>
 
-        <Typography className='brand-name' variant='h3' sx={{ mb: 0 }}>
-          <Link href='/'>{brandName.toUpperCase()}</Link>
-        </Typography>
+          <Link href='/' sx={{ display: 'flex', alignItems: 'center' }} className='logo-link'>
+            <img
+              src={`${process.env.NEXT_PUBLIC_STORAGE_URL}/images/${brandName.toLowerCase()}_logo.png`}
+              alt='Earneee'
+              width={50}
+              height={50}
+            />
 
-        <Search />
+            <Typography className='brand-name' variant='h3' sx={{ mb: 0, ml: 1 }}>
+              {brandName.toUpperCase()}
+            </Typography>
+          </Link>
 
-        {/* <TextField
-          select
-          sx={{ mb: '0 !important', width: 75, mr: 1 }}
-          value={country}
-          onChange={(e) => dispatch(setCountry(e.target.value))}
-          SelectProps={{
-            renderValue: () => (
-              <img
-                src={`${process.env.NEXT_PUBLIC_STORAGE_URL}/images/countries/${country.toLowerCase()}.png`}
-                style={{ width: '20px' }}
-              />
-            ),
-            MenuProps: { keepMounted: true }
-          }}
-        >
-          {[
-            { code: 'CA', name: 'Canada' },
-            { code: 'US', name: 'United States' }
-          ].map((country) => (
-            <MenuItem key={country.code} value={country.code} sx={{ display: 'flex', alignItems: 'center' }}>
-              <img
-                src={`${
-                  process.env.NEXT_PUBLIC_STORAGE_URL
-                }/images/countries/${country.code.toLowerCase()}.png`}
-                style={{ width: '20px', marginRight: '5px' }}
-              />
-              {country.name}
-            </MenuItem>
-          ))}
-        </TextField> */}
+          <Search />
 
-        {isLoading ? (
-          <CircularProgress size={20} />
-        ) : user ? (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <IconButton size='small' sx={{ mr: 2 }}>
-              <Icon path={mdiAccountCircle} size={1} color={theme.palette.primary.main} />
-            </IconButton>
+          {/* <TextField
+            select
+            sx={{ mb: '0 !important', width: 75, mr: 1 }}
+            value={country}
+            onChange={(e) => dispatch(setCountry(e.target.value))}
+            SelectProps={{
+              renderValue: () => (
+                <img
+                  src={`${process.env.NEXT_PUBLIC_STORAGE_URL}/images/countries/${country.toLowerCase()}.png`}
+                  style={{ width: '20px' }}
+                />
+              ),
+              MenuProps: { keepMounted: true }
+            }}
+          >
+            {[
+              { code: 'CA', name: 'Canada' },
+              { code: 'US', name: 'United States' }
+            ].map((country) => (
+              <MenuItem key={country.code} value={country.code} sx={{ display: 'flex', alignItems: 'center' }}>
+                <img
+                  src={`${
+                    process.env.NEXT_PUBLIC_STORAGE_URL
+                  }/images/countries/${country.code.toLowerCase()}.png`}
+                  style={{ width: '20px', marginRight: '5px' }}
+                />
+                {country.name}
+              </MenuItem>
+            ))}
+          </TextField> */}
 
-            <Badge badgeContent={0} color='error' overlap='circular' sx={{ mr: 2 }}>
-              <IconButton size='small'>
-                <Icon path={mdiEmail} size={1} color={theme.palette.info.main} />
+          {isLoading ? (
+            <CircularProgress size={20} />
+          ) : user ? (
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <IconButton size='small' sx={{ mr: 2 }}>
+                <Icon path={mdiAccountCircle} size={1} color={theme.palette.primary.main} />
               </IconButton>
-            </Badge>
 
-            <Button
-              startIcon={<Icon path={mdiLogoutVariant} size={1} />}
-              color='error'
-              onClick={handleLogout}
-            >
-              Logout
-            </Button>
-          </Box>
-        ) : (
-          <Box>
-            {loginStatus?.online && <Link href={`/login?redirect=${pathname}`}>Login</Link>}
-            {loginStatus?.online && registrationStatus?.online && (
-              <Typography component='span'> | </Typography>
-            )}
-            {registrationStatus?.online && <Link href='/register'>Create Account</Link>}
-          </Box>
-        )}
-      </Container>
-    </SnackbarProvider>
+              <Badge badgeContent={0} color='error' overlap='circular' sx={{ mr: 2 }}>
+                <IconButton size='small'>
+                  <Icon path={mdiEmail} size={1} color={theme.palette.info.main} />
+                </IconButton>
+              </Badge>
+
+              <Button
+                startIcon={<Icon path={mdiLogoutVariant} size={1} />}
+                color='error'
+                onClick={handleLogout}
+              >
+                Logout
+              </Button>
+            </Box>
+          ) : (
+            <Box>
+              {loginStatus?.online && <Link href={`/login?redirect=${pathname}`}>Login</Link>}
+              {loginStatus?.online && registrationStatus?.online && (
+                <Typography component='span'> | </Typography>
+              )}
+              {registrationStatus?.online && <Link href='/register'>Create Account</Link>}
+            </Box>
+          )}
+        </Container>
+      </SnackbarProvider>
+    </Box>
   );
 };
 

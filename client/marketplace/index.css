@@ -27,9 +27,14 @@ a:hover {
 }
 
 .product-card a,
-.carousel-container a {
+.carousel-container a,
+.logo-link {
   color: inherit;
   text-decoration: none;
+}
+
+.logo-link:hover {
+  text-decoration: none !important;
 }
 
 .product-description img {
@@ -40,12 +45,13 @@ a:hover {
   font-family: 'Archivo', sans-serif !important;
   font-weight: 900 !important;
   font-style: italic !important;
-  background-image: linear-gradient(270deg, #000, #ff661f);
+  color: #000;
+  /* background-image: linear-gradient(270deg, #000, #fff);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   -moz-background-clip: text;
-  -moz-text-fill-color: transparent;
+  -moz-text-fill-color: transparent; */
 }
 
 .search-category-select {

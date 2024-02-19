@@ -3,7 +3,7 @@ export { createUser } from './create';
 export { login } from './login';
 export { logout } from './logout';
 export { changePassword } from './change-password';
-export { retrieveUserProfiles } from './retrieve';
+export { retrieveUserProfiles, retrieveUsers } from './retrieve';
 export { resetPassword } from './reset-password';
 export { contact } from './contact';
 

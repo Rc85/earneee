@@ -44,7 +44,6 @@ const Search = () => {
           mb: '0 !important',
           pl: 1,
           borderWidth: 1,
-          borderColor: grey[400],
           borderStyle: 'solid',
           borderTopLeftRadius: 4,
           borderBottomLeftRadius: 4,
@@ -56,6 +55,7 @@ const Search = () => {
         className='search-category-select'
         value={selectedCategory}
         onChange={(e) => setSelectedCategory(e.target.value)}
+        style={{ borderColor: '#000' }}
       >
         <option value=''>All categories</option>
 

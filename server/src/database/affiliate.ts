@@ -33,7 +33,7 @@ export const affiliate = {
       SELECT JSONB_AGG(au.*) AS urls
       FROM au
       WHERE au.affiliate_id = a.id
-    ) AS u ON TRUE
+    ) AS u ON true
     ${generateOptionString(options)}`;
 
     return await database

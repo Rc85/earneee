@@ -1,6 +1,7 @@
 import {
   mdiAccessPoint,
   mdiAccount,
+  mdiAccountGroup,
   mdiHandshake,
   mdiHome,
   mdiLogout,
@@ -156,6 +157,18 @@ const TopBar = ({ maxWidth }: Props) => {
                 </ListItemIcon>
 
                 <ListItemText primary='Affiliates' />
+              </ListItemButton>
+            </ListItem>
+          )}
+
+          {user?.isAdmin && (
+            <ListItem disableGutters disablePadding>
+              <ListItemButton onClick={() => handleNavClick('/users')}>
+                <ListItemIcon>
+                  <Icon path={mdiAccountGroup} size={1} />
+                </ListItemIcon>
+
+                <ListItemText primary='Users' />
               </ListItemButton>
             </ListItem>
           )}

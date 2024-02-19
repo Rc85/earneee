@@ -37,7 +37,7 @@ export const product = {
       SELECT TO_JSONB(c.*) AS category
       FROM c
       WHERE c.id = p.category_id
-    ) AS c ON TRUE
+    ) AS c ON true
     ${generateOptionString(options)}`;
 
     return await database
@@ -78,7 +78,7 @@ export const product = {
         SELECT JSONB_AGG(pbu.*) AS urls
         FROM pbu
         WHERE pbu.brand_id = pb.id
-      ) AS pbu ON TRUE
+      ) AS pbu ON true
       ${generateOptionString(options)}`;
 
       return await database
@@ -144,17 +144,17 @@ export const product = {
         SELECT JSONB_AGG(pm.*) AS media
         FROM pm
         WHERE pm.variant_id = pv.id
-      ) AS m ON TRUE
+      ) AS m ON true
       LEFT JOIN LATERAL (
         SELECT TO_JSONB(p.*) AS product
         FROM p
         WHERE p.id = pv.product_id
-      ) AS p ON TRUE
+      ) AS p ON true
       LEFT JOIN LATERAL (
         SELECT JSONB_AGG(pu.*) AS urls
         FROM pu
         WHERE pu.variant_id = pv.id
-      ) AS pu ON TRUE
+      ) AS pu ON true
       ${generateOptionString(options)}`;
 
       return await database
@@ -197,7 +197,7 @@ export const product = {
         SELECT JSONB_AGG(s.*) AS selections
         FROM s
         WHERE s.option_id = po.id
-      ) AS s ON TRUE
+      ) AS s ON true
       ${generateOptionString(options)}`;
 
       return await database

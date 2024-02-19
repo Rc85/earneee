@@ -9,6 +9,8 @@ export interface UserProfilesInterface {
   country: string;
   postalCode: string | null;
   phoneNumber: string | null;
+  logoUrl: string | null;
+  logoPath: string | null;
   createdAt: string;
   updatedAt: string | null;
 }

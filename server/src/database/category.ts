@@ -42,7 +42,7 @@ export const category = {
           SELECT COUNT(p.*) AS product
           FROM products AS p
           WHERE p.category_id = c.id
-        ) AS p ON TRUE
+        ) AS p ON true
         WHERE p.product > 0
       )
       
@@ -55,12 +55,12 @@ export const category = {
         SELECT JSONB_AGG(c1.*) AS subcategories
         FROM c1
         WHERE c1.parent_id = c.id
-      ) AS c1 ON TRUE
+      ) AS c1 ON true
       LEFT JOIN LATERAL (
         SELECT COUNT(p.*) AS product
         FROM products AS p
         WHERE p.category_id = c.id
-      ) AS p ON TRUE
+      ) AS p ON true
       ${generateOptionString(options)}`;
 
       return await database
@@ -88,7 +88,7 @@ export const category = {
           SELECT COUNT(p.*) AS product
           FROM products AS p
           WHERE p.category_id = c.id
-        ) AS p ON TRUE
+        ) AS p ON true
 		    WHERE p.product > 0
       ),
       c1 AS (
@@ -102,12 +102,12 @@ export const category = {
           SELECT JSONB_AGG(c2.*) AS subcategories
           FROM c2
           WHERE c2.parent_id = c.id
-        ) AS c2 ON TRUE
+        ) AS c2 ON true
 		    LEFT JOIN LATERAL (
           SELECT COUNT(p.*) AS product
           FROM products AS p
           WHERE p.category_id = c.id
-        ) AS p ON TRUE
+        ) AS p ON true
         WHERE JSONB_ARRAY_LENGTH(c2.subcategories) > 0 OR p.product > 0
       )
       
@@ -120,12 +120,12 @@ export const category = {
         SELECT JSONB_AGG(c1.*) AS subcategories
         FROM c1
         WHERE c1.parent_id = c.id
-      ) AS c1 ON TRUE
+      ) AS c1 ON true
       LEFT JOIN LATERAL (
         SELECT COUNT(p.*) AS product
         FROM products AS p
         WHERE p.category_id = c.id
-      ) AS p ON TRUE
+      ) AS p ON true
       ${generateOptionString(options)}`;
 
       return await database

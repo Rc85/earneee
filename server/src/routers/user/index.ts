@@ -51,4 +51,6 @@ router.post(
   response
 );
 
+router.get('/api/v1/auth/admin/user/retrieve', dbConnect, middleware(controllers.retrieveUsers), response);
+
 export default router;

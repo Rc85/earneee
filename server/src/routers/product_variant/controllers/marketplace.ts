@@ -47,7 +47,7 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
       SELECT TO_JSONB(pr.*) AS product
       FROM pr
       WHERE pr.id = pv.product_id
-    ) AS pr ON TRUE
+    ) AS pr ON true
     WHERE (pr.product->>'category_id')::INT IN (SELECT id FROM p)
     OFFSET ${offset}
     LIMIT 20`,
@@ -86,7 +86,7 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
       SELECT TO_JSONB(p.*) AS product
       FROM products AS p
       WHERE p.id = pv.product_id
-    ) AS pr ON TRUE
+    ) AS pr ON true
     WHERE (pr.product->>'category_id')::INT IN (SELECT id FROM p)`,
     [id],
     client
@@ -151,7 +151,7 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
         SELECT JSONB_AGG(os.*) AS selections
         FROM os
         WHERE os.option_id = po.id
-      ) AS os ON TRUE
+      ) AS os ON true
       ORDER BY po.name
     ),
     pu AS (
@@ -180,22 +180,22 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
         SELECT JSONB_AGG(pm.*) AS media
         FROM pm
         WHERE pm.variant_id = pv.id
-      ) AS pm ON TRUE
+      ) AS pm ON true
       LEFT JOIN LATERAL (
         SELECT JSONB_AGG(po.*) AS options
         FROM po
         WHERE po.variant_id = pv.id
-      ) AS po ON TRUE
+      ) AS po ON true
       LEFT JOIN LATERAL (
         SELECT JSONB_AGG(ps.*) AS specifications
         FROM ps
         WHERE ps.variant_id = pv.id
-      ) AS ps ON TRUE
+      ) AS ps ON true
       LEFT JOIN LATERAL (
         SELECT JSONB_AGG(pu.*) AS urls
         FROM pu
         WHERE pu.variant_id = pv.id
-      ) AS pu ON TRUE
+      ) AS pu ON true
       ORDER BY pv.ordinance
     ),
     ps AS (
@@ -221,12 +221,12 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
     LEFT JOIN LATERAL (
       SELECT ac.ancestors, ac.depth FROM ac
       WHERE ac.id = p.category_id
-    ) AS ac ON TRUE
+    ) AS ac ON true
     LEFT JOIN LATERAL (
       SELECT JSONB_AGG(pv.*) AS variants
       FROM pv
       WHERE pv.product_id = p.id
-    ) AS pv ON TRUE
+    ) AS pv ON true
     WHERE p.id = $1
     ORDER BY ac.depth desc
     LIMIT 1`,
