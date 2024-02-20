@@ -6,7 +6,6 @@ import {
   CircularProgress,
   Divider,
   FormControlLabel,
-  Link,
   Pagination,
   Paper,
   Typography
@@ -14,6 +13,7 @@ import {
 import { useState } from 'react';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
 import { retrieveCategories, retrieveMarketplaceProducts } from '../../../../_shared/api';
+import Link from 'next/link';
 
 interface Props {
   categoryId: number | undefined;

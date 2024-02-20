@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { ProductVariantsInterface } from '../../../../_shared/types';
 import { Paper, Box, Typography, Divider, Button } from '@mui/material';
 
@@ -9,6 +10,12 @@ interface Props {
 }
 
 const Product = ({ variant, isLast }: Props) => {
+  const router = useRouter();
+
+  const handleProductClick = (url: string) => {
+    router.push(url);
+  };
+
   return (
     <Paper
       key={variant.id}
@@ -23,7 +30,7 @@ const Product = ({ variant, isLast }: Props) => {
       }}
       className='product-card'
     >
-      <Box component='a' href={`/product/${variant.product?.id}?variant=${variant.id}`}>
+      <Box onClick={() => handleProductClick(`/product/${variant.product?.id}?variant=${variant.id}`)}>
         <Box
           sx={{
             borderTopRightRadius: 4,

@@ -1,10 +1,12 @@
 'use client';
+
 import { mdiChevronLeft, mdiChevronRight, mdiCircle } from '@mdi/js';
 import Icon from '@mdi/react';
 import { Box, IconButton, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
 import { ProductVariantsInterface } from '../../../../_shared/types';
+import { useRouter } from 'next/navigation';
 
 let carouselInterval: NodeJS.Timer | undefined | void = undefined;
 
@@ -15,6 +17,7 @@ interface Props {
 const Carousel = ({ variants }: Props) => {
   const [imageIndex, setImageIndex] = useState(0);
   const [carouselTimer, setCarouselTimer] = useState(5);
+  const router = useRouter();
 
   useEffect(() => {
     if (variants.length > 1) {
@@ -66,6 +69,10 @@ const Carousel = ({ variants }: Props) => {
     setImageIndex(imageIndex + 1);
   };
 
+  const handleProductClick = (url: string) => {
+    router.push(url);
+  };
+
   return (
     <Box sx={{ width: '100%' }}>
       <Box
@@ -80,8 +87,7 @@ const Carousel = ({ variants }: Props) => {
         {variants.map((variant, i) => (
           <Box
             key={variant.id}
-            component='a'
-            href={`/product/${variant.product?.id}?variant=${variant.id}`}
+            onClick={() => handleProductClick(`/product/${variant.product?.id}?variant=${variant.id}`)}
             sx={{
               cursor: 'pointer',
               display: 'flex',

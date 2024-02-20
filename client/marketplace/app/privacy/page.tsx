@@ -1,6 +1,7 @@
 'use client';
 
-import { Container, Link, Typography } from '@mui/material';
+import { Container, Typography } from '@mui/material';
+import Link from 'next/link';
 
 const PrivacyPolicy = () => {
   return (

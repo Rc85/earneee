@@ -9,8 +9,7 @@ import {
   Button,
   CircularProgress,
   useTheme,
-  Badge,
-  Link
+  Badge
 } from '@mui/material';
 import Search from '../Search/Search';
 import { SnackbarProvider } from 'notistack';
@@ -22,6 +21,7 @@ import { brandName } from '../../../_shared/constants';
 import { usePathname } from 'next/navigation';
 import { authenticate, useLogout } from '../../../_shared/api';
 import { retrieveStatuses } from '../../../_shared/api/statuses/queries';
+import Link from 'next/link';
 
 const TopBar = () => {
   const [openDrawer, setOpenDrawer] = useState(false);
@@ -60,7 +60,7 @@ const TopBar = () => {
             <Icon path={mdiMenu} size={2} />
           </IconButton>
 
-          <Link href='/' sx={{ display: 'flex', alignItems: 'center' }} className='logo-link'>
+          <Link href='/' style={{ display: 'flex', alignItems: 'center' }} className='logo-link'>
             <img
               src={`${process.env.NEXT_PUBLIC_STORAGE_URL}/images/${brandName.toLowerCase()}_logo.png`}
               alt='Earneee'
@@ -133,7 +133,7 @@ const TopBar = () => {
               {loginStatus?.online && (
                 <Link
                   href={`/login?redirect=${pathname}`}
-                  sx={{ color: 'black', display: 'flex', alignItems: 'center' }}
+                  style={{ color: 'black', display: 'flex', alignItems: 'center' }}
                 >
                   <Icon path={mdiLogin} size={1} style={{ marginRight: '5px' }} /> Login
                 </Link>
@@ -142,7 +142,7 @@ const TopBar = () => {
                 <Typography component='span'> | </Typography>
               )}
               {registrationStatus?.online && (
-                <Link href='/register' sx={{ color: 'black' }}>
+                <Link href='/register' style={{ color: 'black' }}>
                   Create Account
                 </Link>
               )}

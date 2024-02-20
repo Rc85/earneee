@@ -1,7 +1,8 @@
 'use client';
 
-import { Container, Link, List, ListItem, Typography } from '@mui/material';
+import { Container, List, ListItem, Typography } from '@mui/material';
 import { brandName } from '../../../_shared/constants';
+import Link from 'next/link';
 
 const TermsOfService = () => {
   return (

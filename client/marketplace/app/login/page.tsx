@@ -11,7 +11,6 @@ import {
   Container,
   Divider,
   FormControlLabel,
-  Link,
   Paper,
   TextField,
   Typography
@@ -21,6 +20,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useSnackbar } from 'notistack';
 import { retrieveStatuses, useLogin } from '../../../_shared/api';
 import { Loading } from '../../../_shared/components';
+import Link from 'next/link';
 
 export default function Login() {
   const [status, setStatus] = useState('');

@@ -5,12 +5,17 @@ export const retrieveCategories = async (req: Request, resp: Response, next: Nex
   const { client } = resp.locals;
   const where = [];
   const params = [];
-  const { parentId, level } = req.query;
+  const { parentId, level, categoryId, subcategoryId, groupId } = req.query;
+  const id = groupId || subcategoryId || categoryId;
 
   if (parentId) {
     params.push(parentId);
 
     where.push(`c.parent_id = $1`);
+  } else if (id) {
+    params.push(id);
+
+    where.push(`c.id = $1`);
   } else {
     where.push(`c.parent_id IS NULL`);
   }

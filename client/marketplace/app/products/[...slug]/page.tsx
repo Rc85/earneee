@@ -17,26 +17,38 @@ const CategoryContainer = async ({ params: { slug } }: Props) => {
   let category: CategoriesInterface | undefined = undefined;
   let subcategory: CategoriesInterface | undefined = undefined;
   let group: CategoriesInterface | undefined = undefined;
-  let url = '';
 
-  if (categoryId) {
-    url = `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/category/retrieve?categoryId=${categoryId}`;
-  } else if (subcategoryId) {
-    url = `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/category/retrieve?subcategoryId=${subcategoryId}`;
-  } else if (groupId) {
-    url = `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/category/retrieve?groupId=${groupId}`;
+  if (groupId) {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/category/retrieve?groupId=${groupId}`,
+      { next: { revalidate: 300 }, credentials: 'include' }
+    );
+    const data = await res.json();
+    const categories = data.categories;
+
+    group = categories[0];
   }
 
-  const res = await fetch(url, { next: { revalidate: 300 }, credentials: 'include' });
-  const data = await res.json();
-  const categories = data.categories;
+  if (subcategoryId) {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/category/retrieve?subcategoryId=${subcategoryId}`,
+      { next: { revalidate: 300 }, credentials: 'include' }
+    );
+    const data = await res.json();
+    const categories = data.categories;
+
+    subcategory = categories[0];
+  }
 
   if (categoryId) {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/category/retrieve?categoryId=${categoryId}`,
+      { next: { revalidate: 300 }, credentials: 'include' }
+    );
+    const data = await res.json();
+    const categories = data.categories;
+
     category = categories[0];
-  } else if (subcategoryId) {
-    subcategory = categories[0];
-  } else if (groupId) {
-    group = categories[0];
   }
 
   const name = group?.name || subcategory?.name || category?.name;

@@ -1,10 +1,11 @@
 'use client';
 
-import { Box, Container, Divider, Link, Typography } from '@mui/material';
+import { Box, Container, Divider, Typography } from '@mui/material';
 import { brandName } from '../../../_shared/constants';
 import Icon from '@mdi/react';
 import { mdiFacebook, mdiInstagram, mdiTwitter } from '@mdi/js';
 import { retrieveStatuses } from '../../../_shared/api';
+import Link from 'next/link';
 
 const Footer = () => {
   const { data } = retrieveStatuses();
@@ -55,13 +56,13 @@ const Footer = () => {
               Partnership
             </Typography>
 
-            <Typography color='white' sx={{ mb: 2 }}>
+            {/* <Typography color='white' sx={{ mb: 2 }}>
               Sell on {brandName}
             </Typography>
 
             <Typography color='white' sx={{ mb: 2 }}>
               Advertise on {brandName}
-            </Typography>
+            </Typography> */}
 
             <Typography color='white'>Affiliate With Us</Typography>
           </Box>
@@ -78,11 +79,13 @@ const Footer = () => {
               Support
             </Typography>
 
-            <Typography color='white' sx={{ mb: 2 }}>
+            {/* <Typography color='white' sx={{ mb: 2 }}>
               FAQ
-            </Typography>
+            </Typography> */}
 
-            <Typography color='white'>Contact Us</Typography>
+            <Typography color='white'>
+              <Link href='/contact'>Contact Us</Link>
+            </Typography>
           </Box>
 
           <Box sx={{ p: 2, width: '40%', display: 'flex', justifyContent: 'flex-end' }}>
@@ -92,11 +95,11 @@ const Footer = () => {
               </Typography>
 
               <Box sx={{ display: 'flex' }}>
-                <Link href='https://facebook.com' sx={{ mr: 4 }}>
+                <Link href='https://facebook.com' style={{ marginRight: '20px' }}>
                   <Icon path={mdiFacebook} size={1} color='#1877F2' />
                 </Link>
 
-                <Link href='https://twitter.com' sx={{ mr: 4 }}>
+                <Link href='https://twitter.com' style={{ marginRight: '20px' }}>
                   <Icon path={mdiTwitter} size={1} color='#1DA1F2' />
                 </Link>
 

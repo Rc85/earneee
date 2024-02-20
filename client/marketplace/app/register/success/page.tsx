@@ -2,7 +2,8 @@
 
 import { mdiCheckCircle, mdiCloseCircle } from '@mdi/js';
 import Icon from '@mdi/react';
-import { Box, Container, Link, Paper, Typography, useTheme } from '@mui/material';
+import { Box, Container, Paper, Typography, useTheme } from '@mui/material';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
 const Register = () => {
