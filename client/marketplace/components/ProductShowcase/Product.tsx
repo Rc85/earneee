@@ -54,8 +54,7 @@ const Product = ({ variant, isLast }: Props) => {
           <Typography variant='h6' sx={{ mb: 0 }}>
             {Intl.NumberFormat('en-US', {
               style: 'currency',
-              currency: 'CAD',
-              currencyDisplay: 'narrowSymbol'
+              currency: variant.currency
             }).format(variant.price)}
           </Typography>
 

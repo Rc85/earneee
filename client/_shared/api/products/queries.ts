@@ -152,3 +152,19 @@ export const retrieveProductUrls = (options?: { variantId?: string }) => {
     }
   });
 };
+
+export const searchProducts = (options: { value: string | null; category?: string | null }) => {
+  return useQuery<{ variants: ProductVariantsInterface[] }>({
+    queryKey: ['search products', options.value, options.category],
+    queryFn: async () => {
+      const { data } = await axios({
+        method: 'get',
+        url: '/api/v1/product/search',
+        params: options,
+        withCredentials: true
+      });
+
+      return data;
+    }
+  });
+};

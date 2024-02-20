@@ -6,12 +6,14 @@ import { Box, InputBase, IconButton } from '@mui/material';
 import { FormEvent, useState } from 'react';
 import { enqueueSnackbar } from 'notistack';
 import { retrieveCategories } from '../../../_shared/api';
+import { useRouter } from 'next/navigation';
 
 const Search = () => {
   const [searchValue, setSearchValue] = useState('');
   const { data } = retrieveCategories();
   const { categories } = data || {};
   const [selectedCategory, setSelectedCategory] = useState('');
+  const router = useRouter();
 
   const handleSubmit = (e?: FormEvent) => {
     e?.preventDefault();
@@ -26,7 +28,7 @@ const Search = () => {
       url = `${url}&category=${selectedCategory}`;
     }
 
-    window.location.href = url;
+    router.push(url);
   };
 
   return (

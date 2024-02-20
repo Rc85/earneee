@@ -21,4 +21,12 @@ router.delete(
   response
 );
 
+router.get(
+  '/api/v1/product/search',
+  dbConnect,
+  middleware(controllers.validateSearchProducts),
+  middleware(controllers.searchProducts),
+  response
+);
+
 export default router;

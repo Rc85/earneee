@@ -27,6 +27,11 @@ const Main = ({ product }: Props) => {
   const [selectedVariant, setSelectVariant] = useState<ProductVariantsInterface | undefined>(
     variantId ? product.variants?.find((variant) => variant.id === variantId) : product.variants?.[0]
   );
+  const specifications = selectedVariant?.specifications || [];
+  const options = selectedVariant?.options || [];
+  const hasSpecifications = Boolean(specifications.length);
+  const isAvailable = selectedVariant?.status === 'available';
+  const mediaLink = selectedVariant?.urls?.[0]?.url;
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -39,7 +44,7 @@ const Main = ({ product }: Props) => {
           <div className='product-description' dangerouslySetInnerHTML={{ __html: product.description }} />
         )}
 
-        {selectedVariant?.specifications?.length && (
+        {hasSpecifications && (
           <>
             <Divider sx={{ my: 1 }} />
 
@@ -60,7 +65,7 @@ const Main = ({ product }: Props) => {
                 mb: 3
               }}
             >
-              {selectedVariant.specifications.map((specification) => (
+              {specifications.map((specification) => (
                 <Fragment key={specification.name}>
                   <Grid2 xs={4}>
                     <Typography sx={{ margin: 2 }}>{specification.name}</Typography>
@@ -122,9 +127,9 @@ const Main = ({ product }: Props) => {
           </Paper>
         ))}
 
-        {Boolean(selectedVariant?.status === 'available' && selectedVariant?.urls?.[0]?.url) && (
+        {Boolean(isAvailable && mediaLink) && (
           <>
-            {selectedVariant?.status === 'available' && (
+            {isAvailable && (
               <Box>
                 <Divider sx={{ my: 1 }} />
 
@@ -145,12 +150,9 @@ const Main = ({ product }: Props) => {
                     )}
                   </Box>
 
-                  {selectedVariant?.urls?.[0]?.url && (
+                  {Boolean(mediaLink) && (
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                      <Button
-                        variant='contained'
-                        onClick={() => window.open(selectedVariant.urls?.[0]?.url, '_blank')}
-                      >
+                      <Button variant='contained' onClick={() => window.open(mediaLink, '_blank')}>
                         Buy Now
                       </Button>
                     </Box>
@@ -164,11 +166,11 @@ const Main = ({ product }: Props) => {
         )}
 
         {selectedVariant?.description && (
-          <div dangerouslySetInnerHTML={{ __html: selectedVariant.description }} />
+          <div dangerouslySetInnerHTML={{ __html: selectedVariant?.description }} />
         )}
 
-        {selectedVariant?.options?.length &&
-          selectedVariant.options.map((option) => (
+        {options.length > 0 &&
+          options.map((option) => (
             <Box key={option.id}>
               <Typography variant='h6'>
                 {option.name} {option.required && <Typography color='red'>Required</Typography>}
@@ -181,7 +183,7 @@ const Main = ({ product }: Props) => {
                       primary={selection.name}
                       secondary={`+${Intl.NumberFormat('en-US', {
                         style: 'currency',
-                        currency: selectedVariant.currency,
+                        currency: selectedVariant?.currency,
                         currencyDisplay: 'code'
                       }).format(selection.price)}`}
                     />
@@ -192,7 +194,7 @@ const Main = ({ product }: Props) => {
                           primary={selection.name}
                           secondary={`+${Intl.NumberFormat('en-US', {
                             style: 'currency',
-                            currency: selectedVariant.currency,
+                            currency: selectedVariant?.currency,
                             currencyDisplay: 'code'
                           }).format(selection.price)}`}
                         />

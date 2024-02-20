@@ -49,3 +49,17 @@ export const validateCreateProduct = async (req: Request, resp: Response, next: 
 
   return next();
 };
+
+export const validateSearchProducts = async (req: Request, resp: Response, next: NextFunction) => {
+  const { value, category } = req.query;
+
+  if (!value || validations.blankCheck.test(value.toString())) {
+    return next(new HttpException(400, `Value required`));
+  } else if (value && typeof value !== 'string') {
+    return next(new HttpException(400, `Invalid value`));
+  } else if (category && isNaN(parseInt(category.toString()))) {
+    return next(new HttpException(400, `Invalid category`));
+  }
+
+  return next();
+};

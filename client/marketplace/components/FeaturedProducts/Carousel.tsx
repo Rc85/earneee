@@ -1,9 +1,9 @@
 'use client';
 import { mdiChevronLeft, mdiChevronRight, mdiCircle } from '@mdi/js';
 import Icon from '@mdi/react';
-import { Box, Button, IconButton, Typography } from '@mui/material';
+import { Box, IconButton, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import { MouseEvent, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ProductVariantsInterface } from '../../../../_shared/types';
 
 let carouselInterval: NodeJS.Timer | undefined | void = undefined;
@@ -66,14 +66,6 @@ const Carousel = ({ variants }: Props) => {
     setImageIndex(imageIndex + 1);
   };
 
-  const handleBuyNowClick = (e: MouseEvent, url: string | null) => {
-    e.stopPropagation();
-
-    if (url) {
-      window.open(url, '_blank');
-    }
-  };
-
   return (
     <Box sx={{ width: '100%' }}>
       <Box
@@ -129,12 +121,9 @@ const Carousel = ({ variants }: Props) => {
                 <Typography sx={{ ml: 1 }} color='white' variant='h4'>
                   {Intl.NumberFormat('en-US', {
                     style: 'currency',
-                    currency: 'CAD',
-                    currencyDisplay: 'narrowSymbol'
+                    currency: variant.currency
                   }).format(variant.price)}
                 </Typography>
-
-                {/* <Button onClick={(e) => handleBuyNowClick(e, variant.url)}>Buy Now</Button> */}
               </Box>
             </Box>
           </Box>

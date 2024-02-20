@@ -88,6 +88,8 @@ const ProductForm = ({ product }: Props) => {
     if (err.response.data.statusText) {
       enqueueSnackbar(err.response.data.statusText, { variant: 'error' });
     }
+
+    setStatus('');
   };
 
   const createProduct = useCreateProduct(handleSuccess, handleError);

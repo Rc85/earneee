@@ -15,7 +15,7 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
         name,
         parent_id
       FROM categories
-      where ${groupId ? `id = $1` : subcategoryId ? `id = $1` : `id = $1`}
+      WHERE id = $1
       UNION ALL
       SELECT
         c.id,

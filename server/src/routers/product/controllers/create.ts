@@ -8,7 +8,17 @@ export const createProduct = async (req: Request, resp: Response, next: NextFunc
   await database.create(
     'products',
     ['id', 'name', 'excerpt', 'category_id', 'type', 'affiliate_id', 'brand_id', 'description', 'status'],
-    [id, name, excerpt, categoryId, type, affiliateId, brandId, description, status],
+    [
+      id,
+      name,
+      excerpt || null,
+      categoryId,
+      type,
+      affiliateId || null,
+      brandId || null,
+      description || null,
+      status
+    ],
     {
       conflict: {
         columns: 'id',
