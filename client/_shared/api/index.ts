@@ -33,6 +33,22 @@ export const useContact = (onSuccess?: (response: any) => void, onError?: (err: 
   });
 };
 
+export const useSubscribe = (onSuccess?: (response: any) => void, onError?: (err: any) => void) => {
+  const dispatch = useDispatch();
+
+  return useMutation({
+    mutationFn: async (form: { email: string; key: string }) => axios.post('/api/v1/subscribe', form),
+    onSuccess: (response) => {
+      dispatch(setIsLoading(false));
+
+      onSuccess?.(response);
+    },
+    onError: (err) => {
+      onError?.(err);
+    }
+  });
+};
+
 export * from './users/mutations';
 export * from './affiliates/mutations';
 export * from './affiliates/queries';

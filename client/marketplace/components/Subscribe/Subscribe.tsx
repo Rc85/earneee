@@ -2,10 +2,55 @@
 
 import { mdiSend } from '@mdi/js';
 import Icon from '@mdi/react';
-import { Box, Typography, TextField, Button, useTheme } from '@mui/material';
+import { LoadingButton } from '@mui/lab';
+import { Box, Typography, TextField, useTheme, CircularProgress } from '@mui/material';
+import { useSnackbar } from 'notistack';
+import { useRef, useState } from 'react';
+import Recaptcha from 'react-google-recaptcha';
+import { useSubscribe } from '../../../_shared/api';
 
 const Subscribe = () => {
+  const recaptchaRef = useRef<Recaptcha>(null);
+  const [status, setStatus] = useState('');
   const theme = useTheme();
+  const { enqueueSnackbar } = useSnackbar();
+  const [email, setEmail] = useState('');
+
+  const handleSuccess = (response: any) => {
+    recaptchaRef.current?.reset();
+
+    if (response.data.statusText) {
+      enqueueSnackbar(response.data.statusText, { variant: 'success' });
+    }
+
+    setEmail('');
+
+    setStatus('Success');
+  };
+
+  const handleError = (err: any) => {
+    recaptchaRef.current?.reset();
+
+    if (err.response.data.statusText) {
+      enqueueSnackbar(err.response.data.statusText, { variant: 'error' });
+    }
+
+    setStatus('');
+  };
+
+  const subscribe = useSubscribe(handleSuccess, handleError);
+
+  const handleSubmit = async (e?: any) => {
+    e?.preventDefault();
+
+    setStatus('Loading');
+
+    const key = await recaptchaRef.current?.executeAsync();
+
+    if (key) {
+      subscribe.mutate({ key, email });
+    }
+  };
 
   return (
     <Box
@@ -25,24 +70,56 @@ const Subscribe = () => {
       />
 
       <Box sx={{ pl: 10 }}>
-        <Box sx={{ mb: 3 }}>
-          <Typography variant='h4' color='white'>
-            Subscribe to our newsletter to get updates on trending products, latest discounts, and more.
-          </Typography>
-        </Box>
+        {status === 'Success' ? (
+          <>
+            <Typography variant='h4'>Thank you for subscribing to our newsletter!</Typography>
 
-        <Box sx={{ display: 'flex' }}>
-          <TextField label='Email' required color='info' sx={{ mr: 1, mb: '0px !important' }} />
+            <Typography>You can unsubscribe any time using the link you receive in your emails.</Typography>
+          </>
+        ) : (
+          <>
+            <Box sx={{ mb: 3 }}>
+              <Typography variant='h4'>
+                Subscribe to our newsletter to get updates on trending products, latest discounts, and more.
+              </Typography>
+            </Box>
 
-          <Button color='info' variant='contained' startIcon={<Icon path={mdiSend} size={1} />}>
-            Subscribe
-          </Button>
-        </Box>
+            <Box sx={{ display: 'flex' }} component='form' onSubmit={handleSubmit}>
+              <TextField
+                label='Email'
+                type='email'
+                autoComplete='email'
+                required
+                color='info'
+                sx={{ mr: 1, mb: '0px !important' }}
+                onChange={(e) => setEmail(e.target.value)}
+                value={email}
+              />
 
-        <Typography variant='caption' color='GrayText'>
-          Upon subscribing, you agree to us sending you emails regarding news and updates. You may unsubscribe
-          anytime.
-        </Typography>
+              <Recaptcha
+                ref={recaptchaRef}
+                sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_KEY!}
+                size='invisible'
+              />
+
+              <LoadingButton
+                type='submit'
+                color='info'
+                variant='contained'
+                startIcon={<Icon path={mdiSend} size={1} />}
+                loading={status === 'Loading'}
+                loadingPosition='start'
+                loadingIndicator={<CircularProgress size={20} />}
+              >
+                Subscribe
+              </LoadingButton>
+            </Box>
+
+            <Typography variant='caption'>
+              Upon subscribing, you agree on allowing us to send you emails regarding news and updates.
+            </Typography>
+          </>
+        )}
       </Box>
     </Box>
   );

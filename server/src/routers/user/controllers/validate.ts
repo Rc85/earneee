@@ -124,3 +124,13 @@ export const validateUpdateUser = (req: Request, _: Response, next: NextFunction
 
   return next();
 };
+
+export const validateSubscribe = (req: Request, _: Response, next: NextFunction) => {
+  if (!req.body.email || validations.blankCheck.test(req.body.email)) {
+    return next(new HttpException(400, `Email required`));
+  } else if (!validations.emailCheck.test(req.body.email)) {
+    return next(new HttpException(400, 'Invalid email'));
+  }
+
+  return next();
+};

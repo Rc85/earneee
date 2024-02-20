@@ -61,4 +61,13 @@ router.post(
 
 router.get('/api/v1/auth/admin/user/retrieve', dbConnect, middleware(controllers.retrieveUsers), response);
 
+router.post(
+  '/api/v1/subscribe',
+  dbConnect,
+  middleware(recaptcha),
+  middleware(controllers.validateSubscribe),
+  middleware(controllers.subscribe),
+  response
+);
+
 export default router;
