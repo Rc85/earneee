@@ -254,6 +254,17 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
         pu.country
       FROM product_urls AS pu
     ),
+    ps AS (
+      SELECT
+        s.id,
+        s.name,
+        s.value,
+        ps.variant_id
+      FROM specifications AS s
+      LEFT JOIN product_specifications AS ps
+      ON ps.specification_id = s.id
+      ORDER BY s.ordinance
+    ),
     pv AS (
       SELECT
         pv.id,
@@ -289,15 +300,6 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
         WHERE pu.variant_id = pv.id
       ) AS pu ON true
       ORDER BY pv.ordinance
-    ),
-    ps AS (
-      SELECT
-        ps.id,
-        ps.name,
-        ps.value,
-        ps.variant_id
-      FROM product_specifications AS ps
-      ORDER BY ps.ordinance
     )
     
     SELECT

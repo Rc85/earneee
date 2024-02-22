@@ -2,7 +2,7 @@
 
 import { useSearchParams } from 'next/navigation';
 import Section from '../../../_shared/components/Section/Section';
-import { searchProducts } from '../../../_shared/api';
+import { retrieveCategories, searchProducts } from '../../../_shared/api';
 import {
   Avatar,
   List,
@@ -17,15 +17,21 @@ const Search = () => {
   const searchParams = useSearchParams();
   const searchValue = searchParams.get('value');
   const category = searchParams.get('category');
+  const c = retrieveCategories({ categoryId: category as unknown as number });
+  const { categories } = c.data || {};
   const { data } = searchProducts({ value: searchValue, category });
   const { variants } = data || {};
 
   return (
-    <Section title='Search Results' titleVariant='h3'>
+    <Section
+      title='Search Results'
+      subtitle={`Searching for "${searchValue}"${category ? ` in ${categories?.[0]?.name}` : ''}`}
+      titleVariant='h3'
+    >
       {variants && variants.length > 0 ? (
         <List>
           {variants.map((variant) => (
-            <ListItem key={variant.id}>
+            <ListItem key={variant.id} disableGutters disablePadding divider>
               <ListItemButton sx={{ alignItems: 'flex-start' }}>
                 <ListItemIcon>
                   <Avatar
@@ -42,7 +48,7 @@ const Search = () => {
                 />
               </ListItemButton>
 
-              <Typography>
+              <Typography variant='h6' sx={{ mb: 0 }}>
                 {Intl.NumberFormat('en-US', {
                   style: 'currency',
                   currency: variant.currency

@@ -5,7 +5,16 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
   const { client } = resp.locals;
   const { value, category } = req.query;
   const offset = req.query.offset?.toString() || '0';
-  const params = [`%${value}%`];
+  const params: any = [];
+
+  if (value) {
+    const splitBySpaces = value.toString().split(' ');
+    const splitByUnderscores = splitBySpaces.map((value) => value.split('_')).flat();
+    const splitByDashes = splitByUnderscores.map((value) => value.split('-')).flat();
+    const splitByPeriods = splitByDashes.map((value) => value.split('.')).flat();
+
+    params.push(splitByPeriods.join(' '));
+  }
 
   if (category) {
     params.push(category.toString());
@@ -78,6 +87,8 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
       pv.currency,
       pv.description,
       p.product,
+      WORD_SIMILARITY(p.product->>'name', $1) AS product_similarity,
+      WORD_SIMILARITY(pv.name, $1) AS variant_similarity,
       COALESCE(pm.media, '[]'::JSONB) AS media
     FROM product_variants AS pv
     LEFT JOIN LATERAL (
@@ -90,9 +101,9 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
       FROM pm
       WHERE pm.variant_id = pv.id
     ) AS pm ON true
-    WHERE (pv.name ILIKE $1 OR p.product->>'name' ILIKE $1)
+    WHERE (WORD_SIMILARITY(p.product->>'name', $1) > 0.5 OR WORD_SIMILARITY(pv.name, $1) > 0.5 OR p.product->>'name' ILIKE '%' || $1 || '%' OR pv.name ILIKE '%' || $1 || '%')
     ${category ? `AND (p.product->>'category_id')::INT IN (SELECT id FROM pc)` : ''}
-    ORDER BY pv.created_at DESC
+    ORDER BY WORD_SIMILARITY(p.product->>'name', $1) DESC, WORD_SIMILARITY(pv.name, $1) DESC
     OFFSET ${offset}
     LIMIT 20`,
     params,
@@ -150,7 +161,7 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
       FROM p
       WHERE p.id = pv.product_id
     ) AS p ON true
-    WHERE pv.name ILIKE $1 OR p.product->>'name' ILIKE $1`,
+    WHERE (WORD_SIMILARITY(p.product->>'name', $1) > 0.5 OR WORD_SIMILARITY(pv.name, $1) > 0.5 OR p.product->>'name' ILIKE '%' || $1 || '%' OR pv.name ILIKE '%' || $1 || '%')`,
     params,
     client
   );

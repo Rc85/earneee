@@ -14,7 +14,7 @@ interface Props {
 }
 
 const ProductShowcase = async ({ categoryId, subcategoryId, groupId, type }: Props) => {
-  const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/product/variant/retrieve?type=${type}`;
+  const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/product/variant?type=${type}`;
   const queries = [];
 
   if (categoryId) {

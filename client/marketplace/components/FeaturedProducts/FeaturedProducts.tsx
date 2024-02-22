@@ -5,7 +5,7 @@ import Carousel from './Carousel';
 
 const FeaturedProducts = async () => {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/product/variant/retrieve?scope=marketplace&featured=true&limit=5`,
+    `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/product/variant?scope=marketplace&featured=true&limit=5`,
     {
       next: { revalidate: 300, tags: ['featured products'] },
       credentials: 'include'

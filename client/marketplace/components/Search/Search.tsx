@@ -28,6 +28,8 @@ const Search = () => {
       url = `${url}&category=${selectedCategory}`;
     }
 
+    setSearchValue('');
+
     router.push(url);
   };
 
