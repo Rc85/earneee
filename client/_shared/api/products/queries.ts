@@ -138,9 +138,16 @@ export const retrieveMarketplaceProducts = (options?: {
       [key: string]: ProductSpecificationsInterface;
     };
   };
+  orderBy: string;
 }) => {
   return useQuery<{ variants: ProductVariantsInterface[]; count: number }>({
-    queryKey: ['marketplace products', options?.categoryId, options?.offset, options?.filters],
+    queryKey: [
+      'marketplace products',
+      options?.categoryId,
+      options?.offset,
+      options?.filters,
+      options?.orderBy
+    ],
     queryFn: async () => {
       const { data } = await axios({
         method: 'get',

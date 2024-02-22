@@ -8,6 +8,23 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
   const id = groupId || subcategoryId || categoryId;
   const offset = req.query.offset?.toString() || '0';
   const params: any = [id];
+  const sort = req.query.orderBy?.toString() || 'newest';
+
+  let orderBy = `pr.product->>'created_at' DESC`;
+
+  if (sort === 'newest') {
+    orderBy = `pr.product->>'created_at' DESC`;
+  } else if (sort === 'oldest') {
+    orderBy = `pr.product->>'created_at' ASC`;
+  } else if (sort === 'name_asc') {
+    orderBy = `pr.product->>'name' ASC`;
+  } else if (sort === 'name_desc') {
+    orderBy = `pr.product->>'name' DESC`;
+  } else if (sort === 'price_asc') {
+    orderBy = `pv.price ASC`;
+  } else if (sort === 'price_desc') {
+    orderBy = `pv.price DESC`;
+  }
 
   let filters: {
     minPrice: string | undefined;
@@ -69,13 +86,25 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
     SELECT
       pr.id,
       pr.name,
+      pr.excerpt,
       pr.type,
-      pr.category_id
+      pr.category_id,
+      pr.created_at
     FROM products AS pr
+  ),
+  pm AS (
+    SELECT
+      pm.id,
+      pm.url,
+      pm.width,
+      pm.height,
+      pm.variant_id,
+      pm.type
+    FROM product_media AS pm
+    WHERE pm.status = 'enabled'
   )
 
   SELECT
-    DISTINCT ON (pv.id)
     pv.id,
     pv.name,
     pv.price,
@@ -83,7 +112,8 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
     pv.description,
     pv.product_id,
     pv.status,
-    pr.product
+    pr.product,
+    COALESCE(pm.media, '[]'::JSONB) AS media
   FROM product_variants AS pv
   LEFT JOIN LATERAL (
     SELECT TO_JSONB(pr.*) AS product
@@ -95,6 +125,11 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
     FROM s
     WHERE s.variant_id = pv.id
   ) AS s ON true
+  LEFT JOIN LATERAL (
+    SELECT JSONB_AGG(pm.*) AS media
+    FROM pm
+    WHERE pm.variant_id = pv.id
+  ) AS pm ON true
   WHERE (pr.product->>'category_id')::INT IN (SELECT id FROM p)
   ${filters.minPrice ? `AND pv.price >= $2` : ''}
   ${filters.maxPrice ? `AND pv.price <= ${!filters.minPrice ? '$2' : '$3'}` : ''}
@@ -103,6 +138,7 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
       ? `AND s.specifications ?& $${params.length}`
       : ''
   }
+  ORDER BY ${orderBy}
   OFFSET ${offset}
   LIMIT 20`;
 
@@ -132,17 +168,18 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
       pv.id,
       pv.name,
       pv.price,
+      pv.currency,
       pv.description,
       pv.product_id,
       pv.status,
-      pr.product
+      p.product
     FROM product_variants AS pv
     LEFT JOIN LATERAL (
       SELECT TO_JSONB(p.*) AS product
       FROM products AS p
       WHERE p.id = pv.product_id
-    ) AS pr ON true
-    WHERE (pr.product->>'category_id')::INT IN (SELECT id FROM p)`,
+    ) AS p ON true
+    WHERE (p.product->>'category_id')::INT IN (SELECT id FROM p)`,
     [id],
     client
   );

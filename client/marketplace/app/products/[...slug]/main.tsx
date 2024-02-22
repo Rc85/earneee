@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  Avatar,
   Box,
   Button,
   Checkbox,
@@ -8,10 +9,18 @@ import {
   CircularProgress,
   Divider,
   FormControlLabel,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
   Pagination,
   Paper,
   Radio,
   RadioGroup,
+  TextField,
+  ToggleButton,
+  ToggleButtonGroup,
   Typography
 } from '@mui/material';
 import { useState } from 'react';
@@ -24,8 +33,9 @@ import {
 import Link from 'next/link';
 import { ProductSpecificationsInterface } from '../../../../../_shared/types';
 import { PriceFilter } from '../../../components';
-import { mdiCloseBoxMultiple } from '@mdi/js';
+import { mdiCloseBoxMultiple, mdiImageOff, mdiViewGrid, mdiViewList } from '@mdi/js';
 import Icon from '@mdi/react';
+import { grey } from '@mui/material/colors';
 
 interface Props {
   categoryId: number | undefined;
@@ -39,6 +49,8 @@ const Main = ({ categoryId, subcategoryId, groupId }: Props) => {
   const { data } = retrieveCategories({
     parentId: id
   });
+  const [orderBy, setOrderBy] = useState('newest');
+  const [view, setView] = useState('grid');
   const { categories } = data || {};
   const [filters, setFilters] = useState<{
     minPrice: string | undefined;
@@ -54,7 +66,8 @@ const Main = ({ categoryId, subcategoryId, groupId }: Props) => {
   const p = retrieveMarketplaceProducts({
     categoryId: id,
     offset: page * 20,
-    filters
+    filters,
+    orderBy
   });
   const { isLoading } = p;
   const { variants, count = 0 } = p.data || {};
@@ -78,6 +91,12 @@ const Main = ({ categoryId, subcategoryId, groupId }: Props) => {
     setPage(0);
   };
 
+  const handleSortChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setOrderBy(e.target.value);
+
+    setPage(0);
+  };
+
   return (
     <Box sx={{ display: 'flex' }}>
       <Box sx={{ flexGrow: 1, mr: 2 }}>
@@ -87,6 +106,35 @@ const Main = ({ categoryId, subcategoryId, groupId }: Props) => {
           </Box>
         ) : (
           <>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mb: 3 }}>
+              <TextField
+                label='Sort'
+                select
+                SelectProps={{ native: true }}
+                fullWidth={false}
+                sx={{ mb: '0 !important', mr: 2 }}
+                onChange={handleSortChange}
+                value={orderBy}
+              >
+                <option value='newest'>Newest</option>
+                <option value='oldest'>Oldest</option>
+                <option value='name_asc'>Name A-Z</option>
+                <option value='name_desc'>Name Z-A</option>
+                <option value='price_asc'>Lowest Price</option>
+                <option value='price_desc'>Highest Price</option>
+              </TextField>
+
+              <ToggleButtonGroup size='small' exclusive value={view} onChange={(_, value) => setView(value)}>
+                <ToggleButton value='grid'>
+                  <Icon path={mdiViewGrid} size={1} />
+                </ToggleButton>
+
+                <ToggleButton value='list'>
+                  <Icon path={mdiViewList} size={1} />
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Box>
+
             <Box sx={{ display: 'flex', justifyContent: 'center' }}>
               <Pagination
                 count={Math.ceil(count / 30)}
@@ -96,51 +144,100 @@ const Main = ({ categoryId, subcategoryId, groupId }: Props) => {
               />
             </Box>
 
-            <Grid2 container spacing={1}>
-              {variants?.map((variant) => (
-                <Grid2 key={variant.id} xs={12} sm={6} md={4} xl={3}>
-                  <Paper variant='outlined' className='product-card'>
-                    <Box component='a' href={`/product/${variant.product?.id}?variant=${variant.id}`}>
-                      <Box
-                        sx={{
-                          width: '100%',
-                          height: '200px',
-                          borderTopRightRadius: '3px',
-                          borderTopLeftRadius: '3px',
-                          backgroundImage: variant.media?.[0]?.url
-                            ? `url('${variant.media[0].url}')`
-                            : undefined,
-                          backgroundRepeat: 'no-repeat',
-                          backgroundSize: 'contain',
-                          backgroundPosition: 'center'
-                        }}
+            {view === 'grid' ? (
+              <Grid2 container spacing={1}>
+                {variants?.map((variant) => (
+                  <Grid2 key={variant.id} xs={12} sm={6} md={4} xl={3}>
+                    <Paper variant='outlined' className='product-card' sx={{ flexGrow: 1 }}>
+                      <Box component='a' href={`/product/${variant.product?.id}?variant=${variant.id}`}>
+                        <Box
+                          sx={{
+                            width: '100%',
+                            height: '200px',
+                            borderTopRightRadius: '3px',
+                            borderTopLeftRadius: '3px',
+                            backgroundImage: variant.media?.[0]?.url
+                              ? `url('${variant.media[0].url}')`
+                              : undefined,
+                            backgroundRepeat: 'no-repeat',
+                            backgroundSize: 'contain',
+                            backgroundColor: variant.media?.[0]?.url ? 'transparent' : grey[300],
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                          }}
+                        >
+                          {!variant.media?.[0]?.url && <Icon path={mdiImageOff} size={5} color={grey[500]} />}
+                        </Box>
+
+                        <Box sx={{ p: 1 }}>
+                          <Typography sx={{ fontWeight: 'bold' }}>{variant.product?.name}</Typography>
+
+                          <Typography variant='body2' color='GrayText'>
+                            {variant.name}
+                          </Typography>
+                        </Box>
+
+                        {Boolean(variant.product?.excerpt) && (
+                          <Typography
+                            sx={{ p: 1, WebkitLineClamp: '2', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                          >
+                            {variant.product?.excerpt} Lorem ipsum dolor sit amet consectetur adipisicing
+                            elit. Rem atque tempora itaque non, facere aspernatur eligendi recusandae
+                            inventore provident, laboriosam, quis excepturi unde numquam? Doloremque, quas.
+                            Mollitia est obcaecati numquam?
+                          </Typography>
+                        )}
+
+                        <Divider />
+
+                        <Box sx={{ p: 1 }}>
+                          <Typography sx={{ textAlign: 'right' }}>
+                            {Intl.NumberFormat('en-US', {
+                              style: 'currency',
+                              currency: 'CAD',
+                              currencyDisplay: 'narrowSymbol'
+                            }).format(variant.price)}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Paper>
+                  </Grid2>
+                ))}
+              </Grid2>
+            ) : (
+              <List disablePadding>
+                {variants?.map((variant) => (
+                  <ListItem key={variant.id} disableGutters divider>
+                    <ListItemButton sx={{ alignItems: 'flex-start' }}>
+                      <ListItemIcon sx={{ mr: 1 }}>
+                        <Avatar
+                          src={variant.media?.[0]?.url || '/broken.jpg'}
+                          variant='rounded'
+                          alt={variant.name}
+                          sx={{ width: 100, height: 100, backgroundColor: grey[300] }}
+                        >
+                          <Icon path={mdiImageOff} size={1} color={grey[500]} />
+                        </Avatar>
+                      </ListItemIcon>
+
+                      <ListItemText
+                        primary={`${variant.product?.name} - ${variant.name}`}
+                        secondary={variant.product?.excerpt}
                       />
+                    </ListItemButton>
 
-                      <Box sx={{ p: 1 }}>
-                        <Typography sx={{ fontWeight: 'bold' }}>{variant.product?.name}</Typography>
-
-                        <Typography variant='body2' color='GrayText'>
-                          {variant.name}
-                        </Typography>
-                      </Box>
-
-                      <Divider />
-
-                      <Box sx={{ p: 1 }}>
-                        <Typography sx={{ textAlign: 'right' }}>
-                          {' '}
-                          {Intl.NumberFormat('en-US', {
-                            style: 'currency',
-                            currency: 'CAD',
-                            currencyDisplay: 'narrowSymbol'
-                          }).format(variant.price)}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </Paper>
-                </Grid2>
-              ))}
-            </Grid2>
+                    <Typography variant='h6' sx={{ mb: 0 }}>
+                      {Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: 'CAD',
+                        currencyDisplay: 'narrowSymbol'
+                      }).format(variant.price)}
+                    </Typography>
+                  </ListItem>
+                ))}
+              </List>
+            )}
 
             <Box sx={{ display: 'flex', justifyContent: 'center' }}>
               <Pagination
