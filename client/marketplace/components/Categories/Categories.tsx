@@ -1,15 +1,6 @@
 'use client';
 
-import {
-  Box,
-  CircularProgress,
-  IconButton,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText
-} from '@mui/material';
+import { Box, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 import { useState } from 'react';
 import { CategoriesInterface } from '../../../../_shared/types';
 import { useRouter } from 'next/navigation';
@@ -66,122 +57,105 @@ const Categories = ({ onClick }: Props) => {
         flexShrink: 0
       }}
     >
-      {status === 'Loading' ? (
-        <CircularProgress sx={{ mt: 3 }} />
-      ) : (
-        <>
-          <List
-            disablePadding
-            sx={{
-              width: '100%',
-              position: 'absolute',
-              left: selectedCategories.length > 0 ? '-100%' : 0,
-              transition: '0.15s ease-in-out'
-            }}
-          >
-            <ListItem disableGutters divider sx={{ width: '100%' }} onClick={() => handleOnClick('/')}>
-              <ListItemButton sx={{ flexShrink: 1 }}>Main</ListItemButton>
-            </ListItem>
+      <List
+        disablePadding
+        sx={{
+          width: '100%',
+          position: 'absolute',
+          left: selectedCategories.length > 0 ? '-100%' : 0,
+          transition: '0.15s ease-in-out'
+        }}
+      >
+        <ListItem disableGutters divider sx={{ width: '100%' }} onClick={() => handleOnClick('/')}>
+          <ListItemButton sx={{ flexShrink: 1 }}>Main</ListItemButton>
+        </ListItem>
 
-            {categories?.map((category) => (
-              <ListItem key={category.id} disableGutters divider sx={{ width: '100%', pr: 1 }}>
-                <ListItemButton
-                  sx={{ flexShrink: 1 }}
-                  onClick={() => handleOnClick(`/products/${category.id}`)}
-                >
-                  {category.name}
-                </ListItemButton>
+        {categories?.map((category) => (
+          <ListItem key={category.id} disableGutters divider sx={{ width: '100%', pr: 1 }}>
+            <ListItemButton sx={{ flexShrink: 1 }} onClick={() => handleOnClick(`/products/${category.id}`)}>
+              {category.name}
+            </ListItemButton>
 
-                {category.subcategories && category.subcategories.length > 0 && (
-                  <IconButton
-                    size='small'
-                    sx={{ flexShrink: 1 }}
-                    onClick={() => handleCategoryClick(category)}
-                  >
-                    <Icon path={mdiChevronRight} size={1} />
-                  </IconButton>
-                )}
-              </ListItem>
-            ))}
-          </List>
+            {category.subcategories && category.subcategories.length > 0 && (
+              <IconButton size='small' sx={{ flexShrink: 1 }} onClick={() => handleCategoryClick(category)}>
+                <Icon path={mdiChevronRight} size={1} />
+              </IconButton>
+            )}
+          </ListItem>
+        ))}
+      </List>
 
-          <List
-            disablePadding
-            sx={{
-              width: '100%',
-              position: 'absolute',
-              left: selectedCategories.length > 1 ? '-100%' : selectedCategories.length === 1 ? 0 : '100%',
-              transition: '0.15s ease-in-out'
-            }}
-          >
-            <ListItem disableGutters divider sx={{ width: '100%' }}>
-              <ListItemButton onClick={handleBackClick}>
-                <ListItemIcon>
-                  <Icon path={mdiChevronLeft} size={1} />
-                </ListItemIcon>
+      <List
+        disablePadding
+        sx={{
+          width: '100%',
+          position: 'absolute',
+          left: selectedCategories.length > 1 ? '-100%' : selectedCategories.length === 1 ? 0 : '100%',
+          transition: '0.15s ease-in-out'
+        }}
+      >
+        <ListItem disableGutters divider sx={{ width: '100%' }}>
+          <ListItemButton onClick={handleBackClick}>
+            <ListItemIcon>
+              <Icon path={mdiChevronLeft} size={1} />
+            </ListItemIcon>
 
-                <ListItemText primary='Back' />
-              </ListItemButton>
-            </ListItem>
+            <ListItemText primary='Back' />
+          </ListItemButton>
+        </ListItem>
 
-            {categories?.[0]?.subcategories?.map((category) => (
-              <ListItem key={category.id} disableGutters divider sx={{ width: '100%', pr: 1 }}>
-                <ListItemButton
-                  sx={{ flexShrink: 1 }}
-                  onClick={() => handleOnClick(`/products/${selectedCategories[0]?.id}/${category.id}`)}
-                >
-                  {category.name}
-                </ListItemButton>
+        {selectedCategories[0]?.subcategories?.map((category) => (
+          <ListItem key={category.id} disableGutters divider sx={{ width: '100%', pr: 1 }}>
+            <ListItemButton
+              sx={{ flexShrink: 1 }}
+              onClick={() => handleOnClick(`/products/${selectedCategories[0]?.id}/${category.id}`)}
+            >
+              {category.name}
+            </ListItemButton>
 
-                {category.subcategories && category.subcategories.length > 0 && (
-                  <IconButton
-                    size='small'
-                    sx={{ flexShrink: 1 }}
-                    onClick={() => handleCategoryClick(category)}
-                  >
-                    <Icon path={mdiChevronRight} size={1} />
-                  </IconButton>
-                )}
-              </ListItem>
-            ))}
-          </List>
+            {category.subcategories && category.subcategories.length > 0 && (
+              <IconButton size='small' sx={{ flexShrink: 1 }} onClick={() => handleCategoryClick(category)}>
+                <Icon path={mdiChevronRight} size={1} />
+              </IconButton>
+            )}
+          </ListItem>
+        ))}
+      </List>
 
-          <List
-            disablePadding
-            sx={{
-              width: '100%',
-              position: 'absolute',
-              left: selectedCategories.length === 2 ? 0 : '100%',
-              transition: '0.15s ease-in-out'
-            }}
-          >
-            <ListItem disableGutters divider sx={{ width: '100%' }}>
-              <ListItemButton onClick={handleBackClick}>
-                <ListItemIcon>
-                  <Icon path={mdiChevronLeft} size={1} />
-                </ListItemIcon>
+      <List
+        disablePadding
+        sx={{
+          width: '100%',
+          position: 'absolute',
+          left: selectedCategories.length === 2 ? 0 : '100%',
+          transition: '0.15s ease-in-out'
+        }}
+      >
+        <ListItem disableGutters divider sx={{ width: '100%' }}>
+          <ListItemButton onClick={handleBackClick}>
+            <ListItemIcon>
+              <Icon path={mdiChevronLeft} size={1} />
+            </ListItemIcon>
 
-                <ListItemText primary='Back' />
-              </ListItemButton>
-            </ListItem>
+            <ListItemText primary='Back' />
+          </ListItemButton>
+        </ListItem>
 
-            {categories?.[0]?.subcategories?.[0]?.subcategories?.map((category) => (
-              <ListItem key={category.id} disableGutters divider sx={{ width: '100%' }}>
-                <ListItemButton
-                  sx={{ flexShrink: 1 }}
-                  onClick={() =>
-                    handleOnClick(
-                      `/products/${selectedCategories[0]?.id}/${selectedCategories[1]?.id}/${category.id}`
-                    )
-                  }
-                >
-                  {category.name}
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
-        </>
-      )}
+        {selectedCategories[0]?.subcategories?.[0]?.subcategories?.map((category) => (
+          <ListItem key={category.id} disableGutters divider sx={{ width: '100%' }}>
+            <ListItemButton
+              sx={{ flexShrink: 1 }}
+              onClick={() =>
+                handleOnClick(
+                  `/products/${selectedCategories[0]?.id}/${selectedCategories[1]?.id}/${category.id}`
+                )
+              }
+            >
+              {category.name}
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
     </Box>
   );
 };

@@ -10,7 +10,7 @@ export const sortProductSpecifications = async (req: Request, resp: Response, ne
       const ordinance = parseInt(index) + 1;
       const specification = specifications[index];
 
-      await database.update('product_specifications', ['ordinance'], {
+      await database.update('specifications', ['ordinance'], {
         where: 'id = $2',
         params: [ordinance, specification.id],
         client

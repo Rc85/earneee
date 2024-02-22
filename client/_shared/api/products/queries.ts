@@ -16,7 +16,7 @@ export const retrieveProducts = (options?: { productId?: string; offset?: number
     queryFn: async () => {
       const { data } = await axios({
         method: 'get',
-        url: '/api/v1/product/retrieve',
+        url: '/api/v1/product',
         params: options,
         withCredentials: true
       });
@@ -32,7 +32,7 @@ export const retrieveProductBrands = (options?: { brandId: string; offset?: numb
     queryFn: async () => {
       const { data } = await axios({
         method: 'get',
-        url: '/api/v1/product/brand/retrieve',
+        url: '/api/v1/product/brand',
         params: options,
         withCredentials: true
       });
@@ -46,6 +46,7 @@ export const retrieveProductVariants = (options?: {
   variantId?: string;
   featured?: boolean;
   type?: 'new' | 'popular';
+  productId?: string;
   categoryId?: number;
   subcategoryId?: number;
   groupId?: number;
@@ -56,6 +57,7 @@ export const retrieveProductVariants = (options?: {
       options?.variantId,
       options?.featured,
       options?.type,
+      options?.productId,
       options?.categoryId,
       options?.subcategoryId,
       options?.groupId
@@ -63,7 +65,7 @@ export const retrieveProductVariants = (options?: {
     queryFn: async () => {
       const { data } = await axios({
         method: 'get',
-        url: '/api/v1/product/variant/retrieve',
+        url: '/api/v1/product/variant',
         params: options,
         withCredentials: true
       });
@@ -79,7 +81,7 @@ export const retrieveProductOptions = (options?: { variantId?: string }) => {
     queryFn: async () => {
       const { data } = await axios({
         method: 'get',
-        url: '/api/v1/product/option/retrieve',
+        url: '/api/v1/product/option',
         params: options,
         withCredentials: true
       });
@@ -89,13 +91,18 @@ export const retrieveProductOptions = (options?: { variantId?: string }) => {
   });
 };
 
-export const retrieveProductSpecifications = (options?: { variantId?: string }) => {
+export const retrieveProductSpecifications = (options?: {
+  variantId?: string;
+  categoryId?: number;
+  enabled: boolean;
+}) => {
   return useQuery<{ specifications: ProductSpecificationsInterface[] }>({
-    queryKey: ['specifications', options?.variantId],
+    enabled: options?.enabled,
+    queryKey: ['specifications', options?.variantId, options?.categoryId],
     queryFn: async () => {
       const { data } = await axios({
         method: 'get',
-        url: '/api/v1/product/specification/retrieve',
+        url: '/api/v1/product/specification',
         params: options,
         withCredentials: true
       });
@@ -111,7 +118,7 @@ export const retrieveProductMedia = (options?: { variantId?: string }) => {
     queryFn: async () => {
       const { data } = await axios({
         method: 'get',
-        url: '/api/v1/product/media/retrieve',
+        url: '/api/v1/product/media',
         params: options,
         withCredentials: true
       });
@@ -121,13 +128,23 @@ export const retrieveProductMedia = (options?: { variantId?: string }) => {
   });
 };
 
-export const retrieveMarketplaceProducts = (options?: { categoryId?: number; offset?: number }) => {
+export const retrieveMarketplaceProducts = (options?: {
+  categoryId?: number;
+  offset?: number;
+  filters: {
+    minPrice: string | undefined;
+    maxPrice: string | undefined;
+    specifications: {
+      [key: string]: ProductSpecificationsInterface;
+    };
+  };
+}) => {
   return useQuery<{ variants: ProductVariantsInterface[]; count: number }>({
-    queryKey: ['marketplace products', options?.categoryId, options?.offset],
+    queryKey: ['marketplace products', options?.categoryId, options?.offset, options?.filters],
     queryFn: async () => {
       const { data } = await axios({
         method: 'get',
-        url: '/api/v1/auth/marketplace/product/retrieve',
+        url: '/api/v1/auth/marketplace/product',
         params: options,
         withCredentials: true
       });
@@ -143,7 +160,7 @@ export const retrieveProductUrls = (options?: { variantId?: string }) => {
     queryFn: async () => {
       const { data } = await axios({
         method: 'get',
-        url: '/api/v1/product/url/retrieve',
+        url: '/api/v1/product/url',
         params: options,
         withCredentials: true
       });

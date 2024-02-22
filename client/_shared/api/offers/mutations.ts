@@ -12,7 +12,7 @@ export const useCreateOffer = (onSuccess?: (data: any) => void, onError?: (err: 
     mutationFn: (options: OffersInterface) =>
       axios({
         method: 'post',
-        url: '/api/v1/auth/admin/offer/create',
+        url: '/api/v1/auth/admin/offer',
         withCredentials: true,
         data: options
       }),
@@ -40,7 +40,7 @@ export const useDeleteOffer = (onSuccess?: (data: any) => void, onError?: (err: 
     mutationFn: (offerId: string) =>
       axios({
         method: 'delete',
-        url: '/api/v1/auth/admin/offer/delete',
+        url: '/api/v1/auth/admin/offer',
         withCredentials: true,
         params: { offerId }
       }),
@@ -68,7 +68,7 @@ export const useSortOffers = (onSuccess?: (data: any) => void, onError?: (err: a
     mutationFn: (options: { offers: OffersInterface[] }) =>
       axios({
         method: 'put',
-        url: '/api/v1/auth/admin/offer/sort',
+        url: '/api/v1/auth/admin/offer',
         withCredentials: true,
         data: options
       }),

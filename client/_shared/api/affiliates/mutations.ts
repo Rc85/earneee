@@ -12,7 +12,7 @@ export const useAddAffiliate = (onSuccess?: (data: any) => void, onError?: (err:
     mutationFn: (options: AffiliatesInterface) =>
       axios({
         method: 'post',
-        url: '/api/v1/auth/admin/affiliate/add',
+        url: '/api/v1/auth/admin/affiliate',
         withCredentials: true,
         data: options
       }),
@@ -40,7 +40,7 @@ export const useDeleteAffiliate = (onSuccess?: (data: any) => void, onError?: (e
     mutationFn: (options: { affiliateId: string; deleteAllProducts?: boolean }) =>
       axios({
         method: 'delete',
-        url: '/api/v1/auth/admin/affiliate/delete',
+        url: '/api/v1/auth/admin/affiliate',
         withCredentials: true,
         params: options
       }),

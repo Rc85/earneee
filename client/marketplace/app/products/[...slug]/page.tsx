@@ -19,10 +19,10 @@ const CategoryContainer = async ({ params: { slug } }: Props) => {
   let group: CategoriesInterface | undefined = undefined;
 
   if (groupId) {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/category/retrieve?groupId=${groupId}`,
-      { next: { revalidate: 300 }, credentials: 'include' }
-    );
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/category?groupId=${groupId}`, {
+      next: { revalidate: 300 },
+      credentials: 'include'
+    });
     const data = await res.json();
     const categories = data.categories;
 
@@ -31,7 +31,7 @@ const CategoryContainer = async ({ params: { slug } }: Props) => {
 
   if (subcategoryId) {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/category/retrieve?subcategoryId=${subcategoryId}`,
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/category?subcategoryId=${subcategoryId}`,
       { next: { revalidate: 300 }, credentials: 'include' }
     );
     const data = await res.json();
@@ -42,7 +42,7 @@ const CategoryContainer = async ({ params: { slug } }: Props) => {
 
   if (categoryId) {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/category/retrieve?categoryId=${categoryId}`,
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/category?categoryId=${categoryId}`,
       { next: { revalidate: 300 }, credentials: 'include' }
     );
     const data = await res.json();

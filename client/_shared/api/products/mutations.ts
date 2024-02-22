@@ -20,7 +20,7 @@ export const useCreateProductBrand = (onSuccess?: (data: any) => void, onError?:
     mutationFn: (options: ProductBrandsInterface) =>
       axios({
         method: 'post',
-        url: '/api/v1/auth/admin/brand/create',
+        url: '/api/v1/auth/admin/brand',
         withCredentials: true,
         data: options
       }),
@@ -48,7 +48,7 @@ export const useDeleteProductBrand = (onSuccess?: (data: any) => void, onError?:
     mutationFn: (brandId: string) =>
       axios({
         method: 'delete',
-        url: '/api/v1/auth/admin/brand/delete',
+        url: '/api/v1/auth/admin/brand',
         withCredentials: true,
         params: { brandId }
       }),
@@ -76,7 +76,7 @@ export const useCreateProduct = (onSuccess?: (data: any) => void, onError?: (err
     mutationFn: (options: ProductsInterface) =>
       axios({
         method: 'post',
-        url: '/api/v1/auth/admin/product/create',
+        url: '/api/v1/auth/admin/product',
         withCredentials: true,
         data: options
       }),
@@ -104,7 +104,7 @@ export const useDeleteProduct = (onSuccess?: (data: any) => void, onError?: (err
     mutationFn: (productId: string) =>
       axios({
         method: 'delete',
-        url: '/api/v1/auth/admin/product/delete',
+        url: '/api/v1/auth/admin/product',
         withCredentials: true,
         params: { productId }
       }),
@@ -132,7 +132,7 @@ export const useCreateProductVariant = (onSuccess?: (data: any) => void, onError
     mutationFn: (options: ProductVariantsInterface) =>
       axios({
         method: 'post',
-        url: '/api/v1/auth/admin/product/variant/create',
+        url: '/api/v1/auth/admin/product/variant',
         withCredentials: true,
         data: options
       }),
@@ -160,7 +160,7 @@ export const useSortProductVariants = (onSuccess?: (data: any) => void, onError?
     mutationFn: (options: { variants: ProductVariantsInterface[] }) =>
       axios({
         method: 'put',
-        url: '/api/v1/auth/admin/product/variant/sort',
+        url: '/api/v1/auth/admin/product/variant',
         withCredentials: true,
         data: options
       }),
@@ -188,7 +188,7 @@ export const useDeleteProductVariant = (onSuccess?: (data: any) => void, onError
     mutationFn: (variantId: string) =>
       axios({
         method: 'delete',
-        url: '/api/v1/auth/admin/product/variant/delete',
+        url: '/api/v1/auth/admin/product/variant',
         withCredentials: true,
         params: { variantId }
       }),
@@ -216,7 +216,7 @@ export const useDeleteProductOption = (onSuccess?: (data: any) => void, onError?
     mutationFn: (optionId: string) =>
       axios({
         method: 'delete',
-        url: '/api/v1/auth/admin/product/option/delete',
+        url: '/api/v1/auth/admin/product/option',
         withCredentials: true,
         params: { optionId }
       }),
@@ -244,7 +244,7 @@ export const useCreateProductOption = (onSuccess?: (data: any) => void, onError?
     mutationFn: (options: ProductOptionsInterface) =>
       axios({
         method: 'post',
-        url: '/api/v1/auth/admin/product/option/create',
+        url: '/api/v1/auth/admin/product/option',
         withCredentials: true,
         data: options
       }),
@@ -275,7 +275,7 @@ export const useCreateProductSpecification = (
     mutationFn: (options: ProductSpecificationsInterface) =>
       axios({
         method: 'post',
-        url: '/api/v1/auth/admin/product/specification/create',
+        url: '/api/v1/auth/admin/product/specification',
         withCredentials: true,
         data: options
       }),
@@ -306,7 +306,7 @@ export const useDeleteProductSpecification = (
     mutationFn: (specificationId: string) =>
       axios({
         method: 'delete',
-        url: '/api/v1/auth/admin/product/specification/delete',
+        url: '/api/v1/auth/admin/product/specification',
         withCredentials: true,
         params: { specificationId }
       }),
@@ -337,7 +337,7 @@ export const useSortProductSpecifications = (
     mutationFn: (options: { specifications: ProductSpecificationsInterface[] }) =>
       axios({
         method: 'put',
-        url: '/api/v1/auth/admin/product/specification/sort',
+        url: '/api/v1/auth/admin/product/specification',
         withCredentials: true,
         data: options
       }),
@@ -421,7 +421,7 @@ export const useSortProductMedia = (onSuccess?: (data: any) => void, onError?: (
     mutationFn: (options: { media: ProductMediaInterface[] }) =>
       axios({
         method: 'put',
-        url: '/api/v1/auth/admin/product/media/sort',
+        url: '/api/v1/auth/admin/product/media',
         withCredentials: true,
         data: options
       }),
@@ -449,7 +449,7 @@ export const useUpdateProductMedia = (onSuccess?: (data: any) => void, onError?:
     mutationFn: (options: ProductMediaInterface) =>
       axios({
         method: 'put',
-        url: '/api/v1/auth/admin/product/media/update',
+        url: '/api/v1/auth/admin/product/media',
         withCredentials: true,
         data: options
       }),
@@ -477,7 +477,7 @@ export const useCreateProductUrl = (onSuccess?: (data: any) => void, onError?: (
     mutationFn: (options: ProductUrlsInterface) =>
       axios({
         method: 'post',
-        url: '/api/v1/auth/admin/product/url/create',
+        url: '/api/v1/auth/admin/product/url',
         withCredentials: true,
         data: options
       }),
@@ -505,7 +505,7 @@ export const useDeleteProductMedia = (onSuccess?: (data: any) => void, onError?:
     mutationFn: (mediaId: string) =>
       axios({
         method: 'delete',
-        url: '/api/v1/auth/admin/product/media/delete',
+        url: '/api/v1/auth/admin/product/media',
         withCredentials: true,
         params: { mediaId }
       }),
@@ -533,7 +533,7 @@ export const useDeleteProductUrl = (onSuccess?: (data: any) => void, onError?: (
     mutationFn: (urlId: string) =>
       axios({
         method: 'delete',
-        url: '/api/v1/auth/admin/product/url/delete',
+        url: '/api/v1/auth/admin/product/url',
         withCredentials: true,
         params: { urlId }
       }),

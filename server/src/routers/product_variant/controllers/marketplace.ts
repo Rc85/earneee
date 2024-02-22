@@ -1,59 +1,114 @@
 import { NextFunction, Request, Response } from 'express';
 import { database } from '../../../database';
+import { ProductSpecificationsInterface } from '../../../../../_shared/types';
 
 export const retrieveMarketplaceProducts = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
   const { groupId, subcategoryId, categoryId } = req.query;
   const id = groupId || subcategoryId || categoryId;
   const offset = req.query.offset?.toString() || '0';
+  const params: any = [id];
 
-  const variants = await database.query(
-    `WITH RECURSIVE
-    p AS (
-      SELECT
-        id,
-        name,
-        parent_id
-      FROM categories
-      WHERE id = $1
-      UNION ALL
-      SELECT
-        c.id,
-        c.name,
-        c.parent_id
-      FROM categories AS c
-      JOIN p ON p.id = c.parent_id
-    ),
-    pr AS (
-      SELECT
-        pr.id,
-        pr.name,
-        pr.type,
-        pr.category_id
-      FROM products AS pr
-    )
+  let filters: {
+    minPrice: string | undefined;
+    maxPrice: string | undefined;
+    specifications: {
+      [key: string]: ProductSpecificationsInterface;
+    };
+  } = { minPrice: undefined, maxPrice: undefined, specifications: {} };
 
+  if (req.query.filters) {
+    filters = JSON.parse(JSON.stringify(req.query.filters));
+  }
+
+  if (filters.minPrice) {
+    params.push(filters.minPrice);
+  }
+
+  if (filters.maxPrice) {
+    params.push(filters.maxPrice);
+  }
+
+  if (filters.specifications && Object.keys(filters.specifications).length) {
+    const specificationIds = [];
+
+    for (const key in filters.specifications) {
+      specificationIds.push(filters.specifications[key].id);
+    }
+
+    params.push(specificationIds);
+  }
+
+  console.log(params);
+
+  const statement = `WITH RECURSIVE
+  p AS (
     SELECT
-      pv.id,
-      pv.name,
-      pv.price,
-      pv.currency,
-      pv.description,
-      pv.product_id,
-      pv.status,
-      pr.product
-    FROM product_variants AS pv
-    LEFT JOIN LATERAL (
-      SELECT TO_JSONB(pr.*) AS product
-      FROM pr
-      WHERE pr.id = pv.product_id
-    ) AS pr ON true
-    WHERE (pr.product->>'category_id')::INT IN (SELECT id FROM p)
-    OFFSET ${offset}
-    LIMIT 20`,
-    [id],
-    client
-  );
+      id,
+      name,
+      parent_id
+    FROM categories
+    WHERE id = $1
+    UNION ALL
+    SELECT
+      c.id,
+      c.name,
+      c.parent_id
+    FROM categories AS c
+    JOIN p ON p.id = c.parent_id
+  ),
+  s AS (
+    SELECT
+      s.id,
+	  ps.variant_id
+    FROM specifications AS s
+    LEFT JOIN product_specifications AS ps
+    ON ps.specification_id = s.id
+  ),
+  pr AS (
+    SELECT
+      pr.id,
+      pr.name,
+      pr.type,
+      pr.category_id
+    FROM products AS pr
+  )
+
+  SELECT
+    DISTINCT ON (pv.id)
+    pv.id,
+    pv.name,
+    pv.price,
+    pv.currency,
+    pv.description,
+    pv.product_id,
+    pv.status,
+    pr.product
+  FROM product_variants AS pv
+  LEFT JOIN LATERAL (
+    SELECT TO_JSONB(pr.*) AS product
+    FROM pr
+    WHERE pr.id = pv.product_id
+  ) AS pr ON true
+  LEFT JOIN LATERAL (
+    SELECT JSONB_AGG(s.id) AS specifications
+    FROM s
+    WHERE s.variant_id = pv.id
+  ) AS s ON true
+  WHERE (pr.product->>'category_id')::INT IN (SELECT id FROM p)
+  ${filters.minPrice ? `AND pv.price >= $2` : ''}
+  ${filters.maxPrice ? `AND pv.price <= ${!filters.minPrice ? '$2' : '$3'}` : ''}
+  ${
+    filters.specifications && Object.keys(filters.specifications).length
+      ? `AND s.specifications ?& $${params.length}`
+      : ''
+  }
+  OFFSET ${offset}
+  LIMIT 20`;
+
+  console.log(statement);
+
+  const variants = await database.query(statement, params, client);
 
   const count = await database.query(
     `WITH RECURSIVE

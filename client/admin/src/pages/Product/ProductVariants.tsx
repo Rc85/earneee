@@ -17,13 +17,17 @@ import {
 } from '@dnd-kit/sortable';
 import VariantRow from './VariantRow';
 import { retrieveProductVariants, useSortProductVariants } from '../../../../_shared/api';
+import { useParams } from 'react-router-dom';
 
 const ProductVariants = () => {
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
-  const { isLoading, data } = retrieveProductVariants();
+  const params = useParams();
+  const { productId } = params;
+  console.log(productId);
+  const { isLoading, data } = retrieveProductVariants({ productId });
   const { variants } = data || {};
   const sortVariants = useSortProductVariants();
 

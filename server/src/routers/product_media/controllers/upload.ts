@@ -40,7 +40,7 @@ export const uploadProductMedia = async (req: Request, resp: Response, next: Nex
       { client }
     );
   } else if (file) {
-    const fileChunks = file.originalname.split('.');
+    const fileChunks = file.originalname.split('./retrieve');
     const extension = fileChunks[fileChunks.length - 1];
     const id = generateKey(1);
     const key = `product_media/${variantId}/${id}.${extension}`;

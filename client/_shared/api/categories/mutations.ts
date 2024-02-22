@@ -12,7 +12,7 @@ export const useCreateCategory = (onSuccess?: (data: any) => void, onError?: (er
     mutationFn: (options: CategoriesInterface) =>
       axios({
         method: 'post',
-        url: '/api/v1/auth/admin/category/create',
+        url: '/api/v1/auth/admin/category',
         withCredentials: true,
         data: options
       }),
@@ -40,7 +40,7 @@ export const useSortCategories = (onSuccess?: (data: any) => void, onError?: (er
     mutationFn: (options: { categories: CategoriesInterface[] }) =>
       axios({
         method: 'put',
-        url: '/api/v1/auth/admin/category/sort',
+        url: '/api/v1/auth/admin/category',
         withCredentials: true,
         data: options
       }),
@@ -68,7 +68,7 @@ export const useDeleteCategory = (onSuccess?: (data: any) => void, onError?: (er
     mutationFn: (categoryId: number) =>
       axios({
         method: 'delete',
-        url: '/api/v1/auth/admin/category/delete',
+        url: '/api/v1/auth/admin/category',
         withCredentials: true,
         params: { categoryId }
       }),

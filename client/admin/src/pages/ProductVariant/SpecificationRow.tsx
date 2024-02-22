@@ -55,7 +55,7 @@ const SpecificationRow = ({ specification }: Props) => {
       </IconButton>
 
       <ListItemButton onClick={() => setStatus('Edit')} sx={{ mr: 1 }}>
-        <ListItemText primary={specification.name} />
+        <ListItemText primary={specification.name} secondary={specification.value} />
       </ListItemButton>
 
       {status === 'Deleting' ? (

@@ -12,7 +12,7 @@ export const retrieveCategories = (options?: {
     queryFn: async () => {
       const { data } = await axios({
         method: 'get',
-        url: '/api/v1/category/retrieve',
+        url: '/api/v1/category',
         params: options,
         withCredentials: true
       });

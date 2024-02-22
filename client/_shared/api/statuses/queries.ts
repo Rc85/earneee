@@ -7,7 +7,7 @@ export const retrieveStatuses = (options?: { name: string }) => {
     queryKey: ['statuses', options?.name],
     queryFn: async () => {
       const { data } = await axios({
-        url: '/api/v1/statuses/retrieve',
+        url: '/api/v1/statuses',
         method: 'get',
         params: { name: options?.name },
         withCredentials: true

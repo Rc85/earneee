@@ -8,7 +8,7 @@ export const retrieveOffers = (options?: { offerId?: string; status?: string }) 
     queryFn: async () => {
       const { data } = await axios({
         method: 'get',
-        url: '/api/v1/offer/retrieve',
+        url: '/api/v1/offer',
         params: options,
         withCredentials: true
       });

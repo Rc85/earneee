@@ -8,7 +8,7 @@ export const retrieveUserProfiles = (options?: { userId: string; offset?: number
     queryFn: async () => {
       const { data } = await axios({
         method: 'get',
-        url: '/api/v1/auth/admin/profile/retrieve',
+        url: '/api/v1/auth/admin/profile',
         params: options,
         withCredentials: true
       });
@@ -24,7 +24,7 @@ export const retrieveUsers = (options?: { offset?: number; limit?: number }) => 
     queryFn: async () => {
       const { data } = await axios({
         method: 'get',
-        url: '/api/v1/auth/admin/user/retrieve',
+        url: '/api/v1/auth/admin/user',
         params: options,
         withCredentials: true
       });

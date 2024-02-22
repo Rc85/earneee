@@ -2,18 +2,30 @@
 
 import {
   Box,
+  Button,
   Checkbox,
+  Chip,
   CircularProgress,
   Divider,
   FormControlLabel,
   Pagination,
   Paper,
+  Radio,
+  RadioGroup,
   Typography
 } from '@mui/material';
 import { useState } from 'react';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
-import { retrieveCategories, retrieveMarketplaceProducts } from '../../../../_shared/api';
+import {
+  retrieveCategories,
+  retrieveMarketplaceProducts,
+  retrieveProductSpecifications
+} from '../../../../_shared/api';
 import Link from 'next/link';
+import { ProductSpecificationsInterface } from '../../../../../_shared/types';
+import { PriceFilter } from '../../../components';
+import { mdiCloseBoxMultiple } from '@mdi/js';
+import Icon from '@mdi/react';
 
 interface Props {
   categoryId: number | undefined;
@@ -28,15 +40,43 @@ const Main = ({ categoryId, subcategoryId, groupId }: Props) => {
     parentId: id
   });
   const { categories } = data || {};
+  const [filters, setFilters] = useState<{
+    minPrice: string | undefined;
+    maxPrice: string | undefined;
+    specifications: {
+      [key: string]: ProductSpecificationsInterface;
+    };
+  }>({
+    minPrice: undefined,
+    maxPrice: undefined,
+    specifications: {}
+  });
   const p = retrieveMarketplaceProducts({
     categoryId: id,
-    offset: page * 20
+    offset: page * 20,
+    filters
   });
   const { isLoading } = p;
   const { variants, count = 0 } = p.data || {};
-  //const [appliedFilters, setAppliedFilters] = useState({});
   const categoryTypes = categories?.filter((category) => category.type) || [];
   const categoryTypeLabels = [...new Set(categoryTypes.map((category) => category.type))];
+  const s = retrieveProductSpecifications({ categoryId: groupId, enabled: Boolean(groupId) });
+  const { specifications = [] } = s.data || {};
+  const specificationLabels = [...new Set(specifications.map((specification) => specification.name))];
+
+  const handleSpecificationChange = (specification: ProductSpecificationsInterface) => {
+    const specifications = { ...filters.specifications };
+
+    if (specifications[specification.name]?.id === specification.id) {
+      delete specifications[specification.name];
+    } else {
+      specifications[specification.name] = specification;
+    }
+
+    setFilters({ ...filters, specifications });
+
+    setPage(0);
+  };
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -135,23 +175,111 @@ const Main = ({ categoryId, subcategoryId, groupId }: Props) => {
           </Box>
         )}
 
-        {categoryTypeLabels.length > 0 &&
-          categoryTypeLabels.map((label) => (
-            <Box key={label} sx={{ mb: 2 }}>
-              <Typography sx={{ fontWeight: 500 }}>{label}</Typography>
+        {categoryTypeLabels.map((label) => (
+          <Box key={label} sx={{ mb: 2 }}>
+            <Typography sx={{ fontWeight: 500 }}>{label}</Typography>
 
-              {categoryTypes
-                .filter((category) => category.type === label)
-                .map((category) => (
-                  <FormControlLabel
-                    key={category.id}
-                    label={category.name}
-                    control={<Checkbox color='info' />}
-                    sx={{ display: 'block' }}
-                  />
-                ))}
-            </Box>
-          ))}
+            {categoryTypes
+              .filter((category) => category.type === label)
+              .map((category) => (
+                <FormControlLabel
+                  key={category.id}
+                  label={category.name}
+                  control={<Checkbox color='info' />}
+                  sx={{ display: 'block' }}
+                />
+              ))}
+          </Box>
+        ))}
+
+        {Boolean(filters.minPrice) && (
+          <Chip
+            label={`Min Price: $${filters.minPrice}`}
+            onDelete={() => setFilters({ ...filters, minPrice: undefined })}
+            sx={{ mb: 2, mr: 1 }}
+          />
+        )}
+
+        {Boolean(filters.maxPrice) && (
+          <Chip
+            label={`Max Price: $${filters.maxPrice}`}
+            onDelete={() => setFilters({ ...filters, maxPrice: undefined })}
+            sx={{ mb: 2, mr: 1 }}
+          />
+        )}
+
+        {/* filters.specifications.map((specification) => (
+          <Chip
+            key={specification.id}
+            label={specification.value}
+            onDelete={() => handleSpecificationChange(specification)}
+            sx={{ mb: 2, mr: 1 }}
+          />
+        )) */}
+
+        {Object.keys(filters.specifications).length > 0 && (
+          <>
+            {Object.keys(filters.specifications).map((key) => (
+              <Chip
+                key={key}
+                label={`${filters.specifications[key].name}: ${filters.specifications[key].value}`}
+                onDelete={() => handleSpecificationChange(filters.specifications[key])}
+                sx={{ mb: 2, mr: 1 }}
+              />
+            ))}
+
+            <Button
+              variant='contained'
+              color='error'
+              fullWidth
+              startIcon={<Icon path={mdiCloseBoxMultiple} size={1} />}
+              onClick={() => setFilters({ ...filters, specifications: {} })}
+              sx={{ mb: 2 }}
+            >
+              Clear All
+            </Button>
+          </>
+        )}
+
+        <PriceFilter apply={(minPrice, maxPrice) => setFilters({ ...filters, minPrice, maxPrice })} />
+
+        {specificationLabels.length > 0 && (
+          <Box sx={{ overflowY: 'auto', maxHeight: '750px' }}>
+            {specificationLabels.map((label) => {
+              const filteredSpecifications = specifications.filter(
+                (specification) => specification.name === label
+              );
+              const specs = [];
+
+              for (const specification of filteredSpecifications) {
+                const index = specs.findIndex((spec) => spec.id === specification.id);
+
+                if (index < 0) {
+                  specs.push(specification);
+                }
+              }
+
+              if (specs.length > 0) {
+                return (
+                  <RadioGroup key={label} sx={{ mb: 3 }} value={filters.specifications[label]?.id || ''}>
+                    <Typography sx={{ fontWeight: 500 }}>{label}</Typography>
+
+                    {specs.map((specification) => (
+                      <FormControlLabel
+                        key={specification.id}
+                        label={specification.value}
+                        value={specification.id}
+                        control={<Radio color='info' />}
+                        sx={{ display: 'block' }}
+                        onChange={() => handleSpecificationChange(specification)}
+                      />
+                    ))}
+                  </RadioGroup>
+                );
+              }
+            })}
+          </Box>
+        )}
       </Box>
     </Box>
   );

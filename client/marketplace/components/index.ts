@@ -7,6 +7,18 @@ import Gallery from './Gallery/Gallery';
 import Offer from './Offer/Offer';
 import Footer from './Footer/Footer';
 import Subscribe from './Subscribe/Subscribe';
+import PriceFilter from './PriceFilter/PriceFilter';
 
 export { ThemeRegistry } from './ThemeRegistry/ThemeRegistry';
-export { FeaturedProducts, Categories, ProductShowcase, Footer, Gallery, Offer, Search, Subscribe, TopBar };
+export {
+  FeaturedProducts,
+  Categories,
+  PriceFilter,
+  ProductShowcase,
+  Footer,
+  Gallery,
+  Offer,
+  Search,
+  Subscribe,
+  TopBar
+};

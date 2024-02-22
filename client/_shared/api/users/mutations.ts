@@ -130,8 +130,8 @@ export const useChangePassword = (onSuccess?: (data: any) => void, onError?: (er
       admin?: boolean;
     }) =>
       axios({
-        method: 'post',
-        url: options.admin ? '/api/v1/auth/admin/password/change' : '/api/v1/auth/user/password/change',
+        method: 'put',
+        url: options.admin ? '/api/v1/auth/admin/password' : '/api/v1/auth/user/password',
         withCredentials: true,
         data: {
           password: options.password,

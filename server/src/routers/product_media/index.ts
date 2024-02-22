@@ -15,15 +15,10 @@ router.post(
   response
 );
 
-router.get(
-  '/api/v1/product/media/retrieve',
-  dbConnect,
-  middleware(controllers.retrieveProductMedia),
-  response
-);
+router.get('/api/v1/product/media', dbConnect, middleware(controllers.retrieveProductMedia), response);
 
 router.put(
-  '/api/v1/auth/admin/product/media/sort',
+  '/api/v1/auth/admin/product/media',
   dbConnect,
   middleware(controllers.validateSortProductMedia),
   middleware(controllers.sortProductMedia),
@@ -31,7 +26,7 @@ router.put(
 );
 
 router.delete(
-  '/api/v1/auth/admin/product/media/delete',
+  '/api/v1/auth/admin/product/media',
   dbConnect,
   middleware(controllers.deleteProductMedia),
   response
@@ -46,7 +41,7 @@ router.post(
 );
 
 router.put(
-  '/api/v1/auth/admin/product/media/update',
+  '/api/v1/auth/admin/product/media',
   dbConnect,
   middleware(controllers.validateUpdateProductMedia),
   middleware(controllers.updateProductMedia),

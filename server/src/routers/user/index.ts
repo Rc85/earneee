@@ -33,8 +33,8 @@ router.post(/^\/api\/v1\/auth\/(admin|user)$/, middleware(controllers.authentica
 
 router.post(/^\/api\/v1\/auth\/(admin|user)\/logout/, dbConnect, middleware(controllers.logout), response);
 
-router.post(
-  /^\/api\/v1\/auth\/(admin|user)\/password\/change/,
+router.put(
+  /^\/api\/v1\/auth\/(admin|user)\/password/,
   dbConnect,
   middleware(controllers.validateChangePassword),
   middleware(controllers.changePassword),
@@ -42,7 +42,7 @@ router.post(
 );
 
 router.get(
-  /^\/api\/v1\/auth\/(admin|user)\/profile\/retrieve/,
+  /^\/api\/v1\/auth\/(admin|user)\/profile/,
   dbConnect,
   middleware(controllers.retrieveUserProfiles),
   response
@@ -59,7 +59,7 @@ router.post(
   response
 );
 
-router.get('/api/v1/auth/admin/user/retrieve', dbConnect, middleware(controllers.retrieveUsers), response);
+router.get('/api/v1/auth/admin/user', dbConnect, middleware(controllers.retrieveUsers), response);
 
 router.post(
   '/api/v1/subscribe',

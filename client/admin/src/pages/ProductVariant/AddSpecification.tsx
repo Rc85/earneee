@@ -1,9 +1,7 @@
 import { TextField } from '@mui/material';
-import { Modal, RichTextEditor } from '../../../../_shared/components';
+import { Modal } from '../../../../_shared/components';
 import { ProductSpecificationsInterface } from '../../../../../_shared/types';
-import { useEditor } from '@tiptap/react';
-import { useState } from 'react';
-import { editorExtensions } from '../../../../_shared/constants';
+import { FormEvent, useState } from 'react';
 import { generateKey } from '../../../../../_shared/utils';
 import { useSnackbar } from 'notistack';
 import { useParams } from 'react-router-dom';
@@ -13,8 +11,6 @@ interface Props {
   cancel: () => void;
   specification?: ProductSpecificationsInterface;
 }
-
-const editorStyle = { mb: 1.5 };
 
 const AddSpecification = ({ cancel, specification }: Props) => {
   const params = useParams();
@@ -30,16 +26,6 @@ const AddSpecification = ({ cancel, specification }: Props) => {
       createdAt: new Date().toISOString(),
       updatedAt: null
     }
-  );
-  const editor = useEditor(
-    {
-      content: specification?.value || undefined,
-      extensions: editorExtensions,
-      onUpdate: ({ editor }) => {
-        setForm({ ...form, value: editor.getHTML() });
-      }
-    },
-    [specification]
   );
   const { enqueueSnackbar } = useSnackbar();
 
@@ -61,7 +47,9 @@ const AddSpecification = ({ cancel, specification }: Props) => {
 
   const createProductSpecification = useCreateProductSpecification(handleSuccess, handleError);
 
-  const handleSubmit = () => {
+  const handleSubmit = (e?: FormEvent) => {
+    e?.preventDefault();
+
     setStatus('Loading');
 
     createProductSpecification.mutate(form);
@@ -74,8 +62,8 @@ const AddSpecification = ({ cancel, specification }: Props) => {
       submit={handleSubmit}
       cancel={cancel}
       disableBackdropClick
-      maxWidth='lg'
       loading={status === 'Loading'}
+      component='form'
     >
       <TextField
         label='Name'
@@ -85,7 +73,12 @@ const AddSpecification = ({ cancel, specification }: Props) => {
         value={form.name}
       />
 
-      <RichTextEditor editor={editor} sx={editorStyle} />
+      <TextField
+        label='Value'
+        required
+        onChange={(e) => setForm({ ...form, value: e.target.value })}
+        value={form.value}
+      />
     </Modal>
   );
 };

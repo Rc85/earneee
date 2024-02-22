@@ -4,7 +4,7 @@ exports.shorthands = undefined;
 
 exports.up = (pgm) => {
   pgm.createTable(
-    { name: 'product_specifications', schema: 'public' },
+    { name: 'specifications', schema: 'public' },
     {
       id: {
         type: 'varchar',
@@ -17,13 +17,6 @@ exports.up = (pgm) => {
       value: {
         type: 'varchar',
         notNull: true
-      },
-      variant_id: {
-        type: 'varchar',
-        notNull: true,
-        references: 'product_variants (id)',
-        onUpdate: 'cascade',
-        onDelete: 'cascade'
       },
       ordinance: {
         type: 'int'
@@ -39,12 +32,12 @@ exports.up = (pgm) => {
     },
     {
       constraints: {
-        unique: ['name', 'variant_id']
+        unique: ['name', 'value']
       }
     }
   );
 };
 
 exports.down = (pgm) => {
-  pgm.dropTable({ name: 'product_specifications', schema: 'public' });
+  pgm.dropTable({ name: 'specifications', schema: 'public' });
 };
