@@ -93,7 +93,6 @@ const Main = ({ categoryId, subcategoryId, groupId }: Props) => {
 
   const handleSortChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setOrderBy(e.target.value);
-
     setPage(0);
   };
 
