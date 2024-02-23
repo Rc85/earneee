@@ -24,8 +24,6 @@ const Carousel = ({ variants }: Props) => {
 
   useEffect(() => {
     if (containerRef.current) {
-      console.log('container loaded');
-
       setContainerLoaded(true);
     }
   }, [containerRef.current]);
@@ -84,6 +82,18 @@ const Carousel = ({ variants }: Props) => {
     router.push(url);
   };
 
+  const handleOnMouseOver = () => {
+    if (document.hasFocus()) {
+      handleWindowOnBlur();
+    }
+  };
+
+  const handleOnMouseLeave = () => {
+    if (document.hasFocus()) {
+      handleWindowOnFocus();
+    }
+  };
+
   return (
     <Box ref={containerRef} sx={{ width: '100%' }}>
       <Box sx={{ display: 'flex' }}>
@@ -112,59 +122,65 @@ const Carousel = ({ variants }: Props) => {
             <Loading />
           ) : (
             <>
-              {variants.map((variant, i) => (
-                <Box
-                  key={variant.id}
-                  onClick={() => handleProductClick(`/product/${variant.product?.id}?variant=${variant.id}`)}
-                  sx={{
-                    cursor: 'pointer',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'flex-end',
-                    backgroundColor: 'white',
-                    backgroundImage: variant.media?.[0]?.url ? `url("${variant.media[0].url}")` : undefined,
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'center',
-                    backgroundSize:
-                      containerRef.current?.clientWidth - (variant.media?.[0]?.width || 0) <= 200
-                        ? 'cover'
-                        : 'contain',
-                    width: '100%',
-                    height: '500px',
-                    position: 'absolute',
-                    transition: '0.15s linear',
-                    top: 0,
-                    right: `${imageIndex * 100 - i * 100}%`
-                  }}
-                >
+              {variants.map((variant, i) => {
+                return (
                   <Box
+                    key={variant.id}
+                    onMouseOver={handleOnMouseOver}
+                    onMouseLeave={handleOnMouseLeave}
+                    onClick={() =>
+                      handleProductClick(`/product/${variant.product?.id}?variant=${variant.id}`)
+                    }
                     sx={{
-                      backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                      width: '100%',
+                      cursor: 'pointer',
                       display: 'flex',
-                      alignItems: 'flex-start',
-                      p: 2
+                      flexDirection: 'column',
+                      justifyContent: 'flex-end',
+                      backgroundColor: 'white',
+                      backgroundImage: variant.media?.[0]?.url ? `url("${variant.media[0].url}")` : undefined,
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'center',
+                      backgroundSize:
+                        (variant.media?.[0]?.width || 0) / (variant.media?.[0]?.height || 0) > 1.5
+                          ? 'cover'
+                          : 'contain',
+                      width: '100%',
+                      height: '500px',
+                      position: 'absolute',
+                      transition: '0.15s linear',
+                      top: 0,
+                      right: `${imageIndex * 100 - i * 100}%`
                     }}
                   >
-                    <Box sx={{ flexGrow: 1 }}>
-                      <Typography variant='h5' color='white'>
-                        {variant.product?.name} - {variant.name}
-                      </Typography>
+                    <Box
+                      sx={{
+                        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        p: 2
+                      }}
+                    >
+                      <Box sx={{ flexGrow: 1 }}>
+                        <Typography variant='h5' color='white'>
+                          {variant.product?.name} - {variant.name}
+                        </Typography>
 
-                      <Typography color='white'>{variant.product?.excerpt}</Typography>
-                    </Box>
+                        <Typography color='white'>{variant.product?.excerpt}</Typography>
+                      </Box>
 
-                    <Box>
-                      <Typography sx={{ ml: 1 }} color='white' variant='h4'>
-                        {Intl.NumberFormat('en-US', {
-                          style: 'currency',
-                          currency: variant.currency
-                        }).format(variant.price)}
-                      </Typography>
+                      <Box>
+                        <Typography sx={{ ml: 1 }} color='white' variant='h4'>
+                          {Intl.NumberFormat('en-US', {
+                            style: 'currency',
+                            currency: variant.currency
+                          }).format(variant.price)}
+                        </Typography>
+                      </Box>
                     </Box>
                   </Box>
-                </Box>
-              ))}
+                );
+              })}
             </>
           )}
         </Box>

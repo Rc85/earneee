@@ -2,7 +2,8 @@
 
 import { useRouter } from 'next/navigation';
 import { ProductVariantsInterface } from '../../../../_shared/types';
-import { Paper, Box, Typography, Divider, Button } from '@mui/material';
+import { Paper, Box, Typography, Divider } from '@mui/material';
+import { useEffect, useRef, useState } from 'react';
 
 interface Props {
   variant: ProductVariantsInterface;
@@ -11,6 +12,14 @@ interface Props {
 
 const Product = ({ variant, isLast }: Props) => {
   const router = useRouter();
+  const [loaded, setLoaded] = useState(false);
+  const containerRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      setLoaded(true);
+    }
+  }, [containerRef.current]);
 
   const handleProductClick = (url: string) => {
     router.push(url);
@@ -32,11 +41,15 @@ const Product = ({ variant, isLast }: Props) => {
     >
       <Box onClick={() => handleProductClick(`/product/${variant.product?.id}?variant=${variant.id}`)}>
         <Box
+          ref={containerRef}
           sx={{
             borderTopRightRadius: 4,
             borderTopLeftRadius: 4,
-            backgroundImage: variant.media?.[0]?.url ? `url('${variant.media[0].url}')` : undefined,
-            backgroundSize: 'cover',
+            backgroundImage: loaded && variant.media?.[0]?.url ? `url('${variant.media[0].url}')` : undefined,
+            backgroundSize:
+              (variant.media?.[0]?.width || 0) / (variant.media?.[0]?.height || 0) > 1.5
+                ? 'cover'
+                : 'contain',
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'center top',
             height: '200px'
@@ -50,22 +63,24 @@ const Product = ({ variant, isLast }: Props) => {
 
           <Typography>{variant.name}</Typography>
 
-          <Divider sx={{ my: 1 }} />
+          {Boolean(variant.product?.excerpt) && (
+            <>
+              <Divider sx={{ my: 1 }} />
 
-          <Typography>{variant.product?.excerpt}</Typography>
+              <Typography>{variant.product?.excerpt}</Typography>
+            </>
+          )}
         </Box>
 
         <Divider />
 
-        <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ p: 2, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
           <Typography variant='h6' sx={{ mb: 0 }}>
             {Intl.NumberFormat('en-US', {
               style: 'currency',
               currency: variant.currency
             }).format(variant.price)}
           </Typography>
-
-          <Button>Buy Now</Button>
         </Box>
       </Box>
     </Paper>
