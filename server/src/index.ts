@@ -2,40 +2,58 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-import express, { Request, Response } from 'express';
+import express from 'express';
 import { createServer } from 'http';
 import * as routers from './routers';
 import cors from 'cors';
 import * as middlewares from './middlewares';
+import path from 'path';
 
 const app = express();
 const server = createServer(app);
 
 app.use(
   express.json({
-    limit: '96mb',
-    verify: function (req: Request, resp: Response, buffer: Buffer) {
+    limit: '96mb'
+    /* verify: function (req: Request, resp: Response, buffer: Buffer) {
       let url = req.originalUrl;
 
       if (url.startsWith('/webhooks/stripe')) {
         req.rawBody = buffer.toString();
       }
-    }
+    } */
   })
 );
 
 app.use(
   cors({
-    origin: process.env.ENV === 'development' || ['https://oobooroo.com'],
+    origin: process.env.ENV === 'development' || [process.env.SITE_URL!],
     credentials: true
   })
 );
 
-app.use(/^\/api\/v1\/auth\/(marketplace|user)/, middlewares.marketplaceSession);
+app.use(/.*/, (req, resp, next) => {
+  if (process.env.ENV === 'development') {
+    // we don't need to check for subdomain in development
 
-app.use(/^\/api\/v1\/auth\/user\/(?!login).*/, middlewares.authenticateMiddleware('user'));
+    return next();
+  }
 
-app.use(/^\/api\/v1\/auth\/admin.*/, middlewares.adminSession, middlewares.authenticateMiddleware('admin'));
+  const hostChunks = req.headers.host?.split('.') || [];
+  const subdomain = hostChunks[0];
+
+  if (['admin', 'staging-admin'].includes(subdomain)) {
+    return resp.sendFile(path.resolve('web/admin/index.html'));
+  } else if (subdomain === 'api') {
+    return next();
+  }
+});
+
+app.use(/^\/v1\/auth\/(marketplace|user)/, middlewares.marketplaceSession);
+
+app.use(/^\/v1\/auth\/user\/(?!login).*/, middlewares.authenticateMiddleware('user'));
+
+app.use(/^\/v1\/auth\/admin.*/, middlewares.adminSession, middlewares.authenticateMiddleware('admin'));
 
 app.use(routers.userRouter);
 app.use(routers.affiliateRouter);

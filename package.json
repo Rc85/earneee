@@ -1,5 +1,5 @@
 {
-  "name": "oobooroo",
+  "name": "earneee",
   "version": "1.0.0",
   "scripts": {
     "supabase": "supabase",
@@ -14,13 +14,11 @@
     "@dnd-kit/sortable": "^8.0.0",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
-    "@hcaptcha/react-hcaptcha": "^1.9.2",
     "@mdi/js": "^7.3.67",
     "@mdi/react": "^1.6.1",
     "@mui/lab": "^5.0.0-alpha.155",
     "@mui/material": "^5.14.19",
     "@reduxjs/toolkit": "^2.0.1",
-    "@supabase/supabase-js": "^2.39.0",
     "@tanstack/react-query": "^5.18.1",
     "@tiptap/extension-color": "^2.1.13",
     "@tiptap/extension-gapcursor": "^2.1.13",
@@ -59,8 +57,7 @@
     "react-redux": "^9.0.0",
     "react-router-dom": "^6.20.1",
     "redis": "^4.6.12",
-    "sharp": "^0.33.2",
-    "supabase": "^1.115.4"
+    "sharp": "^0.33.2"
   },
   "devDependencies": {
     "@tanstack/react-query-devtools": "^5.18.1",

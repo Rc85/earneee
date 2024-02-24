@@ -9,8 +9,8 @@ import Recaptcha from 'react-google-recaptcha';
 
 const ResetPassword = () => {
   const recaptchaRef = useRef<Recaptcha>(null);
-  const [status, setStatus] = useState('');
-  const [email, setEmail] = useState('');
+  const [status, _setStatus] = useState('');
+  const [_email, setEmail] = useState('');
 
   return (
     <Container maxWidth='sm'>

@@ -5,17 +5,17 @@ import * as controllers from './controllers';
 const router = Router();
 
 router.post(
-  '/api/v1/auth/admin/category',
+  '/v1/auth/admin/category',
   dbConnect,
   middleware(controllers.validateCreateCategory),
   middleware(controllers.createCategory),
   response
 );
 
-router.get('/api/v1/category', dbConnect, middleware(controllers.retrieveCategories), response);
+router.get('/v1/category', dbConnect, middleware(controllers.retrieveCategories), response);
 
-router.put('/api/v1/auth/admin/category', dbConnect, middleware(controllers.sortCategories), response);
+router.put('/v1/auth/admin/category', dbConnect, middleware(controllers.sortCategories), response);
 
-router.delete('/api/v1/auth/admin/category', dbConnect, middleware(controllers.deleteCategory), response);
+router.delete('/v1/auth/admin/category', dbConnect, middleware(controllers.deleteCategory), response);
 
 export default router;

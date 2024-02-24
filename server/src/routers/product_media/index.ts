@@ -8,17 +8,17 @@ const upload = multer({ storage: multer.memoryStorage() });
 const router = Router();
 
 router.post(
-  '/api/v1/auth/admin/product/media/add',
+  '/v1/auth/admin/product/media/add',
   dbConnect,
   middleware(controllers.validateAddProductMedia),
   middleware(controllers.addProductMedia),
   response
 );
 
-router.get('/api/v1/product/media', dbConnect, middleware(controllers.retrieveProductMedia), response);
+router.get('/v1/product/media', dbConnect, middleware(controllers.retrieveProductMedia), response);
 
 router.put(
-  '/api/v1/auth/admin/product/media',
+  '/v1/auth/admin/product/media',
   dbConnect,
   middleware(controllers.validateSortProductMedia),
   middleware(controllers.sortProductMedia),
@@ -26,14 +26,14 @@ router.put(
 );
 
 router.delete(
-  '/api/v1/auth/admin/product/media',
+  '/v1/auth/admin/product/media',
   dbConnect,
   middleware(controllers.deleteProductMedia),
   response
 );
 
 router.post(
-  '/api/v1/auth/admin/product/media/upload',
+  '/v1/auth/admin/product/media/upload',
   dbConnect,
   upload.any(),
   middleware(controllers.uploadProductMedia),
@@ -41,7 +41,7 @@ router.post(
 );
 
 router.put(
-  '/api/v1/auth/admin/product/media',
+  '/v1/auth/admin/product/media',
   dbConnect,
   middleware(controllers.validateUpdateProductMedia),
   middleware(controllers.updateProductMedia),

@@ -3,13 +3,13 @@ import { FeaturedProducts, ProductShowcase, Offer, Subscribe } from '../componen
 import { OffersInterface, StatusesInterface } from '../../../_shared/types';
 
 const Index = async () => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/offer?status=active`, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/v1/offer?status=active`, {
     next: { revalidate: 300, tags: ['offers'] },
     credentials: 'include'
   });
   const data = await res.json();
   const offers: OffersInterface[] = data.offers;
-  const status = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/statuses`);
+  const status = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/v1/statuses`);
   const statusData = await status.json();
   const statuses: StatusesInterface[] = statusData.statuses;
   const emailSubscriptionStatus = statuses.find((status) => status.name === 'email_subscription');

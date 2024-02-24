@@ -41,10 +41,12 @@ const Footer = () => {
               </Typography>
             )}
 
-            <Typography color='white'>About</Typography>
+            <Typography color='white'>
+              <Link href='/about'>About</Link>
+            </Typography>
           </Box>
 
-          <Box
+          {/* <Box
             sx={{
               display: 'flex',
               flexDirection: 'column',
@@ -56,16 +58,16 @@ const Footer = () => {
               Partnership
             </Typography>
 
-            {/* <Typography color='white' sx={{ mb: 2 }}>
+            <Typography color='white' sx={{ mb: 2 }}>
               Sell on {brandName}
             </Typography>
 
             <Typography color='white' sx={{ mb: 2 }}>
               Advertise on {brandName}
-            </Typography> */}
+            </Typography> 
 
             <Typography color='white'>Affiliate With Us</Typography>
-          </Box>
+          </Box>*/}
 
           <Box
             sx={{
@@ -88,7 +90,7 @@ const Footer = () => {
             </Typography>
           </Box>
 
-          <Box sx={{ p: 2, width: '40%', display: 'flex', justifyContent: 'flex-end' }}>
+          <Box sx={{ p: 2, width: '60%', display: 'flex', justifyContent: 'flex-end' }}>
             <Box>
               <Typography color='white' sx={{ fontWeight: 500, mb: 2 }}>
                 Follow Us

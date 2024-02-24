@@ -5,7 +5,7 @@ import * as controllers from './controllers';
 const router = Router();
 
 router.post(
-  '/api/v1/user',
+  '/v1/user',
   middleware(recaptcha),
   dbConnect,
   middleware(controllers.validateCreateUser),
@@ -14,7 +14,7 @@ router.post(
 );
 
 router.put(
-  '/api/v1/user',
+  '/v1/user',
   dbConnect,
   middleware(controllers.validateUpdateUser),
   middleware(controllers.updateUser),
@@ -22,19 +22,19 @@ router.put(
 );
 
 router.post(
-  /^\/api\/v1\/auth\/(admin|user)\/login/,
+  /^\/v1\/auth\/(admin|user)\/login/,
   dbConnect,
   middleware(controllers.validateLogin),
   middleware(controllers.login),
   response
 );
 
-router.post(/^\/api\/v1\/auth\/(admin|user)$/, middleware(controllers.authenticate), response);
+router.post(/^\/v1\/auth\/(admin|user)$/, middleware(controllers.authenticate), response);
 
-router.post(/^\/api\/v1\/auth\/(admin|user)\/logout/, dbConnect, middleware(controllers.logout), response);
+router.post(/^\/v1\/auth\/(admin|user)\/logout/, dbConnect, middleware(controllers.logout), response);
 
 router.put(
-  /^\/api\/v1\/auth\/(admin|user)\/password/,
+  /^\/v1\/auth\/(admin|user)\/password/,
   dbConnect,
   middleware(controllers.validateChangePassword),
   middleware(controllers.changePassword),
@@ -42,16 +42,16 @@ router.put(
 );
 
 router.get(
-  /^\/api\/v1\/auth\/(admin|user)\/profile/,
+  /^\/v1\/auth\/(admin|user)\/profile/,
   dbConnect,
   middleware(controllers.retrieveUserProfiles),
   response
 );
 
-router.post('/api/v1/password/reset', dbConnect, middleware(controllers.resetPassword), response);
+router.post('/v1/password/reset', dbConnect, middleware(controllers.resetPassword), response);
 
 router.post(
-  '/api/v1/contact',
+  '/v1/contact',
   dbConnect,
   middleware(recaptcha),
   middleware(controllers.validateContact),
@@ -59,10 +59,10 @@ router.post(
   response
 );
 
-router.get('/api/v1/auth/admin/user', dbConnect, middleware(controllers.retrieveUsers), response);
+router.get('/v1/auth/admin/user', dbConnect, middleware(controllers.retrieveUsers), response);
 
 router.post(
-  '/api/v1/subscribe',
+  '/v1/subscribe',
   dbConnect,
   middleware(recaptcha),
   middleware(controllers.validateSubscribe),

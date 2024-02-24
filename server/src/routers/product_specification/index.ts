@@ -5,7 +5,7 @@ import * as controllers from './controllers';
 const router = Router();
 
 router.post(
-  '/api/v1/auth/admin/product/specification',
+  '/v1/auth/admin/product/specification',
   dbConnect,
   middleware(controllers.validateCreateProductSpecification),
   middleware(controllers.createProductSpecification),
@@ -13,21 +13,21 @@ router.post(
 );
 
 router.get(
-  '/api/v1/product/specification',
+  '/v1/product/specification',
   dbConnect,
   middleware(controllers.retrieveProductSpecification),
   response
 );
 
 router.delete(
-  '/api/v1/auth/admin/product/specification',
+  '/v1/auth/admin/product/specification',
   dbConnect,
   middleware(controllers.deleteProductSpecification),
   response
 );
 
 router.put(
-  '/api/v1/auth/admin/product/specification',
+  '/v1/auth/admin/product/specification',
   dbConnect,
   middleware(controllers.validateSortProductSpecifications),
   middleware(controllers.sortProductSpecifications),

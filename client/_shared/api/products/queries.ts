@@ -16,7 +16,7 @@ export const retrieveProducts = (options?: { productId?: string; offset?: number
     queryFn: async () => {
       const { data } = await axios({
         method: 'get',
-        url: '/api/v1/product',
+        url: '/v1/product',
         params: options,
         withCredentials: true
       });
@@ -32,7 +32,7 @@ export const retrieveProductBrands = (options?: { brandId: string; offset?: numb
     queryFn: async () => {
       const { data } = await axios({
         method: 'get',
-        url: '/api/v1/product/brand',
+        url: '/v1/product/brand',
         params: options,
         withCredentials: true
       });
@@ -65,7 +65,7 @@ export const retrieveProductVariants = (options?: {
     queryFn: async () => {
       const { data } = await axios({
         method: 'get',
-        url: '/api/v1/product/variant',
+        url: '/v1/product/variant',
         params: options,
         withCredentials: true
       });
@@ -81,7 +81,7 @@ export const retrieveProductOptions = (options?: { variantId?: string }) => {
     queryFn: async () => {
       const { data } = await axios({
         method: 'get',
-        url: '/api/v1/product/option',
+        url: '/v1/product/option',
         params: options,
         withCredentials: true
       });
@@ -102,7 +102,7 @@ export const retrieveProductSpecifications = (options?: {
     queryFn: async () => {
       const { data } = await axios({
         method: 'get',
-        url: '/api/v1/product/specification',
+        url: '/v1/product/specification',
         params: options,
         withCredentials: true
       });
@@ -118,7 +118,7 @@ export const retrieveProductMedia = (options?: { variantId?: string }) => {
     queryFn: async () => {
       const { data } = await axios({
         method: 'get',
-        url: '/api/v1/product/media',
+        url: '/v1/product/media',
         params: options,
         withCredentials: true
       });
@@ -151,7 +151,7 @@ export const retrieveMarketplaceProducts = (options?: {
     queryFn: async () => {
       const { data } = await axios({
         method: 'get',
-        url: '/api/v1/auth/marketplace/product',
+        url: '/v1/auth/marketplace/product',
         params: options,
         withCredentials: true
       });
@@ -167,7 +167,7 @@ export const retrieveProductUrls = (options?: { variantId?: string }) => {
     queryFn: async () => {
       const { data } = await axios({
         method: 'get',
-        url: '/api/v1/product/url',
+        url: '/v1/product/url',
         params: options,
         withCredentials: true
       });
@@ -183,7 +183,7 @@ export const searchProducts = (options: { value: string | null; category?: strin
     queryFn: async () => {
       const { data } = await axios({
         method: 'get',
-        url: '/api/v1/product/search',
+        url: '/v1/product/search',
         params: options,
         withCredentials: true
       });

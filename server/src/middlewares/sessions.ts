@@ -16,11 +16,11 @@ if (!redisClient.isReady) {
 }
 
 export const guestSession = session({
-  name: 'oobooroo.sid',
+  name: `${process.env.APP_NAME}.sid`,
   secret: process.env.GUEST_SESSION_KEY || 'default-guest-session-key',
   cookie: {
     maxAge: 3600000,
-    domain: process.env.ENV === 'development' ? undefined : 'oobooroo.com',
+    domain: process.env.ENV === 'development' ? undefined : process.env.DOMAIN_NAME!,
     path: '/'
   },
   rolling: true,
@@ -30,11 +30,11 @@ export const guestSession = session({
 });
 
 export const marketplaceSession = session({
-  name: 'oobooroo.marketplace.sid',
+  name: `${process.env.APP_NAME}.marketplace.sid`,
   secret: process.env.MARKETPLACE_SESSION_KEY || 'default-marketplace-session-key',
   cookie: {
     maxAge: 3600000,
-    domain: process.env.ENV === 'development' ? undefined : 'oobooroo.com',
+    domain: process.env.ENV === 'development' ? undefined : process.env.DOMAIN_NAME!,
     path: '/'
   },
   rolling: true,
@@ -44,11 +44,11 @@ export const marketplaceSession = session({
 });
 
 export const adminSession = session({
-  name: 'oobooroo.admin.sid',
+  name: `${process.env.APP_NAME}.admin.sid`,
   secret: process.env.ADMIN_SESSION_KEY || 'default-admin-session-key',
   cookie: {
     maxAge: 3600000,
-    domain: process.env.ENV === 'development' ? undefined : 'oobooroo.com',
+    domain: process.env.ENV === 'development' ? undefined : process.env.DOMAIN_NAME!,
     path: '/'
   },
   rolling: true,

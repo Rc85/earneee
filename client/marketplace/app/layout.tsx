@@ -24,7 +24,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     (async () => {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/statuses`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/v1/statuses`);
       const data = await response.json();
       const statuses: StatusesInterface[] = data.statuses;
       const marketplaceStatus = statuses.find((status) => status.name === 'marketplace');

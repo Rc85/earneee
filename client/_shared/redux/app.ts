@@ -1,9 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import { User } from '@supabase/supabase-js';
+import { UsersInterface } from '../../../_shared/types';
 
 interface AppState {
-  user: User | null;
+  user: UsersInterface | null;
   isLoading: boolean;
   country: string;
 }

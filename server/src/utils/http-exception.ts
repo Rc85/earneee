@@ -2,7 +2,7 @@ export class HttpException extends Error {
   status: number;
   message: string;
   details: any;
-  origin: string = 'oobooroo-error';
+  origin: string = `${process.env.APP_NAME}-error`;
 
   constructor(err?: any, status: any = 500, message: any = 'An error occurred') {
     super();

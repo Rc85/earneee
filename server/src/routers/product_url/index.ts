@@ -5,20 +5,15 @@ import * as controllers from './controllers';
 const router = Router();
 
 router.post(
-  '/api/v1/auth/admin/product/url',
+  '/v1/auth/admin/product/url',
   dbConnect,
   middleware(controllers.validateCreateProductUrl),
   middleware(controllers.createProductUrl),
   response
 );
 
-router.get('/api/v1/product/url', dbConnect, middleware(controllers.retrieveProductUrl), response);
+router.get('/v1/product/url', dbConnect, middleware(controllers.retrieveProductUrl), response);
 
-router.delete(
-  '/api/v1/auth/admin/product/url',
-  dbConnect,
-  middleware(controllers.deleteProductUrl),
-  response
-);
+router.delete('/v1/auth/admin/product/url', dbConnect, middleware(controllers.deleteProductUrl), response);
 
 export default router;

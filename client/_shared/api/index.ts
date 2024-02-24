@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 import { setIsLoading } from '../redux/app';
 
 export const authenticate = (application: 'admin' | 'marketplace') => {
-  const url = application === 'marketplace' ? '/api/v1/auth/user' : '/api/v1/auth/admin';
+  const url = application === 'marketplace' ? '/v1/auth/user' : '/v1/auth/admin';
 
   return useQuery<{ user: { id: string; email: string; isAdmin: boolean; country: string } }>({
     queryKey: ['authenticate', application],
@@ -21,7 +21,7 @@ export const useContact = (onSuccess?: (response: any) => void, onError?: (err: 
 
   return useMutation({
     mutationFn: async (form: { name: string; email: string; message: string; key: string }) =>
-      axios.post('/api/v1/contact', form),
+      axios.post('/v1/contact', form),
     onSuccess: (response) => {
       dispatch(setIsLoading(false));
 
@@ -37,7 +37,7 @@ export const useSubscribe = (onSuccess?: (response: any) => void, onError?: (err
   const dispatch = useDispatch();
 
   return useMutation({
-    mutationFn: async (form: { email: string; key: string }) => axios.post('/api/v1/subscribe', form),
+    mutationFn: async (form: { email: string; key: string }) => axios.post('/v1/subscribe', form),
     onSuccess: (response) => {
       dispatch(setIsLoading(false));
 

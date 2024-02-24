@@ -8,7 +8,7 @@ export const retrieveAffiliates = (options?: { affiliateId?: string; offset?: nu
     queryFn: async () => {
       const { data } = await axios({
         method: 'get',
-        url: '/api/v1/affiliate',
+        url: '/v1/affiliate',
         params: options,
         withCredentials: true
       });

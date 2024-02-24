@@ -4,20 +4,20 @@ import * as controllers from './controllers';
 
 const router = Router();
 
-router.get('/api/v1/product', dbConnect, middleware(controllers.retrieveProducts), response);
+router.get('/v1/product', dbConnect, middleware(controllers.retrieveProducts), response);
 
 router.post(
-  '/api/v1/auth/admin/product',
+  '/v1/auth/admin/product',
   dbConnect,
   middleware(controllers.validateCreateProduct),
   middleware(controllers.createProduct),
   response
 );
 
-router.delete('/api/v1/auth/admin/product', dbConnect, middleware(controllers.deleteProduct), response);
+router.delete('/v1/auth/admin/product', dbConnect, middleware(controllers.deleteProduct), response);
 
 router.get(
-  '/api/v1/product/search',
+  '/v1/product/search',
   dbConnect,
   middleware(controllers.validateSearchProducts),
   middleware(controllers.searchProducts),
