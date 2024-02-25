@@ -20,7 +20,7 @@ export const guestSession = session({
   secret: process.env.GUEST_SESSION_KEY || 'default-guest-session-key',
   cookie: {
     maxAge: 3600000,
-    domain: process.env.ENV === 'development' ? undefined : process.env.DOMAIN_NAME!,
+    domain: process.env.ENV === 'development' ? undefined : `${process.env.APP_NAME}.com`,
     path: '/'
   },
   rolling: true,
@@ -34,7 +34,7 @@ export const marketplaceSession = session({
   secret: process.env.MARKETPLACE_SESSION_KEY || 'default-marketplace-session-key',
   cookie: {
     maxAge: 3600000,
-    domain: process.env.ENV === 'development' ? undefined : process.env.DOMAIN_NAME!,
+    domain: process.env.ENV === 'development' ? undefined : `${process.env.APP_NAME}.com`,
     path: '/'
   },
   rolling: true,
@@ -48,7 +48,7 @@ export const adminSession = session({
   secret: process.env.ADMIN_SESSION_KEY || 'default-admin-session-key',
   cookie: {
     maxAge: 3600000,
-    domain: process.env.ENV === 'development' ? undefined : process.env.DOMAIN_NAME!,
+    domain: process.env.ENV === 'development' ? undefined : `${process.env.APP_NAME}.com`,
     path: '/'
   },
   rolling: true,

@@ -129,7 +129,7 @@ const TopBar = () => {
               </Button>
             </Box>
           ) : (
-            <Box>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
               {loginStatus?.online && (
                 <Link
                   href={`/login?redirect=${pathname}`}

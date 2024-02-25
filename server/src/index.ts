@@ -27,12 +27,39 @@ app.use(
 
 app.use(
   cors({
-    origin: process.env.ENV === 'development' || [process.env.SITE_URL!],
+    origin: process.env.ENV === 'development' || [
+      `https://${process.env.APP_NAME}.com`,
+      `https://api.${process.env.APP_NAME}.com`,
+      `https://admin.${process.env.APP_NAME}.com`,
+      `https://www.${process.env.APP_NAME}.com`
+    ],
     credentials: true
   })
 );
 
-app.use(/.*/, (req, resp, next) => {
+app.use('/assets', (req, resp, next) => {
+  const hostChunks = req.headers.host?.split('.') || [];
+  const subdomain = hostChunks[0];
+
+  if (['admin'].includes(subdomain)) {
+    return express.static(path.resolve('client/admin/dist/assets'))(req, resp, next);
+  }
+
+  return next();
+});
+
+app.use('/favicon.ico', (req, resp, next) => {
+  const hostChunks = req.headers.host?.split('.') || [];
+  const subdomain = hostChunks[0];
+
+  if (!subdomain || ['www'].includes(subdomain)) {
+    return express.static(path.resolve('client/marketplace/favicon.ico'))(req, resp, next);
+  }
+
+  return next();
+});
+
+app.use(/(?!(\/assets|favicon.ico)).*/, (req, resp, next) => {
   if (process.env.ENV === 'development') {
     // we don't need to check for subdomain in development
 
@@ -43,7 +70,7 @@ app.use(/.*/, (req, resp, next) => {
   const subdomain = hostChunks[0];
 
   if (['admin', 'staging-admin'].includes(subdomain)) {
-    return resp.sendFile(path.resolve('web/admin/index.html'));
+    return resp.sendFile(path.resolve('client/admin/dist/index.html'));
   } else if (subdomain === 'api') {
     return next();
   }
@@ -53,7 +80,9 @@ app.use(/^\/v1\/auth\/(marketplace|user)/, middlewares.marketplaceSession);
 
 app.use(/^\/v1\/auth\/user\/(?!login).*/, middlewares.authenticateMiddleware('user'));
 
-app.use(/^\/v1\/auth\/admin.*/, middlewares.adminSession, middlewares.authenticateMiddleware('admin'));
+app.use(/^\/v1\/auth\/admin/, middlewares.adminSession);
+
+app.use(/^\/v1\/auth\/admin\/(?!login).*/, middlewares.authenticateMiddleware('admin'));
 
 app.use(routers.userRouter);
 app.use(routers.affiliateRouter);

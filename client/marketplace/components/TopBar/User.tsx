@@ -9,7 +9,7 @@ import Icon from '@mdi/react';
 import { usePathname } from 'next/navigation';
 
 const User = async () => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/auth/user`, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/v1/auth/user`, {
     credentials: 'include',
     next: { revalidate: 180, tags: ['authenticate'] }
   });
