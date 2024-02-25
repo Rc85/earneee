@@ -41,6 +41,10 @@ export const validateLogin = async (req: Request, resp: Response, next: NextFunc
 
   if (user.length === 0 || user[0].status === 'terminated') {
     return next(new HttpException(400, `Incorrect password`));
+  } else if (user[0].status === 'inactive') {
+    return next(new HttpException(400, `Please activate your account`));
+  } else if (user[0].status === 'suspended') {
+    return next(new HttpException(400, `Your account has been suspended`));
   }
 
   const match = await bcrypt.compare(password, user[0].password);

@@ -14,7 +14,7 @@ import {
 import Search from '../Search/Search';
 import { SnackbarProvider } from 'notistack';
 import Icon from '@mdi/react';
-import { mdiAccountCircle, mdiEmail, mdiLogin, mdiLogoutVariant, mdiMenu } from '@mdi/js';
+import { mdiAccountCircle, mdiAccountPlus, mdiEmail, mdiLogin, mdiLogoutVariant, mdiMenu } from '@mdi/js';
 import { useState } from 'react';
 import Categories from '../Categories/Categories';
 import { brandName } from '../../../_shared/constants';
@@ -111,18 +111,18 @@ const TopBar = () => {
           ) : user ? (
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <IconButton size='small' sx={{ mr: 2 }}>
-                <Icon path={mdiAccountCircle} size={1} color={theme.palette.primary.main} />
+                <Icon path={mdiAccountCircle} size={1} color='black' />
               </IconButton>
 
               <Badge badgeContent={0} color='error' overlap='circular' sx={{ mr: 2 }}>
                 <IconButton size='small'>
-                  <Icon path={mdiEmail} size={1} color={theme.palette.info.main} />
+                  <Icon path={mdiEmail} size={1} color='black' />
                 </IconButton>
               </Badge>
 
               <Button
+                color='inherit'
                 startIcon={<Icon path={mdiLogoutVariant} size={1} />}
-                color='error'
                 onClick={handleLogout}
               >
                 Logout
@@ -133,17 +133,20 @@ const TopBar = () => {
               {loginStatus?.online && (
                 <Link
                   href={`/login?redirect=${pathname}`}
-                  style={{ color: 'black', display: 'flex', alignItems: 'center' }}
+                  style={{
+                    color: 'black',
+                    display: 'flex',
+                    alignItems: 'center',
+                    marginRight: registrationStatus?.online ? '10px' : 0
+                  }}
                 >
                   <Icon path={mdiLogin} size={1} style={{ marginRight: '5px' }} /> Login
                 </Link>
               )}
-              {loginStatus?.online && registrationStatus?.online && (
-                <Typography component='span'> | </Typography>
-              )}
+
               {registrationStatus?.online && (
-                <Link href='/register' style={{ color: 'black' }}>
-                  Create Account
+                <Link href='/register' style={{ color: 'black', display: 'flex', alignItems: 'center' }}>
+                  <Icon path={mdiAccountPlus} size={1} style={{ marginRight: '5px' }} /> Create Account
                 </Link>
               )}
             </Box>

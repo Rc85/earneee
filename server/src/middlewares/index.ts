@@ -65,7 +65,7 @@ export const errorHandler = async (err: HttpException, req: Request, resp: Respo
     await client.release();
   }
 
-  const message = err.origin === 'oobooroo-error' ? err.message : 'An error occurred';
+  const message = err.origin === `${process.env.APP_NAME}-error` ? err.message : 'An error occurred';
 
   return resp.status(err.status).send({ statusText: message });
 };

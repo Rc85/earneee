@@ -30,7 +30,7 @@ const ProductShowcase = async ({ categoryId, subcategoryId, groupId, type }: Pro
   const data = await res.json();
   const variants: ProductVariantsInterface[] = data.variants;
 
-  return (
+  return variants.length > 0 ? (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <Section
         title={type === 'new' ? 'NEW PRODUCTS' : 'POPULAR PRODUCTS'}
@@ -42,7 +42,7 @@ const ProductShowcase = async ({ categoryId, subcategoryId, groupId, type }: Pro
         </Box>
       </Section>
     </HydrationBoundary>
-  );
+  ) : null;
 };
 
 export default ProductShowcase;

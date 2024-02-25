@@ -11,7 +11,7 @@ export const useCreateStatus = (onSuccess?: (resp: any) => void, onError?: (err:
   return useMutation({
     mutationFn: (options: { status: StatusesInterface }) =>
       axios({
-        url: '/v1/statuses/create',
+        url: '/v1/statuses',
         method: 'post',
         data: options,
         withCredentials: true
