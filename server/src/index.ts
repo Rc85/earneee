@@ -96,7 +96,6 @@ app.use(routers.productVariantRouter);
 app.use(routers.productOptionRouter);
 app.use(routers.productSpecificationRouter);
 app.use(routers.productMediaRouter);
-app.use(routers.productUrlRouter);
 app.use(routers.statusRouter);
 
 app.use(middlewares.errorHandler);

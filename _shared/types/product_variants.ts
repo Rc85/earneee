@@ -11,6 +11,8 @@ export interface ProductVariantsInterface {
   productId: string;
   featured: boolean;
   description: string | null;
+  about: string | null;
+  details: string | null;
   ordinance: number;
   status: string;
   createdAt: string;

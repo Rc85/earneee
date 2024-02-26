@@ -1,4 +1,11 @@
-import { mdiDetails, mdiFormatListBulleted, mdiImage, mdiPencil, mdiWeb } from '@mdi/js';
+import {
+  mdiDetails,
+  mdiFormatListBulleted,
+  mdiImage,
+  mdiImageText,
+  mdiInformation,
+  mdiPencil
+} from '@mdi/js';
 import { Icon } from '@mdi/react';
 import {
   Box,
@@ -18,7 +25,8 @@ import EditVariant from './EditVariant';
 import VariantOptions from './VariantOptions';
 import Specifications from './Specifications';
 import { retrieveProductVariants, retrieveProducts } from '../../../../_shared/api';
-import ProductUrls from './ProductUrls';
+import About from './About';
+import Details from './Details';
 
 const ProductVariant = () => {
   const params = useParams();
@@ -53,12 +61,22 @@ const ProductVariant = () => {
           </ListItem>
 
           <ListItem disablePadding disableGutters>
-            <ListItemButton onClick={() => navigate(`/product/${productId}/variant/${variantId}/urls`)}>
+            <ListItemButton onClick={() => navigate(`/product/${productId}/variant/${variantId}/about`)}>
               <ListItemIcon>
-                <Icon path={mdiWeb} size={1} />
+                <Icon path={mdiInformation} size={1} />
               </ListItemIcon>
 
-              <ListItemText primary='URLS' />
+              <ListItemText primary='About' />
+            </ListItemButton>
+          </ListItem>
+
+          <ListItem disablePadding disableGutters>
+            <ListItemButton onClick={() => navigate(`/product/${productId}/variant/${variantId}/details`)}>
+              <ListItemIcon>
+                <Icon path={mdiImageText} size={1} />
+              </ListItemIcon>
+
+              <ListItemText primary='Main Details' />
             </ListItemButton>
           </ListItem>
 
@@ -115,6 +133,7 @@ ProductVariant.Edit = EditVariant;
 ProductVariant.Media = VariantMedia;
 ProductVariant.Options = VariantOptions;
 ProductVariant.Specifications = Specifications;
-ProductVariant.URLS = ProductUrls;
+ProductVariant.About = About;
+ProductVariant.Details = Details;
 
 export default ProductVariant;

@@ -1,11 +1,8 @@
 import { Box, Chip, CircularProgress, TextField, Typography } from '@mui/material';
-import { RichTextEditor } from '../../../../_shared/components';
 import { LoadingButton } from '@mui/lab';
 import { Icon } from '@mdi/react';
 import { mdiArrowUpDropCircle, mdiTrashCan } from '@mdi/js';
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
-import { useEditor } from '@tiptap/react';
-import { editorExtensions } from '../../../../_shared/constants';
 import { useSnackbar } from 'notistack';
 import { CategoriesInterface, ProductsInterface } from '../../../../../_shared/types';
 import { useNavigate } from 'react-router-dom';
@@ -20,8 +17,6 @@ import { generateKey } from '../../../../../_shared/utils';
 interface Props {
   product?: ProductsInterface;
 }
-
-const editorStyle = { mb: 1.5 };
 
 const ProductForm = ({ product }: Props) => {
   const [status, setStatus] = useState('');
@@ -38,16 +33,6 @@ const ProductForm = ({ product }: Props) => {
     createdAt: '',
     updatedAt: ''
   });
-  const editor = useEditor(
-    {
-      content: product?.description || undefined,
-      extensions: editorExtensions,
-      onUpdate: ({ editor }) => {
-        setForm({ ...form, description: editor.getHTML() });
-      }
-    },
-    [product]
-  );
   const { enqueueSnackbar } = useSnackbar();
   const [selectedCategories, setSelectedCategories] = useState<CategoriesInterface[]>([]);
   const navigate = useNavigate();
@@ -232,8 +217,6 @@ const ProductForm = ({ product }: Props) => {
           </option>
         ))}
       </TextField>
-
-      <RichTextEditor editor={editor} sx={editorStyle} />
 
       <LoadingButton
         type='submit'

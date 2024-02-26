@@ -164,10 +164,19 @@ const App = () => {
                       />
 
                       <Route
-                        path='/product/:productId/variant/:variantId/urls'
+                        path='/product/:productId/variant/:variantId/about'
                         element={
                           <AuthenticatedRoute>
-                            <Pages.ProductVariant.URLS />
+                            <Pages.ProductVariant.About />
+                          </AuthenticatedRoute>
+                        }
+                      />
+
+                      <Route
+                        path='/product/:productId/variant/:variantId/details'
+                        element={
+                          <AuthenticatedRoute>
+                            <Pages.ProductVariant.Details />
                           </AuthenticatedRoute>
                         }
                       />

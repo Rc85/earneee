@@ -12,8 +12,6 @@ export const addAffiliate = async (req: Request, resp: Response, next: NextFunct
   let url = null;
   let path = null;
 
-  console.log(logoUrl && /^data:image\/(jpeg|png);base64.*/.test(logoUrl));
-
   if (logoUrl && /^data:image\/(jpeg|png);base64.*/.test(logoUrl)) {
     const base64 = logoUrl.split(',')[1];
     const buffer = Buffer.from(base64, 'base64');

@@ -5,7 +5,6 @@ import {
   ProductMediaInterface,
   ProductOptionsInterface,
   ProductSpecificationsInterface,
-  ProductUrlsInterface,
   ProductVariantsInterface,
   ProductsInterface
 } from '../../../../_shared/types';
@@ -152,22 +151,6 @@ export const retrieveMarketplaceProducts = (options?: {
       const { data } = await axios({
         method: 'get',
         url: '/v1/auth/marketplace/product',
-        params: options,
-        withCredentials: true
-      });
-
-      return data;
-    }
-  });
-};
-
-export const retrieveProductUrls = (options?: { variantId?: string }) => {
-  return useQuery<{ urls: ProductUrlsInterface[] }>({
-    queryKey: ['product url', options?.variantId],
-    queryFn: async () => {
-      const { data } = await axios({
-        method: 'get',
-        url: '/v1/product/url',
         params: options,
         withCredentials: true
       });

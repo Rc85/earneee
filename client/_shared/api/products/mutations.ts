@@ -7,7 +7,6 @@ import {
   ProductMediaInterface,
   ProductOptionsInterface,
   ProductSpecificationsInterface,
-  ProductUrlsInterface,
   ProductVariantsInterface,
   ProductsInterface
 } from '../../../../_shared/types';
@@ -469,34 +468,6 @@ export const useUpdateProductMedia = (onSuccess?: (data: any) => void, onError?:
   });
 };
 
-export const useCreateProductUrl = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
-  const dispatch = useDispatch();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (options: ProductUrlsInterface) =>
-      axios({
-        method: 'post',
-        url: '/v1/auth/admin/product/url',
-        withCredentials: true,
-        data: options
-      }),
-
-    onSuccess: (data) => {
-      dispatch(setIsLoading(false));
-
-      queryClient.invalidateQueries({ queryKey: ['product url'] });
-
-      onSuccess?.(data);
-    },
-    onError: (err) => {
-      dispatch(setIsLoading(false));
-
-      onError?.(err);
-    }
-  });
-};
-
 export const useDeleteProductMedia = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
@@ -514,34 +485,6 @@ export const useDeleteProductMedia = (onSuccess?: (data: any) => void, onError?:
       dispatch(setIsLoading(false));
 
       queryClient.invalidateQueries({ queryKey: ['product media'] });
-
-      onSuccess?.(data);
-    },
-    onError: (err) => {
-      dispatch(setIsLoading(false));
-
-      onError?.(err);
-    }
-  });
-};
-
-export const useDeleteProductUrl = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
-  const dispatch = useDispatch();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (urlId: string) =>
-      axios({
-        method: 'delete',
-        url: '/v1/auth/admin/product/url',
-        withCredentials: true,
-        params: { urlId }
-      }),
-
-    onSuccess: (data) => {
-      dispatch(setIsLoading(false));
-
-      queryClient.invalidateQueries({ queryKey: ['product url'] });
 
       onSuccess?.(data);
     },

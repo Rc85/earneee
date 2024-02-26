@@ -8,11 +8,9 @@ import productVariantRouter from './product_variant';
 import productOptionRouter from './product_option';
 import productSpecificationRouter from './product_specification';
 import productMediaRouter from './product_media';
-import productUrlRouter from './product_url';
 import statusRouter from './statuses';
 
 export {
-  productUrlRouter,
   affiliateRouter,
   productMediaRouter,
   userRouter,

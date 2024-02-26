@@ -135,6 +135,8 @@ export const product = {
         pv.currency,
         pv.featured,
         pv.product_id,
+        pv.about,
+        pv.details,
         pv.status,
         p.product,
         COALESCE(m.media, '[]'::JSONB) AS media,
