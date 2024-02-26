@@ -12,7 +12,9 @@ export const addAffiliate = async (req: Request, resp: Response, next: NextFunct
   let url = null;
   let path = null;
 
-  if (logoUrl && /^data:image\/png;base64.*/.test(logoUrl)) {
+  console.log(logoUrl && /^data:image\/(jpeg|png);base64.*/.test(logoUrl));
+
+  if (logoUrl && /^data:image\/(jpeg|png);base64.*/.test(logoUrl)) {
     const base64 = logoUrl.split(',')[1];
     const buffer = Buffer.from(base64, 'base64');
     const body = await sharp(buffer).withMetadata().resize(500).toBuffer();

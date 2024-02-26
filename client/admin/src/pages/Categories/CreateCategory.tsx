@@ -33,15 +33,17 @@ const CreateCategory = ({ cancel, category }: Props) => {
   const handleSuccess = () => {
     if (category) {
       enqueueSnackbar('Category updated', { variant: 'success' });
-
-      cancel();
     }
+
+    setStatus('');
   };
 
   const handleError = (err: any) => {
     if (err.response.data.statusText) {
       enqueueSnackbar(err.response.data.statusText, { variant: 'error' });
     }
+
+    setStatus('');
   };
 
   const createCategories = useCreateCategory(handleSuccess, handleError);

@@ -54,6 +54,8 @@ app.use('/favicon.ico', (req, resp, next) => {
 
   if (!subdomain || ['www'].includes(subdomain)) {
     return express.static(path.resolve('client/marketplace/favicon.ico'))(req, resp, next);
+  } else if (['admin'].includes(subdomain)) {
+    return express.static(path.resolve('client/admin/dist/favicon.ico'))(req, resp, next);
   }
 
   return next();
