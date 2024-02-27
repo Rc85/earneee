@@ -1,12 +1,12 @@
 'use client';
+
 import {
-  Avatar,
   Box,
   Button,
   Checkbox,
-  Chip,
   Divider,
   FormControlLabel,
+  Link,
   ListItemText,
   Paper,
   Typography
@@ -30,18 +30,40 @@ const Main = ({ product }: Props) => {
   const specifications = selectedVariant?.specifications || [];
   const options = selectedVariant?.options || [];
   const hasSpecifications = Boolean(specifications.length);
-  const isAvailable = selectedVariant?.status === 'available';
-  const mediaLink = selectedVariant?.urls?.[0]?.url;
 
   return (
     <Box sx={{ display: 'flex' }}>
       <Box sx={{ flexGrow: 1 }}>
         <Gallery media={selectedVariant?.media || []} />
 
-        <Divider sx={{ my: 1 }} />
+        {Boolean(selectedVariant?.description) && (
+          <>
+            <Divider sx={{ my: 1 }} />
 
-        {product.description && (
-          <div className='product-description' dangerouslySetInnerHTML={{ __html: product.description }} />
+            <Typography variant='h6'>Description</Typography>
+
+            {selectedVariant?.description && (
+              <div
+                className='product-description'
+                dangerouslySetInnerHTML={{ __html: selectedVariant?.description }}
+              />
+            )}
+          </>
+        )}
+
+        {Boolean(selectedVariant?.details) && (
+          <>
+            <Divider sx={{ my: 1 }} />
+
+            <Typography variant='h6'>Details</Typography>
+
+            {selectedVariant?.details && (
+              <div
+                className='product-description'
+                dangerouslySetInnerHTML={{ __html: selectedVariant?.details }}
+              />
+            )}
+          </>
         )}
 
         {hasSpecifications && (
@@ -111,62 +133,62 @@ const Main = ({ product }: Props) => {
 
             <Box sx={{ flexGrow: 1, p: 1 }}>
               <Typography>{variant.name}</Typography>
-
-              <Typography variant='h6' sx={{ mb: 0, textAlign: 'right' }}>
-                {variant.status === 'available' ? (
-                  Intl.NumberFormat('en-US', {
-                    style: 'currency',
-                    currency: variant.currency,
-                    currencyDisplay: 'code'
-                  }).format(variant.price)
-                ) : (
-                  <Chip size='small' color='error' label='Unavailable' />
-                )}
-              </Typography>
             </Box>
           </Paper>
         ))}
 
-        {Boolean(isAvailable && mediaLink) && (
+        {selectedVariant?.status === 'available' && (
           <>
-            {isAvailable && (
-              <Box>
-                <Divider sx={{ my: 1 }} />
+            {selectedVariant.urls?.map((url) => (
+              <Box
+                key={url.id}
+                sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+              >
+                <Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <img
+                      src={`https://earneee.sfo3.cdn.digitaloceanspaces.com/images/countries/${url.country.toLowerCase()}.png`}
+                    />
 
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Box>
-                    {Boolean(product.affiliate) && (
-                      <>
-                        <Typography>Sold by</Typography>
-
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          {product.affiliate?.logoUrl && (
-                            <Avatar variant='square' src={product.affiliate.logoUrl} />
-                          )}
-
-                          <Typography sx={{ ml: 1 }}>{product.affiliate?.name}</Typography>
-                        </Box>
-                      </>
-                    )}
+                    <Typography sx={{ fontWeight: 500, ml: 1 }}>
+                      {Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: url.currency,
+                        currencyDisplay: 'code'
+                      }).format(url.price)}
+                    </Typography>
                   </Box>
 
-                  {Boolean(mediaLink) && (
-                    <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                      <Button variant='contained' onClick={() => window.open(mediaLink, '_blank')}>
-                        Buy Now
-                      </Button>
-                    </Box>
+                  {url.affiliate && (
+                    <Typography>
+                      Sold by{' '}
+                      {Boolean(url.affiliate.url) ? (
+                        <Link href={url.affiliate.url!} target='_blank'>
+                          {url.affiliate.name}
+                        </Link>
+                      ) : (
+                        url.affiliate.name
+                      )}
+                    </Typography>
                   )}
                 </Box>
+
+                <Button variant='contained' onClick={() => window.open(url.url, '_blank')}>
+                  Buy Now
+                </Button>
               </Box>
-            )}
+            ))}
 
             <Divider sx={{ my: 1 }} />
           </>
         )}
 
-        {selectedVariant?.description && (
-          <div dangerouslySetInnerHTML={{ __html: selectedVariant?.description }} />
+        {Boolean(selectedVariant?.about) && (
+          <>
+            <Typography variant='h6'>About this item</Typography>
+
+            <div dangerouslySetInnerHTML={{ __html: selectedVariant?.about! }} />
+          </>
         )}
 
         {options.length > 0 &&

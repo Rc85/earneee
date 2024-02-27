@@ -3,14 +3,17 @@ import sharp from 'sharp';
 import { s3 } from '../../../services';
 import { ObjectCannedACL } from '@aws-sdk/client-s3';
 import { database } from '../../../database';
-import { AffiliateUrlsInterface, AffiliatesInterface } from '../../../../../_shared/types';
+import { AffiliatesInterface } from '../../../../../_shared/types';
 
 export const addAffiliate = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
-  const { id, name, description, logoUrl, managerUrl, commissionRate, rateType, status, urls } = req.body;
+  const { id, name, url, description, logoUrl, managerUrl, commissionRate, rateType, status, logoPath } =
+    req.body;
 
-  let url = null;
-  let path = null;
+  let logo = logoUrl;
+  let path = logoPath;
+
+  console.log(logoPath);
 
   if (logoUrl && /^data:image\/(jpeg|png);base64.*/.test(logoUrl)) {
     const base64 = logoUrl.split(',')[1];
@@ -29,7 +32,7 @@ export const addAffiliate = async (req: Request, resp: Response, next: NextFunct
     const data = await s3.putObject(params);
     const eTag = data.ETag ? data.ETag.replace(/"/g, '') : '';
 
-    url = `https://${process.env.S3_BUCKET_NAME}.${process.env.S3_ENDPOINT}/${key}?ETag=${eTag}`;
+    logo = `https://${process.env.S3_BUCKET_NAME}.${process.env.S3_ENDPOINT}/${key}?ETag=${eTag}`;
     path = key;
   } else if (!logoUrl) {
     const affiliate: AffiliatesInterface[] = await database.retrieve('affiliates', {
@@ -51,6 +54,7 @@ export const addAffiliate = async (req: Request, resp: Response, next: NextFunct
     [
       'id',
       'name',
+      'url',
       'description',
       'logo_url',
       'logo_path',
@@ -59,12 +63,13 @@ export const addAffiliate = async (req: Request, resp: Response, next: NextFunct
       'rate_type',
       'status'
     ],
-    [id, name, description || null, url, path, managerUrl, commissionRate || 0, rateType, status],
+    [id, name, url, description || null, logo, path, managerUrl, commissionRate || 0, rateType, status],
     {
       conflict: {
         columns: 'id',
         do: `UPDATE SET
           name = EXCLUDED.name,
+          url = EXCLUDED.url,
           description = EXCLUDED.description,
           logo_url = EXCLUDED.logo_url,
           logo_path = EXCLUDED.logo_path,
@@ -77,30 +82,6 @@ export const addAffiliate = async (req: Request, resp: Response, next: NextFunct
       client
     }
   );
-
-  const affiliateId = affiliate[0].id;
-
-  if (urls) {
-    const affiliateUrls: AffiliateUrlsInterface[] = urls;
-    const urlIds = affiliateUrls.map((url) => url.id);
-
-    await database.delete('affiliate_urls', { where: 'NOT (id = ANY($1))', params: [urlIds], client });
-
-    for (const url of affiliateUrls) {
-      await database.create(
-        'affiliate_urls',
-        ['id', 'url', 'country', 'affiliate_id'],
-        [url.id, url.url, url.country, affiliateId],
-        {
-          conflict: {
-            columns: 'id',
-            do: `UPDATE SET url = EXCLUDED.url, country = EXCLUDED.country, updated_at = NOW()`
-          },
-          client
-        }
-      );
-    }
-  }
 
   if (affiliate[0].updatedAt) {
     resp.locals.response = { data: { statusText: 'Affiliate updated' } };

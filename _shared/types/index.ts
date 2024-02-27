@@ -9,7 +9,6 @@ export type { OffersInterface } from './offers';
 export type { ProductBrandsInterface } from './product_brands';
 export type { UserProfilesInterface } from './user_profiles';
 export type { ProductSpecificationsInterface } from './product_specifications';
-export type { AffiliateUrlsInterface } from './affiliate_urls';
 export type { ProductBrandUrlsInterface } from './product_brand_urls';
 export type { ProductUrlsInterface } from './product_urls';
 export type { UsersInterface } from './users';

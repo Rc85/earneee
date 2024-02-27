@@ -1,23 +1,15 @@
-import {
-  TextField,
-  InputAdornment,
-  FormControlLabel,
-  Checkbox,
-  Box,
-  CircularProgress,
-  Button,
-  IconButton
-} from '@mui/material';
+import { TextField, FormControlLabel, Checkbox, Box, CircularProgress, Button, List } from '@mui/material';
 import { ProductUrlsInterface, ProductVariantsInterface } from '../../../../../_shared/types';
 import { FormEvent, useEffect, useState } from 'react';
 import { deepEqual, generateKey } from '../../../../../_shared/utils';
 import { useSnackbar } from 'notistack';
 import { Icon } from '@mdi/react';
-import { mdiArrowUpDropCircle, mdiPlusBox, mdiTrashCan } from '@mdi/js';
+import { mdiArrowUpDropCircle, mdiPlusBox, mdiRefresh } from '@mdi/js';
 import { useNavigate, useParams } from 'react-router-dom';
 import { LoadingButton } from '@mui/lab';
-import { useCreateProductVariant } from '../../../../_shared/api';
-import { countries } from '../../../../../_shared';
+import { retrieveAffiliates, useCreateProductVariant } from '../../../../_shared/api';
+import AddUrl from './AddUrl';
+import UrlRow from './UrlRow';
 
 interface Props {
   variant?: ProductVariantsInterface;
@@ -47,6 +39,8 @@ const VariantForm = ({ variant }: Props) => {
   const [initialState, setInitialState] = useState<ProductVariantsInterface>(initialVariant);
   const [form, setForm] = useState<ProductVariantsInterface>(initialVariant);
   const { enqueueSnackbar } = useSnackbar();
+  const { data } = retrieveAffiliates();
+  const { affiliates } = data || {};
 
   const handleSuccess = () => {
     setStatus('');
@@ -70,6 +64,8 @@ const VariantForm = ({ variant }: Props) => {
 
   useEffect(() => {
     if (variant) {
+      console.log('variant', variant);
+
       setInitialState(JSON.parse(JSON.stringify(variant)));
 
       setForm(JSON.parse(JSON.stringify(variant)));
@@ -88,27 +84,19 @@ const VariantForm = ({ variant }: Props) => {
     createVariant.mutate(form);
   };
 
-  const handleAddUrlClick = () => {
+  const handleAddUrl = (url: ProductUrlsInterface) => {
     const urls = form.urls || [];
+    const index = urls.findIndex((u) => u.id === url.id);
 
-    urls.push({
-      id: generateKey(1),
-      url: '',
-      country: 'CA',
-      variantId: form.id,
-      createdAt: new Date().toISOString(),
-      updatedAt: null
-    });
+    if (index >= 0) {
+      urls[index] = url;
+    } else {
+      urls.push(url);
+    }
 
     setForm({ ...form, urls });
-  };
 
-  const handleUrlChange = (value: string, key: keyof ProductUrlsInterface, index: number) => {
-    const urls = form.urls || [];
-
-    urls[index][key] = value;
-
-    setForm({ ...form, urls });
+    setStatus('');
   };
 
   const handleDeleteUrl = (index: number) => {
@@ -123,38 +111,21 @@ const VariantForm = ({ variant }: Props) => {
 
   return (
     <Box component='form' onSubmit={handleSubmit}>
+      {status === 'Add URL' && (
+        <AddUrl
+          cancel={() => setStatus('')}
+          submit={handleAddUrl}
+          variantId={form.id}
+          affiliates={affiliates || []}
+        />
+      )}
+
       <TextField
         label='Name'
         onChange={(e) => setForm({ ...form, name: e.target.value })}
         value={form.name}
         autoFocus
       />
-
-      <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-        <TextField
-          label='Price'
-          onChange={(e) => setForm({ ...form, price: e.target.value as unknown as number })}
-          value={form.price}
-          InputProps={{ startAdornment: <InputAdornment position='start'>$</InputAdornment> }}
-          sx={{ mr: 1 }}
-        />
-
-        <TextField
-          label='Currency'
-          select
-          SelectProps={{ native: true }}
-          sx={{ minWidth: '25%' }}
-          onChange={(e) => setForm({ ...form, currency: e.target.value })}
-          value={form.currency}
-          fullWidth={false}
-        >
-          <option value='aud'>Australian Dollar</option>
-          <option value='cad'>Canadian Dollar</option>
-          <option value='eur'>Euro</option>
-          <option value='gbp'>Pound</option>
-          <option value='usd'>US Dollar</option>
-        </TextField>
-      </Box>
 
       <TextField
         label='Description'
@@ -172,41 +143,24 @@ const VariantForm = ({ variant }: Props) => {
           onChange={() => setForm({ ...form, featured: !form.featured })}
         />
 
-        <Button startIcon={<Icon path={mdiPlusBox} size={1} />} onClick={handleAddUrlClick}>
+        <Button startIcon={<Icon path={mdiPlusBox} size={1} />} onClick={() => setStatus('Add URL')}>
           Add URL
         </Button>
       </Box>
 
-      {form.urls?.map((url, i) => (
-        <Box key={url.id} sx={{ display: 'flex', alignItems: 'center' }}>
-          <TextField
-            type='url'
-            label='URL'
-            value={url.url}
-            onChange={(e) => handleUrlChange(e.target.value, 'url', i)}
-            sx={{ mr: 1, mb: '0 !important' }}
-          />
-
-          <TextField
-            label='Country'
-            select
-            SelectProps={{ native: true }}
-            value={url.country}
-            onChange={(e) => handleUrlChange(e.target.value, 'country', i)}
-            sx={{ mb: '0 !important' }}
-          >
-            {countries.map((country) => (
-              <option key={country.code} value={country.code}>
-                {country.name}
-              </option>
-            ))}
-          </TextField>
-
-          <IconButton size='small' sx={{ ml: 1 }} onClick={() => handleDeleteUrl(i)}>
-            <Icon path={mdiTrashCan} size={1} />
-          </IconButton>
-        </Box>
-      ))}
+      {Boolean(form.urls && form.urls.length > 0) && (
+        <List disablePadding>
+          {form.urls?.map((url, i) => (
+            <UrlRow
+              key={url.id}
+              url={url}
+              onDelete={() => handleDeleteUrl(i)}
+              affiliates={affiliates || []}
+              submit={handleAddUrl}
+            />
+          ))}
+        </List>
+      )}
 
       <LoadingButton
         variant='contained'
@@ -222,6 +176,16 @@ const VariantForm = ({ variant }: Props) => {
       >
         Submit
       </LoadingButton>
+
+      <Button
+        color='inherit'
+        sx={{ mt: 1 }}
+        fullWidth
+        startIcon={<Icon path={mdiRefresh} size={1} />}
+        onClick={() => setForm(JSON.parse(JSON.stringify(initialState)))}
+      >
+        Reset
+      </Button>
     </Box>
   );
 };

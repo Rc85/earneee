@@ -1,8 +1,7 @@
-import { AffiliateUrlsInterface } from '.';
-
 export interface AffiliatesInterface {
   id: string;
   name: string;
+  url: string | null;
   managerUrl: string | null;
   logoUrl: string | null;
   logoPath: string | null;
@@ -12,5 +11,4 @@ export interface AffiliatesInterface {
   status: string;
   createdAt: string;
   updatedAt: string | null;
-  urls?: AffiliateUrlsInterface[];
 }

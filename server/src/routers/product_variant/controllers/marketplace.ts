@@ -56,8 +56,6 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
     params.push(specificationIds);
   }
 
-  console.log(params);
-
   const statement = `WITH RECURSIVE
   p AS (
     SELECT
@@ -102,18 +100,27 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
       pm.type
     FROM product_media AS pm
     WHERE pm.status = 'enabled'
+  ),
+  pu AS (
+    SELECT
+      pu.id,
+      pu.url,
+      pu.variant_id,
+      pu.country,
+      pu.price,
+      pu.currency
+    FROM product_urls AS pu
   )
 
   SELECT
     pv.id,
     pv.name,
-    pv.price,
-    pv.currency,
     pv.description,
     pv.product_id,
     pv.status,
     pr.product,
-    COALESCE(pm.media, '[]'::JSONB) AS media
+    COALESCE(pm.media, '[]'::JSONB) AS media,
+    COALESCE(pu.urls, '[]'::JSONB) AS urls
   FROM product_variants AS pv
   LEFT JOIN LATERAL (
     SELECT TO_JSONB(pr.*) AS product
@@ -130,6 +137,11 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
     FROM pm
     WHERE pm.variant_id = pv.id
   ) AS pm ON true
+  LEFT JOIN LATERAL (
+    SELECT JSONB_AGG(pu.*) AS urls
+    FROM pu
+    WHERE pu.variant_id = pv.id
+  ) AS pu ON true
   WHERE (pr.product->>'category_id')::INT IN (SELECT id FROM p)
   ${filters.minPrice ? `AND pv.price >= $2` : ''}
   ${filters.maxPrice ? `AND pv.price <= ${!filters.minPrice ? '$2' : '$3'}` : ''}
@@ -141,8 +153,6 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
   ORDER BY ${orderBy}
   OFFSET ${offset}
   LIMIT 20`;
-
-  console.log(statement);
 
   const variants = await database.query(statement, params, client);
 
@@ -165,14 +175,7 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
     )
 
     SELECT
-      pv.id,
-      pv.name,
-      pv.price,
-      pv.currency,
-      pv.description,
-      pv.product_id,
-      pv.status,
-      p.product
+      pv.id
     FROM product_variants AS pv
     LEFT JOIN LATERAL (
       SELECT TO_JSONB(p.*) AS product
@@ -246,13 +249,29 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
       ) AS os ON true
       ORDER BY po.name
     ),
+    a AS (
+      SELECT
+        a.id,
+        a.name,
+        a.url,
+        a.logo_url
+      FROM affiliates AS a
+    ),
     pu AS (
       SELECT
         pu.id,
         pu.url,
         pu.variant_id,
-        pu.country
+        pu.country,
+        pu.price,
+        pu.currency,
+        a.affiliate
       FROM product_urls AS pu
+      LEFT JOIN LATERAL (
+        SELECT TO_JSONB(a.*) AS affiliate
+        FROM a
+        WHERE a.id = pu.affiliate_id
+      ) AS a ON true
     ),
     ps AS (
       SELECT
@@ -269,9 +288,9 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
       SELECT
         pv.id,
         pv.name,
-        pv.price,
-        pv.currency,
         pv.description,
+        pv.about,
+        pv.details,
         pv.product_id,
         pv.status,
         COALESCE(pm.media, '[]'::JSONB) AS media,

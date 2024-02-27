@@ -7,33 +7,17 @@ import { resultsToCamelCase } from '../../../_shared/utils';
 export const affiliate = {
   retrieve: async (options?: DatabaseRetrieveOptions): Promise<AffiliatesInterface[]> => {
     const database = options?.client || db;
-    const statement = `WITH
-    au AS (
-      SELECT
-        id,
-        url,
-        country,
-        affiliate_id
-      FROM affiliate_urls AS au
-      ORDER BY country
-    )
-
-    SELECT
+    const statement = `SELECT
       id,
       name,
+      url,
       description,
       manager_url,
       logo_url,
       commission_rate,
       rate_type,
-      status,
-      COALESCE(u.urls, '[]'::JSONB) AS urls
+      status
     FROM affiliates AS a
-    LEFT JOIN LATERAL (
-      SELECT JSONB_AGG(au.*) AS urls
-      FROM au
-      WHERE au.affiliate_id = a.id
-    ) AS u ON true
     ${generateOptionString(options)}`;
 
     return await database

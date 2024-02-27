@@ -4,8 +4,7 @@ import { ProductUrlsInterface } from '../../../../../_shared/types';
 
 export const createVariant = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
-  const { id, name, description, price, featured, status, productId, currency, urls, about, details } =
-    req.body;
+  const { id, name, description, featured, status, productId, urls, about, details } = req.body;
 
   const variants = await database.retrieve('product_variants', {
     where: 'product_id = $1',
@@ -15,39 +14,13 @@ export const createVariant = async (req: Request, resp: Response, next: NextFunc
 
   await database.create(
     'product_variants',
-    [
-      'id',
-      'name',
-      'description',
-      'price',
-      'currency',
-      'featured',
-      'status',
-      'product_id',
-      'ordinance',
-      'about',
-      'details'
-    ],
-    [
-      id,
-      name,
-      description || null,
-      price || 0,
-      currency || 'cad',
-      Boolean(featured),
-      status,
-      productId,
-      variants.length,
-      about,
-      details
-    ],
+    ['id', 'name', 'description', 'featured', 'status', 'product_id', 'ordinance', 'about', 'details'],
+    [id, name, description || null, Boolean(featured), status, productId, variants.length, about, details],
     {
       conflict: {
         columns: 'id',
         do: `UPDATE SET
           name = EXCLUDED.name,
-          price = EXCLUDED.price,
-          currency = EXCLUDED.currency,
           description = EXCLUDED.description,
           featured = EXCLUDED.featured,
           status = EXCLUDED.status,
@@ -67,12 +40,17 @@ export const createVariant = async (req: Request, resp: Response, next: NextFunc
     for (const url of urls) {
       await database.create(
         'product_urls',
-        ['id', 'url', 'country', 'variant_id'],
-        [url.id, url.url, url.country, id],
+        ['id', 'url', 'country', 'variant_id', 'price', 'currency', 'affiliate_id'],
+        [url.id, url.url, url.country, id, url.price || 0, url.currency || 'cad', url.affiliateId || null],
         {
           conflict: {
             columns: 'variant_id, country',
-            do: `UPDATE SET url = EXCLUDED.url, updated_at = NOW()`
+            do: `UPDATE SET
+              url = EXCLUDED.url,
+              price = EXCLUDED.price,
+              currency = EXCLUDED.currency,
+              affiliate_id = EXCLUDED.affiliate_id,
+              updated_at = NOW()`
           },
           client
         }

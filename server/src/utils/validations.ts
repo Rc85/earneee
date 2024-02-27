@@ -174,7 +174,7 @@ export const validations = {
   },
   phoneCheck: /^\([0-9]{3}\)\s[0-9]{3}-[0-9]{4}$/,
   locationCheck: /^[a-zA-Z0-9À-ž,'().\-\s\u2011]{1,}$/,
-  urlCheck: /^(http:\/\/|https:\/\/)[a-zA-Z0-9.\/-]*/,
+  urlCheck: /^(http:\/\/|https:\/\/).*/,
   userTitleCheck: /^[a-zA-Z0-9À-ž,'().\-\s\/]{3,30}$/,
   searchUserTitleCheck: /^[a-zA-Z0-9À-ž,'().\-\s]{1,}$/,
   dobYearCheck: /^(1|2){1}[0-9]{3}$/,

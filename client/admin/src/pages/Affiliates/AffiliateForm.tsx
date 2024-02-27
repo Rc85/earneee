@@ -1,14 +1,13 @@
-import { mdiArrowUpDropCircle, mdiPlus, mdiTrashCan, mdiUpload } from '@mdi/js';
+import { mdiArrowUpDropCircle, mdiTrashCan, mdiUpload } from '@mdi/js';
 import { Box, Button, CircularProgress, IconButton, TextField, useTheme } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
-import { AffiliateUrlsInterface, AffiliatesInterface } from '../../../../../_shared/types';
+import { AffiliatesInterface } from '../../../../../_shared/types';
 import { Icon } from '@mdi/react';
 import { deepEqual, generateKey } from '../../../../../_shared/utils';
 import { useSnackbar } from 'notistack';
 import { useAddAffiliate } from '../../../../_shared/api';
 import { LoadingButton } from '@mui/lab';
-import { countries } from '../../../../../_shared';
 import { useNavigate } from 'react-router-dom';
 
 interface Props {
@@ -22,6 +21,7 @@ const AffiliateForm = ({ affiliate }: Props) => {
   const initial = {
     id: generateKey(1),
     name: '',
+    url: null,
     description: null,
     logoUrl: null,
     logoPath: null,
@@ -30,8 +30,7 @@ const AffiliateForm = ({ affiliate }: Props) => {
     rateType: 'fixed',
     status: 'active',
     createdAt: new Date().toISOString(),
-    updatedAt: null,
-    urls: []
+    updatedAt: null
   };
   const [initialState, setInitialState] = useState<AffiliatesInterface>({ ...initial });
   const [form, setForm] = useState<AffiliatesInterface>({ ...initial });
@@ -99,32 +98,6 @@ const AffiliateForm = ({ affiliate }: Props) => {
     setForm({ ...form, logoUrl: null });
   };
 
-  const handleAddWebsiteLinkClick = () => {
-    const urls = form.urls ? [...form.urls] : [];
-
-    urls.push({ id: generateKey(1), url: '', country: 'CA', affiliateId: '', createdAt: '', updatedAt: '' });
-
-    setForm({ ...form, urls });
-  };
-
-  const handleUrlChange = (value: string, key: keyof AffiliateUrlsInterface, index: number) => {
-    const urls = form.urls ? [...form.urls] : [];
-
-    urls[index][key] = value;
-
-    setForm({ ...form, urls });
-  };
-
-  const handleRemoveUrl = (index: number) => {
-    const urls = form.urls ? [...form.urls] : [];
-
-    if (index >= 0) {
-      urls.splice(index, 1);
-    }
-
-    setForm({ ...form, urls });
-  };
-
   return (
     <Box component='form' onSubmit={handleSubmit}>
       <Box sx={{ mb: 1, display: 'flex' }}>
@@ -187,31 +160,16 @@ const AffiliateForm = ({ affiliate }: Props) => {
           />
 
           <TextField
+            label='Website URL'
+            onChange={(e) => setForm({ ...form, url: e.target.value })}
+            value={form.url || ''}
+          />
+
+          <TextField
             label='Manager Website'
             onChange={(e) => setForm({ ...form, managerUrl: e.target.value })}
             value={form.managerUrl || ''}
           />
-
-          <Box sx={{ display: 'flex' }}>
-            <TextField
-              type='number'
-              label='Commission Rate'
-              onChange={(e) => setForm({ ...form, commissionRate: e.target.value as unknown as number })}
-              value={form.commissionRate || ''}
-            />
-
-            <TextField
-              label='Rate Type'
-              select
-              SelectProps={{ native: true }}
-              sx={{ ml: 1 }}
-              onChange={(e) => setForm({ ...form, rateType: e.target.value })}
-              value={form.rateType}
-            >
-              <option value='fixed'>$</option>
-              <option value='percentage'>%</option>
-            </TextField>
-          </Box>
 
           <TextField
             label='Description'
@@ -224,46 +182,6 @@ const AffiliateForm = ({ affiliate }: Props) => {
 
         <input type='file' ref={fileInputRef} hidden onChange={handleFileChange} />
       </Box>
-
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
-        <Button startIcon={<Icon path={mdiPlus} size={1} />} onClick={handleAddWebsiteLinkClick}>
-          Add Website Link
-        </Button>
-      </Box>
-
-      {form.urls?.map((url, i) => (
-        <Box key={url.id} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-          <TextField
-            label='URL'
-            type='url'
-            required
-            autoFocus
-            sx={{ mr: 1, mb: '0px !important' }}
-            onChange={(e) => handleUrlChange(e.target.value, 'url', i)}
-            value={url.url}
-          />
-
-          <TextField
-            label='Country'
-            required
-            select
-            SelectProps={{ native: true }}
-            onChange={(e) => handleUrlChange(e.target.value, 'country', i)}
-            value={url.country}
-            sx={{ mb: '0px !important' }}
-          >
-            {countries.map((country) => (
-              <option key={country.code} value={country.code}>
-                {country.name}
-              </option>
-            ))}
-          </TextField>
-
-          <IconButton size='small' onClick={() => handleRemoveUrl(i)}>
-            <Icon path={mdiTrashCan} size={1} />
-          </IconButton>
-        </Box>
-      ))}
 
       <LoadingButton
         variant='contained'

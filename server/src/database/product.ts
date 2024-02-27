@@ -29,7 +29,6 @@ export const product = {
       p.excerpt,
       p.status,
       p.type,
-      p.affiliate_id,
       p.brand_id,
       c.category
     FROM products AS p
@@ -118,21 +117,37 @@ export const product = {
           p.category_id
         FROM products AS p
       ),
+      a AS (
+        SELECT
+          a.id,
+          a.name,
+          a.url,
+          a.logo_url,
+          a.logo_path
+        FROM affiliates AS a
+      ),
       pu AS (
         SELECT
           pu.id,
           pu.url,
           pu.variant_id,
-          pu.country
+          pu.country,
+          pu.price,
+          pu.currency,
+          pu.affiliate_id,
+          a.affiliate
         FROM product_urls AS pu
+        LEFT JOIN LATERAL (
+          SELECT TO_JSONB(a.*) AS affiliate
+          FROM a
+          WHERE a.id = pu.affiliate_id
+        ) AS a ON true
       )
 
       SELECT
         pv.id,
         pv.name,
         pv.description,
-        pv.price,
-        pv.currency,
         pv.featured,
         pv.product_id,
         pv.about,

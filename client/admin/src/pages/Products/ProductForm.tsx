@@ -6,12 +6,7 @@ import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { useSnackbar } from 'notistack';
 import { CategoriesInterface, ProductsInterface } from '../../../../../_shared/types';
 import { useNavigate } from 'react-router-dom';
-import {
-  retrieveAffiliates,
-  retrieveCategories,
-  retrieveProductBrands,
-  useCreateProduct
-} from '../../../../_shared/api';
+import { retrieveCategories, retrieveProductBrands, useCreateProduct } from '../../../../_shared/api';
 import { generateKey } from '../../../../../_shared/utils';
 
 interface Props {
@@ -25,7 +20,6 @@ const ProductForm = ({ product }: Props) => {
     name: '',
     description: '',
     type: '',
-    affiliateId: '',
     categoryId: 0,
     brandId: '',
     excerpt: '',
@@ -37,12 +31,10 @@ const ProductForm = ({ product }: Props) => {
   const [selectedCategories, setSelectedCategories] = useState<CategoriesInterface[]>([]);
   const navigate = useNavigate();
   const b = retrieveProductBrands();
-  const a = retrieveAffiliates();
   const c = retrieveCategories({
     parentId: selectedCategories[selectedCategories.length - 1]?.id || null
   });
   const { brands } = b.data || {};
-  const { affiliates } = a.data || {};
   const { categories } = c.data || {};
 
   useEffect(() => {
@@ -186,21 +178,6 @@ const ProductForm = ({ product }: Props) => {
         <option value=''></option>
         <option value='affiliate'>Affiliate</option>
         <option value='dropship'>Dropship</option>
-      </TextField>
-
-      <TextField
-        select
-        label='Affiliate'
-        SelectProps={{ native: true }}
-        onChange={(e) => handleChange('affiliateId', e.target.value)}
-        value={form.affiliateId || ''}
-      >
-        <option value=''></option>
-        {affiliates?.map((affiliate) => (
-          <option key={affiliate.id} value={affiliate.id}>
-            {affiliate.name}
-          </option>
-        ))}
       </TextField>
 
       <TextField
