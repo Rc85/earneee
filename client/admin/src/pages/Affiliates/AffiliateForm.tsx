@@ -26,8 +26,6 @@ const AffiliateForm = ({ affiliate }: Props) => {
     logoUrl: null,
     logoPath: null,
     managerUrl: null,
-    commissionRate: null,
-    rateType: 'fixed',
     status: 'active',
     createdAt: new Date().toISOString(),
     updatedAt: null

@@ -6,8 +6,6 @@ import { ProductsInterface } from './products';
 export interface ProductVariantsInterface {
   id: string;
   name: string;
-  price: number;
-  currency: string;
   productId: string;
   featured: boolean;
   description: string | null;

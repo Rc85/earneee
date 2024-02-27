@@ -32,7 +32,8 @@ const Specifications = () => {
   const params = useParams();
   const { variantId } = params;
   const { isLoading, data } = retrieveProductSpecifications({
-    variantId
+    variantId,
+    enabled: true
   });
   const { specifications } = data || {};
   const sortProductSpecifications = useSortProductSpecifications();

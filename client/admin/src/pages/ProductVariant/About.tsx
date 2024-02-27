@@ -23,8 +23,6 @@ const About = () => {
   const initialVariant = {
     id: generateKey(1),
     name: '',
-    price: 0,
-    currency: 'cad',
     ordinance: 0,
     description: null,
     about: null,

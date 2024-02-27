@@ -352,38 +352,43 @@ const Main = ({ categoryId, subcategoryId, groupId }: Props) => {
               </Grid2>
             ) : (
               <List disablePadding>
-                {variants?.map((variant) => (
-                  <ListItem key={variant.id} disableGutters divider>
-                    <ListItemButton
-                      sx={{ alignItems: 'flex-start' }}
-                      onClick={() => router.push(`/product/${variant.product?.id}?variant=${variant.id}`)}
-                    >
-                      <ListItemIcon sx={{ mr: 1 }}>
-                        <Avatar
-                          src={variant.media?.[0]?.url || '/broken.jpg'}
-                          variant='rounded'
-                          alt={variant.name}
-                          sx={{ width: 100, height: 100, backgroundColor: grey[300] }}
-                        >
-                          <Icon path={mdiImageOff} size={1} color={grey[500]} />
-                        </Avatar>
-                      </ListItemIcon>
+                {variants?.map((variant) => {
+                  const urls = variant.urls || [];
+                  const countryCode = country || 'ca';
+                  const url =
+                    urls.find((url) => url.country.toLowerCase() === countryCode.toLowerCase()) || urls[0];
 
-                      <ListItemText
-                        primary={`${variant.product?.name} - ${variant.name}`}
-                        secondary={variant.product?.excerpt}
-                      />
-                    </ListItemButton>
+                  return (
+                    <ListItem key={variant.id} disableGutters divider>
+                      <ListItemButton
+                        sx={{ alignItems: 'flex-start' }}
+                        onClick={() => router.push(`/product/${variant.product?.id}?variant=${variant.id}`)}
+                      >
+                        <ListItemIcon sx={{ mr: 1 }}>
+                          <Avatar
+                            src={variant.media?.[0]?.url || '/broken.jpg'}
+                            variant='rounded'
+                            alt={variant.name}
+                            sx={{ width: 100, height: 100, backgroundColor: grey[300] }}
+                          >
+                            <Icon path={mdiImageOff} size={1} color={grey[500]} />
+                          </Avatar>
+                        </ListItemIcon>
 
-                    <Typography variant='h6' sx={{ mb: 0 }}>
-                      {Intl.NumberFormat('en-US', {
-                        style: 'currency',
-                        currency: 'CAD',
-                        currencyDisplay: 'narrowSymbol'
-                      }).format(variant.price)}
-                    </Typography>
-                  </ListItem>
-                ))}
+                        <ListItemText
+                          primary={`${variant.product?.name} - ${variant.name}`}
+                          secondary={variant.product?.excerpt}
+                        />
+                      </ListItemButton>
+
+                      {Boolean(url) && (
+                        <Typography variant='h6'>
+                          ${url.price.toFixed(2)} {url.currency.toUpperCase()}
+                        </Typography>
+                      )}
+                    </ListItem>
+                  );
+                })}
               </List>
             )}
 
