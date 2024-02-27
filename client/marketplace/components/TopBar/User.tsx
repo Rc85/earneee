@@ -11,7 +11,7 @@ import { usePathname } from 'next/navigation';
 const User = async () => {
   const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/v1/auth/user`, {
     credentials: 'include',
-    next: { revalidate: 180, tags: ['authenticate'] }
+    next: { revalidate: 60, tags: ['authenticate'] }
   });
   const data = await res.json();
   const user: UsersInterface = data.user;

@@ -10,7 +10,6 @@ interface Props {
 
 const Product = async ({ params: { id } }: Props) => {
   const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/v1/auth/marketplace/product/${id}`, {
-    next: { revalidate: 300, tags: ['product', id] },
     credentials: 'include'
   });
   const data = await res.json();

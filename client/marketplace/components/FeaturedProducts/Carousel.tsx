@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ProductVariantsInterface } from '../../../../_shared/types';
 import { useRouter } from 'next/navigation';
 import { Loading } from '../../../_shared/components';
+import { useAppSelector } from '../../../_shared/redux/store';
 
 let carouselInterval: NodeJS.Timer | undefined | void = undefined;
 
@@ -21,6 +22,7 @@ const Carousel = ({ variants }: Props) => {
   const [containerLoaded, setContainerLoaded] = useState(false);
   const router = useRouter();
   const containerRef = useRef<any>(null);
+  const { country } = useAppSelector((state) => state.App);
 
   useEffect(() => {
     if (containerRef.current) {
@@ -123,6 +125,11 @@ const Carousel = ({ variants }: Props) => {
           ) : (
             <>
               {variants.map((variant, i) => {
+                const urls = variant.urls || [];
+                const countryCode = country || 'ca';
+                const url =
+                  urls.find((url) => url.country.toLowerCase() === countryCode.toLowerCase()) || urls[0];
+
                 return (
                   <Box
                     key={variant.id}
@@ -169,14 +176,9 @@ const Carousel = ({ variants }: Props) => {
                         <Typography color='white'>{variant.product?.excerpt}</Typography>
                       </Box>
 
-                      <Box>
-                        <Typography sx={{ ml: 1 }} color='white' variant='h4'>
-                          {Intl.NumberFormat('en-US', {
-                            style: 'currency',
-                            currency: variant.currency
-                          }).format(variant.price)}
-                        </Typography>
-                      </Box>
+                      <Typography sx={{ ml: 1 }} color='white' variant='h4'>
+                        ${url.price.toFixed(2)} {url.currency.toUpperCase()}
+                      </Typography>
                     </Box>
                   </Box>
                 );

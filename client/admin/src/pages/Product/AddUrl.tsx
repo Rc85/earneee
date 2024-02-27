@@ -45,7 +45,14 @@ const AddUrl = ({ cancel, url, submit, affiliates, variantId }: Props) => {
   };
 
   return (
-    <Modal open title={url ? 'Edit URL' : 'Add URL'} cancel={cancel} submit={handleSubmit} component='form'>
+    <Modal
+      open
+      title={url ? 'Edit URL' : 'Add URL'}
+      cancel={cancel}
+      submit={handleSubmit}
+      component='form'
+      disableBackdropClick
+    >
       <TextField
         label='URL'
         value={form.url}

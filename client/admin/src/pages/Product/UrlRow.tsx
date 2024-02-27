@@ -39,6 +39,7 @@ const UrlRow = ({ url, onDelete, affiliates, submit }: Props) => {
           secondary={`${url.country} \u2022 $${url.price} ${url.currency.toUpperCase()}${
             url.affiliate ? ` \u2022 ${url.affiliate.name}` : ''
           }`}
+          primaryTypographyProps={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
         />
       </ListItemButton>
 

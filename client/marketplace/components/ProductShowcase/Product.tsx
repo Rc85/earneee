@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { ProductVariantsInterface } from '../../../../_shared/types';
 import { Paper, Box, Typography, Divider } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
+import { useAppSelector } from '../../../_shared/redux/store';
 
 interface Props {
   variant: ProductVariantsInterface;
@@ -14,6 +15,10 @@ const Product = ({ variant, isLast }: Props) => {
   const router = useRouter();
   const [loaded, setLoaded] = useState(false);
   const containerRef = useRef<any>(null);
+  const { country } = useAppSelector((state) => state.App);
+  const urls = variant.urls || [];
+  const countryCode = country || 'ca';
+  const url = urls.find((url) => url.country.toLowerCase() === countryCode.toLowerCase()) || urls[0];
 
   useEffect(() => {
     if (containerRef.current) {
@@ -76,10 +81,7 @@ const Product = ({ variant, isLast }: Props) => {
 
         <Box sx={{ p: 2, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
           <Typography variant='h6' sx={{ mb: 0 }}>
-            {Intl.NumberFormat('en-US', {
-              style: 'currency',
-              currency: variant.currency
-            }).format(variant.price)}
+            ${url.price.toFixed(2)} {url.currency.toUpperCase()}
           </Typography>
         </Box>
       </Box>

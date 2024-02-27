@@ -4,7 +4,7 @@ import { OffersInterface, StatusesInterface } from '../../../_shared/types';
 
 const Index = async () => {
   const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/v1/offer?status=active`, {
-    next: { revalidate: 300, tags: ['offers'] },
+    next: { revalidate: 30, tags: ['offers'] },
     credentials: 'include'
   });
   const data = await res.json();

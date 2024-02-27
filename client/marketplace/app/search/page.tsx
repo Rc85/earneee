@@ -12,6 +12,7 @@ import {
   ListItemText,
   Typography
 } from '@mui/material';
+import { useAppSelector } from '../../../_shared/redux/store';
 
 const Search = () => {
   const searchParams = useSearchParams();
@@ -21,6 +22,7 @@ const Search = () => {
   const { categories } = c.data || {};
   const { data } = searchProducts({ value: searchValue, category });
   const { variants } = data || {};
+  const { country } = useAppSelector((state) => state.App);
 
   return (
     <Section
@@ -30,32 +32,38 @@ const Search = () => {
     >
       {variants && variants.length > 0 ? (
         <List>
-          {variants.map((variant) => (
-            <ListItem key={variant.id} disableGutters disablePadding divider>
-              <ListItemButton sx={{ alignItems: 'flex-start' }}>
-                <ListItemIcon>
-                  <Avatar
-                    src={variant.media?.[0]?.url || '/broken.jpg'}
-                    alt={`${variant.product?.name} || ${variant.name}`}
-                    variant='square'
-                    sx={{ mr: 2, width: 100, height: 100 }}
+          {variants.map((variant) => {
+            const urls = variant.urls || [];
+            const countryCode = country || 'ca';
+            const url =
+              urls.find((url) => url.country.toLowerCase() === countryCode.toLowerCase()) || urls[0];
+
+            return (
+              <ListItem key={variant.id} disableGutters disablePadding divider>
+                <ListItemButton sx={{ alignItems: 'flex-start' }}>
+                  <ListItemIcon>
+                    <Avatar
+                      src={variant.media?.[0]?.url || '/broken.jpg'}
+                      alt={`${variant.product?.name} || ${variant.name}`}
+                      variant='square'
+                      sx={{ mr: 2, width: 100, height: 100 }}
+                    />
+                  </ListItemIcon>
+
+                  <ListItemText
+                    primary={`${variant.product?.name} - ${variant.name}`}
+                    secondary={variant.product?.excerpt}
                   />
-                </ListItemIcon>
+                </ListItemButton>
 
-                <ListItemText
-                  primary={`${variant.product?.name} - ${variant.name}`}
-                  secondary={variant.product?.excerpt}
-                />
-              </ListItemButton>
-
-              <Typography variant='h6' sx={{ mb: 0 }}>
-                {Intl.NumberFormat('en-US', {
-                  style: 'currency',
-                  currency: variant.currency
-                }).format(variant.price)}
-              </Typography>
-            </ListItem>
-          ))}
+                {Boolean(url) && (
+                  <Typography variant='h6'>
+                    ${url.price.toFixed(2)} {url.currency.toUpperCase()}
+                  </Typography>
+                )}
+              </ListItem>
+            );
+          })}
         </List>
       ) : (
         <Typography>No search results</Typography>

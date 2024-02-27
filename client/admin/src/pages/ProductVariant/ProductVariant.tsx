@@ -114,7 +114,7 @@ const ProductVariant = () => {
         </List>
       </Box>
 
-      <Box sx={{ p: 2, flexGrow: 1 }}>
+      <Box sx={{ p: 2, flexGrow: 1, minWidth: 0 }}>
         <Breadcrumbs>
           <Link onClick={() => navigate('/products')}>Products</Link>
 

@@ -25,7 +25,7 @@ const ProductShowcase = async ({ categoryId, subcategoryId, groupId, type }: Pro
     queries.push(`groupId=${groupId}`);
   }
 
-  const res = await fetch(url + queries.join('&'), { credentials: 'include', next: { revalidate: 300 } });
+  const res = await fetch(url + queries.join('&'), { credentials: 'include', next: { revalidate: 30 } });
   const queryClient = new QueryClient();
   const data = await res.json();
   const variants: ProductVariantsInterface[] = data.variants;

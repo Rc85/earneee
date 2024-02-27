@@ -39,8 +39,8 @@ const Main = ({ product }: Props) => {
         <Gallery media={selectedVariant?.media || []} />
 
         {Boolean(selectedVariant?.details) && (
-          <>
-            <Divider sx={{ my: 1 }} />
+          <Box sx={{ mb: 3 }}>
+            <Divider sx={{ mb: 1 }} />
 
             <Typography variant='h6'>Details</Typography>
 
@@ -50,12 +50,12 @@ const Main = ({ product }: Props) => {
                 dangerouslySetInnerHTML={{ __html: selectedVariant?.details }}
               />
             )}
-          </>
+          </Box>
         )}
 
         {hasSpecifications && (
-          <>
-            <Divider sx={{ my: 1 }} />
+          <Box sx={{ mb: 3 }}>
+            <Divider sx={{ mb: 1 }} />
 
             <Typography variant='h6'>Specifications</Typography>
 
@@ -89,12 +89,12 @@ const Main = ({ product }: Props) => {
                 </Fragment>
               ))}
             </Grid2>
-          </>
+          </Box>
         )}
 
         {Boolean(selectedVariant?.description) && (
-          <>
-            <Divider sx={{ my: 1 }} />
+          <Box sx={{ mb: 3 }}>
+            <Divider sx={{ mb: 1 }} />
 
             <Typography variant='h6'>Description</Typography>
 
@@ -104,7 +104,7 @@ const Main = ({ product }: Props) => {
                 dangerouslySetInnerHTML={{ __html: selectedVariant?.description }}
               />
             )}
-          </>
+          </Box>
         )}
       </Box>
 
@@ -141,7 +141,7 @@ const Main = ({ product }: Props) => {
 
         {selectedVariant?.status === 'available' && (
           <>
-            {selectedVariant.urls && selectedVariant.urls.length > 1 && (
+            {Boolean(selectedVariant.urls && selectedVariant.urls.length > 0) && (
               <List disablePadding>
                 {selectedVariant.urls?.map((url) => (
                   <ListItem
