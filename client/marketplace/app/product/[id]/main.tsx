@@ -38,21 +38,6 @@ const Main = ({ product }: Props) => {
       <Box sx={{ flexGrow: 1 }}>
         <Gallery media={selectedVariant?.media || []} />
 
-        {Boolean(selectedVariant?.description) && (
-          <>
-            <Divider sx={{ my: 1 }} />
-
-            <Typography variant='h6'>Description</Typography>
-
-            {selectedVariant?.description && (
-              <div
-                className='product-description'
-                dangerouslySetInnerHTML={{ __html: selectedVariant?.description }}
-              />
-            )}
-          </>
-        )}
-
         {Boolean(selectedVariant?.details) && (
           <>
             <Divider sx={{ my: 1 }} />
@@ -104,6 +89,21 @@ const Main = ({ product }: Props) => {
                 </Fragment>
               ))}
             </Grid2>
+          </>
+        )}
+
+        {Boolean(selectedVariant?.description) && (
+          <>
+            <Divider sx={{ my: 1 }} />
+
+            <Typography variant='h6'>Description</Typography>
+
+            {selectedVariant?.description && (
+              <div
+                className='product-description'
+                dangerouslySetInnerHTML={{ __html: selectedVariant?.description }}
+              />
+            )}
           </>
         )}
       </Box>

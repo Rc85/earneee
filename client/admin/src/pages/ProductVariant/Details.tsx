@@ -52,6 +52,8 @@ const Details = () => {
       content: variant?.details || undefined,
       extensions: editorExtensions,
       onUpdate: ({ editor }) => {
+        console.log('update');
+
         setForm({ ...form, details: editor.getHTML() });
       }
     },
@@ -86,7 +88,12 @@ const Details = () => {
 
   return (
     <Section title='Main Details' titleVariant='h3' component='form' onSubmit={handleSubmit}>
-      <RichTextEditor sx={editorStyle} editor={editor} />
+      <RichTextEditor
+        sx={editorStyle}
+        editor={editor}
+        onHtmlChange={(html) => setForm({ ...form, details: html })}
+        rawHtml={form.details || ''}
+      />
 
       <LoadingButton
         variant='contained'
