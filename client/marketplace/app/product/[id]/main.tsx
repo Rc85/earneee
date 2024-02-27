@@ -7,6 +7,8 @@ import {
   Divider,
   FormControlLabel,
   Link,
+  List,
+  ListItem,
   ListItemText,
   Paper,
   Typography
@@ -139,47 +141,81 @@ const Main = ({ product }: Props) => {
 
         {selectedVariant?.status === 'available' && (
           <>
-            {selectedVariant.urls?.map((url) => (
-              <Box
-                key={url.id}
-                sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
-              >
-                <Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <img
-                      src={`https://earneee.sfo3.cdn.digitaloceanspaces.com/images/countries/${url.country.toLowerCase()}.png`}
-                    />
+            {selectedVariant.urls && selectedVariant.urls.length > 1 && (
+              <List disablePadding>
+                {selectedVariant.urls?.map((url) => (
+                  <ListItem
+                    disableGutters
+                    divider
+                    key={url.id}
+                    sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}
+                  >
+                    <Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                        <img
+                          src={`${
+                            process.env.NEXT_PUBLIC_STORAGE_URL
+                          }/images/countries/${url.country.toLowerCase()}.png`}
+                        />
 
-                    <Typography sx={{ fontWeight: 500, ml: 1 }}>
-                      {Intl.NumberFormat('en-US', {
-                        style: 'currency',
-                        currency: url.currency,
-                        currencyDisplay: 'code'
-                      }).format(url.price)}
-                    </Typography>
-                  </Box>
+                        <Typography sx={{ fontWeight: 500, ml: 1 }}>
+                          ${url.price.toFixed(2)} {url.currency.toUpperCase()}
+                        </Typography>
+                      </Box>
 
-                  {url.affiliate && (
-                    <Typography>
-                      Sold by{' '}
-                      {Boolean(url.affiliate.url) ? (
-                        <Link href={url.affiliate.url!} target='_blank'>
-                          {url.affiliate.name}
-                        </Link>
-                      ) : (
-                        url.affiliate.name
-                      )}
-                    </Typography>
-                  )}
-                </Box>
+                      {product.type === 'dropship'
+                        ? options.map((option) => (
+                            <Box key={option.id}>
+                              <Typography variant='h6'>
+                                {option.name}{' '}
+                                {option.required && <Typography color='red'>Required</Typography>}
+                              </Typography>
 
-                <Button variant='contained' onClick={() => window.open(url.url, '_blank')}>
-                  Buy Now
-                </Button>
-              </Box>
-            ))}
+                              {option.selections?.map((selection) => (
+                                <Box key={selection.id}>
+                                  {product?.type === 'affiliate' ? (
+                                    <ListItemText
+                                      primary={selection.name}
+                                      secondary={`+$${url.price.toFixed(2)} ${url.currency.toUpperCase()}`}
+                                    />
+                                  ) : (
+                                    <FormControlLabel
+                                      label={
+                                        <ListItemText
+                                          primary={selection.name}
+                                          secondary={`+$${url.price.toFixed(
+                                            2
+                                          )} ${url.currency.toUpperCase()}`}
+                                        />
+                                      }
+                                      control={<Checkbox color='info' />}
+                                    />
+                                  )}
+                                </Box>
+                              ))}
+                            </Box>
+                          ))
+                        : url.affiliate && (
+                            <Typography>
+                              Sold by{' '}
+                              {Boolean(url.affiliate.url) ? (
+                                <Link href={url.affiliate.url!} target='_blank'>
+                                  {url.affiliate.name}
+                                </Link>
+                              ) : (
+                                url.affiliate.name
+                              )}
+                            </Typography>
+                          )}
+                    </Box>
 
-            <Divider sx={{ my: 1 }} />
+                    <Button variant='contained' onClick={() => window.open(url.url, '_blank')}>
+                      Buy Now
+                    </Button>
+                  </ListItem>
+                ))}
+              </List>
+            )}
           </>
         )}
 
@@ -190,44 +226,6 @@ const Main = ({ product }: Props) => {
             <div dangerouslySetInnerHTML={{ __html: selectedVariant?.about! }} />
           </>
         )}
-
-        {options.length > 0 &&
-          options.map((option) => (
-            <Box key={option.id}>
-              <Typography variant='h6'>
-                {option.name} {option.required && <Typography color='red'>Required</Typography>}
-              </Typography>
-
-              {option.selections?.map((selection) => (
-                <Box key={selection.id}>
-                  {product?.type === 'affiliate' ? (
-                    <ListItemText
-                      primary={selection.name}
-                      secondary={`+${Intl.NumberFormat('en-US', {
-                        style: 'currency',
-                        currency: selectedVariant?.currency,
-                        currencyDisplay: 'code'
-                      }).format(selection.price)}`}
-                    />
-                  ) : (
-                    <FormControlLabel
-                      label={
-                        <ListItemText
-                          primary={selection.name}
-                          secondary={`+${Intl.NumberFormat('en-US', {
-                            style: 'currency',
-                            currency: selectedVariant?.currency,
-                            currencyDisplay: 'code'
-                          }).format(selection.price)}`}
-                        />
-                      }
-                      control={<Checkbox color='info' />}
-                    />
-                  )}
-                </Box>
-              ))}
-            </Box>
-          ))}
       </Box>
     </Box>
   );

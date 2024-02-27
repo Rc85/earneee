@@ -9,19 +9,24 @@ import {
   Button,
   CircularProgress,
   useTheme,
-  Badge
+  Badge,
+  MenuItem,
+  TextField
 } from '@mui/material';
 import Search from '../Search/Search';
 import { SnackbarProvider } from 'notistack';
 import Icon from '@mdi/react';
 import { mdiAccountCircle, mdiAccountPlus, mdiEmail, mdiLogin, mdiLogoutVariant, mdiMenu } from '@mdi/js';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Categories from '../Categories/Categories';
 import { brandName } from '../../../_shared/constants';
 import { usePathname } from 'next/navigation';
 import { authenticate, useLogout } from '../../../_shared/api';
 import { retrieveStatuses } from '../../../_shared/api/statuses/queries';
 import Link from 'next/link';
+import { useDispatch } from 'react-redux';
+import { useAppSelector } from '../../../_shared/redux/store';
+import { setCountry } from '../../../_shared/redux/app';
 
 const TopBar = () => {
   const [openDrawer, setOpenDrawer] = useState(false);
@@ -34,7 +39,7 @@ const TopBar = () => {
   const { statuses } = s.data || {};
   const loginStatus = statuses?.find((status) => status.name === 'login');
   const registrationStatus = statuses?.find((status) => status.name === 'registration');
-  /* const [selectedCountry, setSelectedCountry] = useState('CA');
+  const [_, setSelectedCountry] = useState('CA');
   const dispatch = useDispatch();
   const { country } = useAppSelector((state) => state.App);
 
@@ -42,7 +47,7 @@ const TopBar = () => {
     if (user) {
       setSelectedCountry(user.country);
     }
-  }, [user]); */
+  }, [user]);
 
   const handleLogout = () => {
     logout.mutate('marketplace');
@@ -75,7 +80,7 @@ const TopBar = () => {
 
           <Search />
 
-          {/* <TextField
+          <TextField
             select
             sx={{ mb: '0 !important', width: 75, mr: 1 }}
             value={country}
@@ -91,10 +96,16 @@ const TopBar = () => {
             }}
           >
             {[
+              { code: 'AU', name: 'Australia' },
+              { code: 'GB', name: 'United Kingdom' },
               { code: 'CA', name: 'Canada' },
               { code: 'US', name: 'United States' }
             ].map((country) => (
-              <MenuItem key={country.code} value={country.code} sx={{ display: 'flex', alignItems: 'center' }}>
+              <MenuItem
+                key={country.code}
+                value={country.code}
+                sx={{ display: 'flex', alignItems: 'center' }}
+              >
                 <img
                   src={`${
                     process.env.NEXT_PUBLIC_STORAGE_URL
@@ -104,7 +115,7 @@ const TopBar = () => {
                 {country.name}
               </MenuItem>
             ))}
-          </TextField> */}
+          </TextField>
 
           {isLoading ? (
             <CircularProgress size={20} />

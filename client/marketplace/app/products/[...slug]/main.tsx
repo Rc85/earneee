@@ -35,6 +35,7 @@ import { mdiCloseBoxMultiple, mdiImageOff, mdiViewGrid, mdiViewList } from '@mdi
 import Icon from '@mdi/react';
 import { grey } from '@mui/material/colors';
 import { useRouter } from 'next/navigation';
+import { useAppSelector } from '../../../../_shared/redux/store';
 
 interface Props {
   categoryId: number | undefined;
@@ -68,6 +69,7 @@ const Main = ({ categoryId, subcategoryId, groupId }: Props) => {
     filters,
     orderBy
   });
+  const { country } = useAppSelector((state) => state.App);
   const { isLoading } = p;
   const { variants, count = 0 } = p.data || {};
   const categoryTypes = categories?.filter((category) => category.type) || [];
@@ -274,72 +276,79 @@ const Main = ({ categoryId, subcategoryId, groupId }: Props) => {
 
             {view === 'grid' ? (
               <Grid2 container spacing={1}>
-                {variants?.map((variant) => (
-                  <Grid2 key={variant.id} xs={12} sm={6} md={4} xl={3}>
-                    <Paper
-                      variant='outlined'
-                      className='product-card'
-                      onClick={() => router.push(`/product/${variant.product?.id}?variant=${variant.id}`)}
-                      sx={{ width: 0, minWidth: '100%', cursor: 'pointer' }}
-                    >
-                      <Box
-                        sx={{
-                          width: '100%',
-                          height: '200px',
-                          borderTopRightRadius: '3px',
-                          borderTopLeftRadius: '3px',
-                          backgroundImage: variant.media?.[0]?.url
-                            ? `url('${variant.media[0].url}')`
-                            : undefined,
-                          backgroundRepeat: 'no-repeat',
-                          backgroundSize: 'contain',
-                          backgroundColor: variant.media?.[0]?.url ? 'transparent' : grey[300],
-                          display: 'flex',
-                          justifyContent: 'center',
-                          alignItems: 'center'
-                        }}
+                {variants?.map((variant) => {
+                  const urls = variant.urls || [];
+                  const countryCode = country || 'ca';
+                  const url =
+                    urls.find((url) => url.country.toLowerCase() === countryCode.toLowerCase()) || urls[0];
+
+                  return (
+                    <Grid2 key={variant.id} xs={12} sm={6} md={4} xl={3}>
+                      <Paper
+                        variant='outlined'
+                        className='product-card'
+                        onClick={() => router.push(`/product/${variant.product?.id}?variant=${variant.id}`)}
+                        sx={{ width: 0, minWidth: '100%', cursor: 'pointer' }}
                       >
-                        {!variant.media?.[0]?.url && <Icon path={mdiImageOff} size={5} color={grey[500]} />}
-                      </Box>
+                        <Box
+                          sx={{
+                            width: '100%',
+                            height: '200px',
+                            borderTopRightRadius: '3px',
+                            borderTopLeftRadius: '3px',
+                            backgroundImage: variant.media?.[0]?.url
+                              ? `url('${variant.media[0].url}')`
+                              : undefined,
+                            backgroundRepeat: 'no-repeat',
+                            backgroundSize: 'contain',
+                            backgroundColor: variant.media?.[0]?.url ? 'transparent' : grey[300],
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                          }}
+                        >
+                          {!variant.media?.[0]?.url && <Icon path={mdiImageOff} size={5} color={grey[500]} />}
+                        </Box>
 
-                      <Box sx={{ p: 1 }}>
-                        <Typography sx={{ fontWeight: 'bold' }}>{variant.product?.name}</Typography>
-
-                        <Typography variant='body2' color='GrayText'>
-                          {variant.name}
-                        </Typography>
-                      </Box>
-
-                      {Boolean(variant.product?.excerpt) && (
                         <Box sx={{ p: 1 }}>
-                          <Typography
-                            sx={{
-                              display: '-webkit-box',
-                              WebkitBoxOrient: 'vertical',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              WebkitLineClamp: 3
-                            }}
-                          >
-                            {variant.product?.excerpt}
+                          <Typography sx={{ fontWeight: 'bold' }}>{variant.product?.name}</Typography>
+
+                          <Typography variant='body2' color='GrayText'>
+                            {variant.name}
                           </Typography>
                         </Box>
-                      )}
 
-                      <Divider />
+                        {Boolean(variant.product?.excerpt) && (
+                          <Box sx={{ p: 1 }}>
+                            <Typography
+                              sx={{
+                                display: '-webkit-box',
+                                WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                WebkitLineClamp: 3
+                              }}
+                            >
+                              {variant.product?.excerpt}
+                            </Typography>
+                          </Box>
+                        )}
 
-                      <Box sx={{ p: 1 }}>
-                        <Typography sx={{ textAlign: 'right' }}>
-                          {Intl.NumberFormat('en-US', {
-                            style: 'currency',
-                            currency: 'CAD',
-                            currencyDisplay: 'narrowSymbol'
-                          }).format(variant.price)}
-                        </Typography>
-                      </Box>
-                    </Paper>
-                  </Grid2>
-                ))}
+                        {Boolean(url) && (
+                          <>
+                            <Divider />
+
+                            <Box sx={{ p: 1 }}>
+                              <Typography sx={{ textAlign: 'right' }}>
+                                ${url.price.toFixed(2)} {url.currency.toUpperCase()}
+                              </Typography>
+                            </Box>
+                          </>
+                        )}
+                      </Paper>
+                    </Grid2>
+                  );
+                })}
               </Grid2>
             ) : (
               <List disablePadding>
