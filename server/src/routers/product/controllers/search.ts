@@ -44,32 +44,19 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
         b.logo_url
       FROM product_brands AS b
     ),
-    a AS (
-      SELECT
-        a.id,
-        a.name,
-        a.logo_url
-      FROM affiliates AS a
-    ),
     p AS (
       SELECT
         p.id,
         p.name,
         p.excerpt,
         p.category_id,
-        b.brand,
-        a.affiliate
+        b.brand
       FROM products AS p
       LEFT JOIN LATERAL (
         SELECT TO_JSONB(b.*) AS brand
         FROM b
         WHERE b.id = p.brand_id
       ) AS b ON true
-      LEFT JOIN LATERAL (
-        SELECT TO_JSONB(a.*) AS affiliate
-        FROM a
-        WHERE a.id = p.affiliate_id
-      ) AS a ON true
     ),
     pm AS (
       SELECT
@@ -119,32 +106,19 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
         b.logo_url
       FROM product_brands AS b
     ),
-    a AS (
-      SELECT
-        a.id,
-        a.name,
-        a.logo_url
-      FROM affiliates AS a
-    ),
     p AS (
       SELECT
         p.id,
         p.name,
         p.excerpt,
         p.category_id,
-        b.brand,
-        a.affiliate
+        b.brand
       FROM products AS p
       LEFT JOIN LATERAL (
         SELECT TO_JSONB(b.*) AS brand
         FROM b
         WHERE b.id = p.brand_id
       ) AS b ON true
-      LEFT JOIN LATERAL (
-        SELECT TO_JSONB(a.*) AS affiliate
-        FROM a
-        WHERE a.id = p.affiliate_id
-      ) AS a ON true
       ${category ? `WHERE p.category_id = $2` : ''}
     )
     
@@ -154,6 +128,7 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
       pv.price,
       pv.currency,
       pv.description,
+      pv.excerpt,
       p.product
     FROM product_variants AS pv
     LEFT JOIN LATERAL (

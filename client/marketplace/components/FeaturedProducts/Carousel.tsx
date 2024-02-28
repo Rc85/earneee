@@ -173,12 +173,25 @@ const Carousel = ({ variants }: Props) => {
                           {variant.product?.name} - {variant.name}
                         </Typography>
 
-                        <Typography color='white'>{variant.excerpt || variant.product?.excerpt}</Typography>
+                        <Typography
+                          color='white'
+                          sx={{
+                            display: '-webkit-box',
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            WebkitLineClamp: 3
+                          }}
+                        >
+                          {variant.excerpt || variant.product?.excerpt}
+                        </Typography>
                       </Box>
 
-                      <Typography sx={{ ml: 1 }} color='white' variant='h4'>
-                        ${url.price.toFixed(2)} {url.currency.toUpperCase()}
-                      </Typography>
+                      {url && (
+                        <Typography sx={{ ml: 1, flexShrink: 0 }} color='white' variant='h4'>
+                          ${url.price.toFixed(2)} {url.currency.toUpperCase()}
+                        </Typography>
+                      )}
                     </Box>
                   </Box>
                 );

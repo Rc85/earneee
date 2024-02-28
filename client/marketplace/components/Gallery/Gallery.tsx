@@ -2,7 +2,7 @@
 import { Box, IconButton } from '@mui/material';
 import { ProductMediaInterface } from '../../../../_shared/types';
 import Icon from '@mdi/react';
-import { mdiChevronLeft, mdiChevronRight, mdiPlayCircleOutline } from '@mdi/js';
+import { mdiChevronLeft, mdiChevronRight } from '@mdi/js';
 import { useEffect, useState } from 'react';
 
 interface Props {
@@ -18,97 +18,116 @@ const Gallery = ({ media }: Props) => {
 
   return (
     <>
-      <Box sx={{ position: 'relative', width: '100%', height: '500px', overflowX: 'hidden' }}>
-        {media.map((media, i) =>
-          media.type === 'image' ? (
-            <Box
-              key={media.id}
-              onClick={() => window.open(media.url, '_blank')}
-              sx={{
-                cursor: 'pointer',
-                position: 'absolute',
-                width: '100%',
-                height: '100%',
-                top: 0,
-                right: `${mediaIndex * 100 - i * 100}%`,
-                backgroundImage: media.url ? `url('${media.url}')` : undefined,
-                backgroundRepeat: 'no-repeat',
-                backgroundSize: 'contain',
-                backgroundPosition: 'top center',
-                transition: 'right 0.15s ease-in-out'
-              }}
-            />
-          ) : (
-            <Box
-              key={media.id}
-              sx={{
-                position: 'absolute',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                width: '100%',
-                height: '100%',
-                top: 0,
-                right: `${mediaIndex * 100 - i * 100}%`,
-                transition: 'right 0.15s ease-in-out'
-              }}
-            >
-              <video
+      <Box sx={{ display: 'flex', width: '100%', height: '500px' }}>
+        <Box
+          sx={{
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <IconButton
+            size='small'
+            onClick={() => (mediaIndex > 0 ? setMediaIndex(mediaIndex - 1) : undefined)}
+            disabled={mediaIndex === 0}
+          >
+            <Icon path={mdiChevronLeft} size={2} />
+          </IconButton>
+        </Box>
+
+        <Box sx={{ position: 'relative', overflowX: 'hidden', width: '100%', height: '100%' }}>
+          {media.map((media, i) =>
+            media.type === 'image' ? (
+              <Box
+                key={media.id}
                 onClick={() => window.open(media.url, '_blank')}
-                style={{ maxHeight: '100%', maxWidth: '100%', opacity: 0.75, cursor: 'pointer' }}
-                poster={
-                  media.type === 'youtube' ? `http://img.youtube.com/vi/${media.path}/default.jpg` : undefined
-                }
+                sx={{
+                  cursor: 'pointer',
+                  position: 'absolute',
+                  width: '100%',
+                  height: '100%',
+                  maxHeight: '500px',
+                  top: 0,
+                  right: `${mediaIndex * 100 - i * 100}%`,
+                  backgroundImage: media.url ? `url('${media.url}')` : undefined,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundSize: 'contain',
+                  backgroundPosition: 'top center',
+                  transition: 'right 0.15s ease-in-out'
+                }}
+              />
+            ) : media.type === 'youtube' ? (
+              <Box
+                key={media.id}
+                sx={{
+                  position: 'absolute',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  width: '100%',
+                  height: '100%',
+                  top: 0,
+                  right: `${mediaIndex * 100 - i * 100}%`,
+                  transition: 'right 0.15s ease-in-out',
+                  minWidth: 0
+                }}
               >
-                <source src={`${media.url}#t=0.001`} type='video/mp4' />
-              </video>
+                <iframe
+                  width='100%'
+                  height='100%'
+                  src={`https://www.youtube.com/embed/${media.path}`}
+                  title='Levoit Air Purifier, Noise, Wind Speed, Power Measured'
+                  allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
+                  allowFullScreen
+                />
 
-              <Icon path={mdiPlayCircleOutline} size={5} color='black' style={{ position: 'absolute' }} />
-            </Box>
-          )
-        )}
+                {/* <Icon path={mdiPlayCircleOutline} size={5} color='black' style={{ position: 'absolute' }} /> */}
+              </Box>
+            ) : (
+              <Box
+                key={media.id}
+                sx={{
+                  position: 'absolute',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  width: '100%',
+                  height: '100%',
+                  top: 0,
+                  right: `${mediaIndex * 100 - i * 100}%`,
+                  transition: 'right 0.15s ease-in-out'
+                }}
+              >
+                <video
+                  controls
+                  controlsList='nodownload noremoteplayback noplaybackrate'
+                  disablePictureInPicture
+                  style={{ maxHeight: '100%', maxWidth: '100%' }}
+                >
+                  <source src={`${media.url}#t=0.001`} type='video/mp4' />
+                </video>
+              </Box>
+            )
+          )}
+        </Box>
 
-        {mediaIndex > 0 && (
-          <Box
-            sx={{
-              position: 'absolute',
-              height: '100%',
-              left: 0,
-              top: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
+        <Box
+          sx={{
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <IconButton
+            size='small'
+            onClick={() => setMediaIndex(mediaIndex === media.length - 1 ? mediaIndex : mediaIndex + 1)}
+            disabled={!Boolean(mediaIndex !== media.length - 1)}
           >
-            <IconButton
-              size='small'
-              onClick={() => (mediaIndex > 0 ? setMediaIndex(mediaIndex - 1) : undefined)}
-            >
-              <Icon path={mdiChevronLeft} size={2} />
-            </IconButton>
-          </Box>
-        )}
-
-        {mediaIndex !== media.length - 1 && (
-          <Box
-            sx={{
-              position: 'absolute',
-              height: '100%',
-              right: 0,
-              top: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <IconButton
-              size='small'
-              onClick={() => setMediaIndex(mediaIndex === media.length - 1 ? mediaIndex : mediaIndex + 1)}
-            >
-              <Icon path={mdiChevronRight} size={2} />
-            </IconButton>
-          </Box>
-        )}
+            <Icon path={mdiChevronRight} size={2} />
+          </IconButton>
+        </Box>
       </Box>
 
       <Box sx={{ display: 'flex', justifyContent: 'center', overflowX: 'auto', mt: 1 }}>

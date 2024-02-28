@@ -33,6 +33,8 @@ const Main = ({ product }: Props) => {
   const options = selectedVariant?.options || [];
   const hasSpecifications = Boolean(specifications.length);
 
+  console.log(selectedVariant);
+
   return (
     <Box sx={{ display: 'flex' }}>
       <Box sx={{ flexGrow: 1 }}>
@@ -197,7 +199,7 @@ const Main = ({ product }: Props) => {
                           ))
                         : url.affiliate && (
                             <Typography>
-                              Sold by{' '}
+                              Sold on{' '}
                               {Boolean(url.affiliate.url) ? (
                                 <Link href={url.affiliate.url!} target='_blank'>
                                   {url.affiliate.name}
@@ -219,13 +221,17 @@ const Main = ({ product }: Props) => {
           </>
         )}
 
-        {Boolean(selectedVariant?.about) && (
-          <>
-            <Typography variant='h6'>About this item</Typography>
+        <Box sx={{ mt: 3 }}>
+          {Boolean(selectedVariant?.excerpt) && <Typography>{selectedVariant?.excerpt}</Typography>}
 
-            <div dangerouslySetInnerHTML={{ __html: selectedVariant?.about! }} />
-          </>
-        )}
+          {Boolean(selectedVariant?.about) && (
+            <>
+              <Typography variant='h6'>About this item</Typography>
+
+              <div dangerouslySetInnerHTML={{ __html: selectedVariant?.about! }} />
+            </>
+          )}
+        </Box>
       </Box>
     </Box>
   );

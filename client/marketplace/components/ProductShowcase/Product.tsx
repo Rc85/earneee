@@ -72,18 +72,30 @@ const Product = ({ variant, isLast }: Props) => {
             <>
               <Divider sx={{ my: 1 }} />
 
-              <Typography>{variant.excerpt || variant.product?.excerpt}</Typography>
+              <Typography
+                sx={{
+                  display: '-webkit-box',
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  WebkitLineClamp: 3
+                }}
+              >
+                {variant.excerpt || variant.product?.excerpt}
+              </Typography>
             </>
           )}
         </Box>
 
         <Divider />
 
-        <Box sx={{ p: 2, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-          <Typography variant='h6' sx={{ mb: 0 }}>
-            ${url.price.toFixed(2)} {url.currency.toUpperCase()}
-          </Typography>
-        </Box>
+        {url && (
+          <Box sx={{ p: 2, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+            <Typography variant='h6' sx={{ mb: 0 }}>
+              ${url.price.toFixed(2)} {url.currency.toUpperCase()}
+            </Typography>
+          </Box>
+        )}
       </Box>
     </Paper>
   );

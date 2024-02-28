@@ -219,6 +219,7 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
       SELECT
         pm.id,
         pm.url,
+        pm.path,
         pm.width,
         pm.height,
         pm.variant_id,
