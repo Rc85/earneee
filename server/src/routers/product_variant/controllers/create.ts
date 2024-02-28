@@ -4,7 +4,7 @@ import { ProductUrlsInterface } from '../../../../../_shared/types';
 
 export const createVariant = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
-  const { id, name, description, featured, status, productId, urls, about, details } = req.body;
+  const { id, name, description, featured, status, productId, urls, about, details, excerpt } = req.body;
 
   const variants = await database.retrieve('product_variants', {
     where: 'product_id = $1',
@@ -14,8 +14,30 @@ export const createVariant = async (req: Request, resp: Response, next: NextFunc
 
   await database.create(
     'product_variants',
-    ['id', 'name', 'description', 'featured', 'status', 'product_id', 'ordinance', 'about', 'details'],
-    [id, name, description || null, Boolean(featured), status, productId, variants.length, about, details],
+    [
+      'id',
+      'name',
+      'description',
+      'featured',
+      'status',
+      'product_id',
+      'ordinance',
+      'about',
+      'details',
+      'excerpt'
+    ],
+    [
+      id,
+      name,
+      description || null,
+      Boolean(featured),
+      status,
+      productId,
+      variants.length,
+      about,
+      details,
+      excerpt || null
+    ],
     {
       conflict: {
         columns: 'id',
@@ -26,6 +48,7 @@ export const createVariant = async (req: Request, resp: Response, next: NextFunc
           status = EXCLUDED.status,
           about = EXCLUDED.about,
           details = EXCLUDED.details,
+          excerpt = EXCLUDED.excerpt,
           updated_at = NOW()`
       },
       client

@@ -329,7 +329,7 @@ const Main = ({ categoryId, subcategoryId, groupId }: Props) => {
                                 WebkitLineClamp: 3
                               }}
                             >
-                              {variant.product?.excerpt}
+                              {variant.excerpt || variant.product?.excerpt}
                             </Typography>
                           </Box>
                         )}
@@ -377,7 +377,7 @@ const Main = ({ categoryId, subcategoryId, groupId }: Props) => {
 
                         <ListItemText
                           primary={`${variant.product?.name} - ${variant.name}`}
-                          secondary={variant.product?.excerpt}
+                          secondary={variant.excerpt || variant.product?.excerpt}
                         />
                       </ListItemButton>
 

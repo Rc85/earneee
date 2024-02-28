@@ -173,7 +173,7 @@ const Carousel = ({ variants }: Props) => {
                           {variant.product?.name} - {variant.name}
                         </Typography>
 
-                        <Typography color='white'>{variant.product?.excerpt}</Typography>
+                        <Typography color='white'>{variant.excerpt || variant.product?.excerpt}</Typography>
                       </Box>
 
                       <Typography sx={{ ml: 1 }} color='white' variant='h4'>

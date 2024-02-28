@@ -10,7 +10,7 @@ export const validateCreateVariant = async (req: Request, resp: Response, next: 
   req.body.about = purify.sanitize(req.body.about);
   req.body.details = purify.sanitize(req.body.details);
 
-  const { name, description, featured, status, urls, about, details } = req.body;
+  const { name, description, featured, status, urls, about, details, excerpt } = req.body;
 
   if (!name || validations.blankCheck.test(name)) {
     return next(new HttpException(400, `Name required`));
@@ -26,6 +26,8 @@ export const validateCreateVariant = async (req: Request, resp: Response, next: 
     return next(new HttpException(400, `Featured must be true or false`));
   } else if (!['available', 'unavailable'].includes(status)) {
     return next(new HttpException(400, `Invalid status`));
+  } else if (excerpt && typeof excerpt !== 'string') {
+    return next(new HttpException(400, `Invalid excerpt`));
   }
 
   if (urls) {

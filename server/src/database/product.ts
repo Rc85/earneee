@@ -148,6 +148,7 @@ export const product = {
         pv.id,
         pv.name,
         pv.description,
+        pv.excerpt,
         pv.featured,
         pv.product_id,
         pv.about,

@@ -52,7 +52,7 @@ const Search = () => {
 
                   <ListItemText
                     primary={`${variant.product?.name} - ${variant.name}`}
-                    secondary={variant.product?.excerpt}
+                    secondary={variant.excerpt || variant.product?.excerpt}
                   />
                 </ListItemButton>
 

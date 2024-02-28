@@ -68,11 +68,11 @@ const Product = ({ variant, isLast }: Props) => {
 
           <Typography>{variant.name}</Typography>
 
-          {Boolean(variant.product?.excerpt) && (
+          {Boolean(variant.excerpt || variant.product?.excerpt) && (
             <>
               <Divider sx={{ my: 1 }} />
 
-              <Typography>{variant.product?.excerpt}</Typography>
+              <Typography>{variant.excerpt || variant.product?.excerpt}</Typography>
             </>
           )}
         </Box>

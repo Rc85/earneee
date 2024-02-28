@@ -24,6 +24,7 @@ const VariantForm = ({ variant }: Props) => {
     id: generateKey(1),
     name: '',
     ordinance: 0,
+    excerpt: null,
     description: null,
     about: null,
     details: null,
@@ -123,6 +124,12 @@ const VariantForm = ({ variant }: Props) => {
         onChange={(e) => setForm({ ...form, name: e.target.value })}
         value={form.name}
         autoFocus
+      />
+
+      <TextField
+        label='Excerpt'
+        onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
+        value={form.excerpt || ''}
       />
 
       <TextField

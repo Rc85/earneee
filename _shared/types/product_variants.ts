@@ -8,6 +8,7 @@ export interface ProductVariantsInterface {
   name: string;
   productId: string;
   featured: boolean;
+  excerpt: string | null;
   description: string | null;
   about: string | null;
   details: string | null;
