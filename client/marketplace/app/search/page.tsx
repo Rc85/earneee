@@ -1,6 +1,6 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Section from '../../../_shared/components/Section/Section';
 import { retrieveCategories, searchProducts } from '../../../_shared/api';
 import {
@@ -23,6 +23,7 @@ const Search = () => {
   const { data } = searchProducts({ value: searchValue, category });
   const { variants } = data || {};
   const { country } = useAppSelector((state) => state.App);
+  const router = useRouter();
 
   return (
     <Section
@@ -40,7 +41,10 @@ const Search = () => {
 
             return (
               <ListItem key={variant.id} disableGutters disablePadding divider>
-                <ListItemButton sx={{ alignItems: 'flex-start' }}>
+                <ListItemButton
+                  sx={{ alignItems: 'flex-start' }}
+                  onClick={() => router.push(`/product/${variant.product?.id}?variant=${variant.id}`)}
+                >
                   <ListItemIcon>
                     <Avatar
                       src={variant.media?.[0]?.url || '/broken.jpg'}

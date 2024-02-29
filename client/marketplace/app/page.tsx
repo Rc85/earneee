@@ -9,7 +9,9 @@ const Index = async () => {
   });
   const data = await res.json();
   const offers: OffersInterface[] = data.offers;
-  const status = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/v1/statuses`);
+  const status = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/v1/statuses`, {
+    next: { revalidate: 5 }
+  });
   const statusData = await status.json();
   const statuses: StatusesInterface[] = statusData.statuses;
   const emailSubscriptionStatus = statuses.find((status) => status.name === 'email_subscription');

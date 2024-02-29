@@ -58,7 +58,11 @@ export const createVariant = async (req: Request, resp: Response, next: NextFunc
   if (urls) {
     const urlIds = urls.map((url: ProductUrlsInterface) => url.id);
 
-    await database.delete('product_urls', { where: 'NOT (id = ANY($1))', params: [urlIds], client });
+    await database.delete('product_urls', {
+      where: 'NOT (id = ANY($1)) AND variant_id = $2',
+      params: [urlIds, id],
+      client
+    });
 
     for (const url of urls) {
       await database.create(

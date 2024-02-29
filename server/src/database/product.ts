@@ -114,6 +114,7 @@ export const product = {
         SELECT
           p.id,
           p.name,
+          p.excerpt,
           p.category_id
         FROM products AS p
       ),
