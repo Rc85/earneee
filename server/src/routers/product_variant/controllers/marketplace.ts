@@ -80,16 +80,6 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
     LEFT JOIN product_specifications AS ps
     ON ps.specification_id = s.id
   ),
-  pr AS (
-    SELECT
-      pr.id,
-      pr.name,
-      pr.excerpt,
-      pr.type,
-      pr.category_id,
-      pr.created_at
-    FROM products AS pr
-  ),
   pm AS (
     SELECT
       pm.id,
@@ -97,6 +87,7 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
       pm.width,
       pm.height,
       pm.variant_id,
+      pm.product_id,
       pm.type
     FROM product_media AS pm
     WHERE pm.status = 'enabled'
@@ -106,10 +97,33 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
       pu.id,
       pu.url,
       pu.variant_id,
+      pu.product_id,
       pu.country,
       pu.price,
-      pu.currency
+      pu.currency,
+      pu.type
     FROM product_urls AS pu
+  ),
+  pr AS (
+    SELECT
+      pr.id,
+      pr.name,
+      pr.excerpt,
+      pr.category_id,
+      pr.created_at,
+      COALESCE(pm.media, '[]'::JSONB) AS media,
+      COALESCE(pu.urls, '[]'::JSONB) AS urls
+    FROM products AS pr
+    LEFT JOIN LATERAL (
+      SELECT JSONB_AGG(pm.*) AS media
+      FROM pm
+      WHERE pm.product_id = pr.id
+    ) AS pm ON true
+    LEFT JOIN LATERAL (
+      SELECT JSONB_AGG(pu.*) AS urls
+      FROM pu
+      WHERE pu.product_id = pr.id
+    ) AS pu ON true
   )
 
   SELECT
@@ -223,6 +237,7 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
         pm.width,
         pm.height,
         pm.variant_id,
+        pm.product_id,
         pm.type
       FROM product_media AS pm
       WHERE pm.status = 'enabled'
@@ -242,6 +257,7 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
         po.id,
         po.name,
         po.variant_id,
+        po.product_id,
         COALESCE(os.selections, '[]'::JSONB) AS selections
       FROM product_options AS po
       LEFT JOIN LATERAL (
@@ -264,6 +280,7 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
         pu.id,
         pu.url,
         pu.variant_id,
+        pu.product_id,
         pu.country,
         pu.price,
         pu.currency,
@@ -280,7 +297,8 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
         s.id,
         s.name,
         s.value,
-        ps.variant_id
+        ps.variant_id,
+        ps.product_id
       FROM specifications AS s
       LEFT JOIN product_specifications AS ps
       ON ps.specification_id = s.id
@@ -328,11 +346,16 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
       p.id,
       p.name,
       p.description,
+      p.details,
+      p.about,
       p.excerpt,
       p.status,
-      p.type,
       ac.ancestors,
-      COALESCE(pv.variants, '[]'::JSONB) AS variants
+      COALESCE(pv.variants, '[]'::JSONB) AS variants,
+      COALESCE(pm.media, '[]'::JSONB) AS media,
+      COALESCE(po.options, '[]'::JSONB) AS options,
+      COALESCE(ps.specifications, '[]'::JSONB) AS specifications,
+      COALESCE(pu.urls, '[]'::JSONB) AS urls
     FROM products AS p
     LEFT JOIN LATERAL (
       SELECT ac.ancestors, ac.depth FROM ac
@@ -343,6 +366,26 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
       FROM pv
       WHERE pv.product_id = p.id
     ) AS pv ON true
+    LEFT JOIN LATERAL (
+      SELECT JSONB_AGG(pm.*) AS media
+      FROM pm
+      WHERE pm.product_id = p.id
+    ) AS pm ON true
+    LEFT JOIN LATERAL (
+      SELECT JSONB_AGG(po.*) AS options
+      FROM po
+      WHERE po.product_id = p.id
+    ) AS po ON true
+    LEFT JOIN LATERAL (
+      SELECT JSONB_AGG(ps.*) AS specifications
+      FROM ps
+      WHERE ps.product_id = p.id
+    ) AS ps ON true
+    LEFT JOIN LATERAL (
+      SELECT JSONB_AGG(pu.*) AS urls
+      FROM pu
+      WHERE pu.product_id = p.id
+    ) AS pu ON true
     WHERE p.id = $1
     ORDER BY ac.depth desc
     LIMIT 1`,

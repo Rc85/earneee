@@ -7,8 +7,7 @@ import { AffiliatesInterface } from '../../../../../_shared/types';
 
 export const addAffiliate = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
-  const { id, name, url, description, logoUrl, managerUrl, commissionRate, rateType, status, logoPath } =
-    req.body;
+  const { id, name, url, description, logoUrl, managerUrl, status, logoPath } = req.body;
 
   let logo = logoUrl;
   let path = logoPath;
@@ -51,19 +50,8 @@ export const addAffiliate = async (req: Request, resp: Response, next: NextFunct
 
   const affiliate: AffiliatesInterface[] = await database.create(
     'affiliates',
-    [
-      'id',
-      'name',
-      'url',
-      'description',
-      'logo_url',
-      'logo_path',
-      'manager_url',
-      'commission_rate',
-      'rate_type',
-      'status'
-    ],
-    [id, name, url, description || null, logo, path, managerUrl, commissionRate || 0, rateType, status],
+    ['id', 'name', 'url', 'description', 'logo_url', 'logo_path', 'manager_url', 'status'],
+    [id, name, url, description || null, logo, path, managerUrl, status],
     {
       conflict: {
         columns: 'id',
@@ -74,8 +62,6 @@ export const addAffiliate = async (req: Request, resp: Response, next: NextFunct
           logo_url = EXCLUDED.logo_url,
           logo_path = EXCLUDED.logo_path,
           manager_url = EXCLUDED.manager_url,
-          commission_rate = EXCLUDED.commission_rate,
-          rate_type = EXCLUDED.rate_type,
           status = EXCLUDED.status,
           updated_at = NOW()`
       },

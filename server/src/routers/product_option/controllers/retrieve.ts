@@ -3,11 +3,21 @@ import { database } from '../../../database';
 
 export const retrieveProductOption = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
-  const { variantId } = req.query;
+  const { variantId, productId } = req.query;
+  const params = [productId];
+  const where = [`po.product_id = $1`];
+
+  if (variantId) {
+    params.push(variantId);
+
+    where.push(`po.variant_id = $${params.length}`);
+  } else {
+    where.push(`po.variant_id IS NULL`);
+  }
 
   const options = await database.product.option.retrieve({
-    where: 'po.variant_id = $1',
-    params: [variantId],
+    where: where.join(' AND '),
+    params,
     client
   });
 

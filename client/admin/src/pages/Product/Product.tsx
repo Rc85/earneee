@@ -12,12 +12,26 @@ import {
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
 import { grey } from '@mui/material/colors';
 import { Icon } from '@mdi/react';
-import { mdiPencil, mdiPlusBox, mdiViewGridPlus } from '@mdi/js';
+import {
+  mdiDetails,
+  mdiFormatListBulleted,
+  mdiImage,
+  mdiImageText,
+  mdiInformation,
+  mdiPencil,
+  mdiPlusBox,
+  mdiViewGridPlus
+} from '@mdi/js';
 import EditProduct from './EditProduct';
 import ProductVariants from './ProductVariants';
 import AddVariant from './AddVariant';
 import { retrieveProducts } from '../../../../_shared/api';
 import { Loading } from '../../../../_shared/components';
+import About from './About';
+import Media from './Media';
+import Options from './Options';
+import Specifications from './Specifications';
+import Details from './Details';
 
 const Product = () => {
   const navigate = useNavigate();
@@ -47,6 +61,56 @@ const Product = () => {
               </ListItemIcon>
 
               <ListItemText primary='Edit' />
+            </ListItemButton>
+          </ListItem>
+
+          <ListItem disablePadding disableGutters>
+            <ListItemButton onClick={() => navigate(`/product/${productId}/about`)}>
+              <ListItemIcon>
+                <Icon path={mdiInformation} size={1} />
+              </ListItemIcon>
+
+              <ListItemText primary='About' />
+            </ListItemButton>
+          </ListItem>
+
+          <ListItem disablePadding disableGutters>
+            <ListItemButton onClick={() => navigate(`/product/${productId}/details`)}>
+              <ListItemIcon>
+                <Icon path={mdiImageText} size={1} />
+              </ListItemIcon>
+
+              <ListItemText primary='Main Details' />
+            </ListItemButton>
+          </ListItem>
+
+          <ListItem disablePadding disableGutters>
+            <ListItemButton onClick={() => navigate(`/product/${productId}/options`)}>
+              <ListItemIcon>
+                <Icon path={mdiFormatListBulleted} size={1} />
+              </ListItemIcon>
+
+              <ListItemText primary='Options' />
+            </ListItemButton>
+          </ListItem>
+
+          <ListItem disablePadding disableGutters>
+            <ListItemButton onClick={() => navigate(`/product/${productId}/specifications`)}>
+              <ListItemIcon>
+                <Icon path={mdiDetails} size={1} />
+              </ListItemIcon>
+
+              <ListItemText primary='Specifications' />
+            </ListItemButton>
+          </ListItem>
+
+          <ListItem disablePadding disableGutters>
+            <ListItemButton onClick={() => navigate(`/product/${productId}/media`)}>
+              <ListItemIcon>
+                <Icon path={mdiImage} size={1} />
+              </ListItemIcon>
+
+              <ListItemText primary='Media' />
             </ListItemButton>
           </ListItem>
 
@@ -88,5 +152,10 @@ const Product = () => {
 Product.Edit = EditProduct;
 Product.Variants = ProductVariants;
 Product.AddVariant = AddVariant;
+Product.About = About;
+Product.Media = Media;
+Product.Options = Options;
+Product.Specifications = Specifications;
+Product.Details = Details;
 
 export default Product;

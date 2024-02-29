@@ -2,20 +2,14 @@ import { NextFunction, Request, Response } from 'express';
 import DOMPurify from 'dompurify';
 import { JSDOM } from 'jsdom';
 import { HttpException, validations } from '../../../utils';
-import { database } from '../../../database';
 
-export const validateCreateProductSpecification = async (
-  req: Request,
-  resp: Response,
-  next: NextFunction
-) => {
+export const validateCreateProductSpecification = async (req: Request, _: Response, next: NextFunction) => {
   const window = new JSDOM('').window;
   const purify = DOMPurify(window);
 
   req.body.value = purify.sanitize(req.body.value);
 
-  const { name, value, variantId } = req.body;
-  const { client } = resp.locals;
+  const { name, value } = req.body;
 
   if (!name || validations.blankCheck.test(name)) {
     return next(new HttpException(400, `Name required`));
@@ -25,16 +19,6 @@ export const validateCreateProductSpecification = async (
     return next(new HttpException(400, `Specification details required`));
   } else if (typeof value !== 'string') {
     return next(new HttpException(400, `Invalid specification details`));
-  }
-
-  const variant = await database.retrieve('product_variants', {
-    where: 'id = $1',
-    params: [variantId],
-    client
-  });
-
-  if (!variant.length) {
-    return next(new HttpException(400, `The variant does not exist`));
   }
 
   return next();

@@ -3,14 +3,16 @@ import { database } from '../../../database';
 
 export const retrieveProductSpecification = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
-  const { variantId, categoryId } = req.query;
-  const params = [];
-  const where = [];
+  const { variantId, categoryId, productId } = req.query;
+  const params = [productId];
+  const where = [`ps.product_id = $1`];
 
   if (variantId) {
     params.push(variantId);
 
-    where.push(`variant_id = $${params.length}`);
+    where.push(`ps.variant_id = $${params.length}`);
+  } else {
+    where.push(`ps.variant_id IS NULL`);
   }
 
   if (categoryId) {
@@ -40,7 +42,6 @@ export const retrieveProductSpecification = async (req: Request, resp: Response,
       SELECT
         pr.id,
         pr.name,
-        pr.type,
         pr.category_id
       FROM products AS pr
     )

@@ -4,25 +4,30 @@ import { Modal } from '../../../../_shared/components';
 import { useState } from 'react';
 import { generateKey } from '../../../../../_shared/utils';
 import { countries } from '../../../../../_shared';
+import { useParams } from 'react-router-dom';
 
 interface Props {
   cancel: () => void;
   submit: (url: ProductUrlsInterface) => void;
-  variantId: string;
   url?: ProductUrlsInterface;
   affiliates: AffiliatesInterface[];
+  variantId?: string;
 }
 
 const AddUrl = ({ cancel, url, submit, affiliates, variantId }: Props) => {
-  const [form, setForm] = useState(
+  const params = useParams();
+  const { productId } = params;
+  const [form, setForm] = useState<ProductUrlsInterface>(
     url || {
       id: generateKey(1),
       url: '',
       price: 0,
       currency: 'cad',
       country: 'CA',
+      type: 'affiliate',
       affiliateId: null,
-      variantId,
+      variantId: variantId || null,
+      productId: productId || null,
       createdAt: new Date().toISOString(),
       updatedAt: null
     }
@@ -98,20 +103,34 @@ const AddUrl = ({ cancel, url, submit, affiliates, variantId }: Props) => {
       </TextField>
 
       <TextField
-        label='Affiliate'
+        label='Type'
+        required
         select
         SelectProps={{ native: true }}
-        onChange={handleAffiliateChange}
-        value={form.affiliateId}
+        onChange={(e) => setForm({ ...form, type: e.target.value })}
+        value={form.type}
       >
-        <option value=''></option>
-
-        {affiliates.map((affiliate) => (
-          <option key={affiliate.id} value={affiliate.id}>
-            {affiliate.name}
-          </option>
-        ))}
+        <option value='affiliate'>Affiliate</option>
+        <option value='dropship'>Dropship</option>
       </TextField>
+
+      {form.type === 'affiliate' && (
+        <TextField
+          label='Affiliate'
+          select
+          SelectProps={{ native: true }}
+          onChange={handleAffiliateChange}
+          value={form.affiliateId}
+        >
+          <option value=''></option>
+
+          {affiliates.map((affiliate) => (
+            <option key={affiliate.id} value={affiliate.id}>
+              {affiliate.name}
+            </option>
+          ))}
+        </TextField>
+      )}
     </Modal>
   );
 };

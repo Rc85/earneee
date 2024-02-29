@@ -129,6 +129,8 @@ const Carousel = ({ variants }: Props) => {
                 const countryCode = country || 'ca';
                 const url =
                   urls.find((url) => url.country.toLowerCase() === countryCode.toLowerCase()) || urls[0];
+                const media = variant.media?.[0] || variant.product?.media?.[0];
+                const mediaUrl = media?.url;
 
                 return (
                   <Box
@@ -144,13 +146,10 @@ const Carousel = ({ variants }: Props) => {
                       flexDirection: 'column',
                       justifyContent: 'flex-end',
                       backgroundColor: 'white',
-                      backgroundImage: variant.media?.[0]?.url ? `url("${variant.media[0].url}")` : undefined,
+                      backgroundImage: mediaUrl ? `url("${mediaUrl}")` : undefined,
                       backgroundRepeat: 'no-repeat',
                       backgroundPosition: 'center',
-                      backgroundSize:
-                        (variant.media?.[0]?.width || 0) / (variant.media?.[0]?.height || 0) > 1.5
-                          ? 'cover'
-                          : 'contain',
+                      backgroundSize: (media?.width || 0) / (media?.height || 0) > 1.5 ? 'cover' : 'contain',
                       width: '100%',
                       height: '500px',
                       position: 'absolute',

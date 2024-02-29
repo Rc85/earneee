@@ -14,8 +14,6 @@ export const affiliate = {
       description,
       manager_url,
       logo_url,
-      commission_rate,
-      rate_type,
       status
     FROM affiliates AS a
     ${generateOptionString(options)}`;

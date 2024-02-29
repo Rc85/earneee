@@ -14,14 +14,15 @@ interface Props {
 
 const AddSpecification = ({ cancel, specification }: Props) => {
   const params = useParams();
-  const { variantId } = params;
+  const { productId, variantId } = params;
   const [status, setStatus] = useState('');
   const [form, setForm] = useState<ProductSpecificationsInterface>(
     specification || {
       id: generateKey(1),
       name: '',
       value: '',
-      variantId: variantId!,
+      productId: productId!,
+      variantId: variantId || null,
       ordinance: null,
       createdAt: new Date().toISOString(),
       updatedAt: null

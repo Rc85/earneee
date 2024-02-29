@@ -8,7 +8,7 @@ import { database } from '../../../database';
 export const uploadProductMedia = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
   const file = req.files?.[0];
-  const { image, variantId } = req.body;
+  const { image, variantId, productId } = req.body;
 
   if (image) {
     const base64 = image.split(',')[1];
@@ -35,8 +35,8 @@ export const uploadProductMedia = async (req: Request, resp: Response, next: Nex
 
     await database.create(
       'product_media',
-      ['id', 'url', 'path', 'width', 'height', 'variant_id', 'type'],
-      [id, url, key, info.width, info.height, variantId, 'image'],
+      ['id', 'url', 'path', 'width', 'height', 'variant_id', 'type', 'product_id'],
+      [id, url, key, info.width, info.height, variantId || null, 'image', productId],
       { client }
     );
   } else if (file) {
@@ -59,8 +59,8 @@ export const uploadProductMedia = async (req: Request, resp: Response, next: Nex
 
     await database.create(
       'product_media',
-      ['id', 'url', 'path', 'width', 'height', 'variant_id', 'type'],
-      [id, url, key, 0, 0, variantId, 'video'],
+      ['id', 'url', 'path', 'width', 'height', 'variant_id', 'type', 'product_id'],
+      [id, url, key, 0, 0, variantId || null, 'video', productId],
       { client }
     );
   }

@@ -14,6 +14,9 @@ exports.up = (pgm) => {
         type: 'varchar',
         notNull: true
       },
+      url: {
+        type: 'varchar'
+      },
       logo_url: {
         type: 'varchar'
       },
@@ -25,16 +28,6 @@ exports.up = (pgm) => {
       },
       description: {
         type: 'varchar'
-      },
-      commission_rate: {
-        type: 'double precision',
-        default: 0,
-        notNull: true
-      },
-      rate_type: {
-        type: 'varchar',
-        notNull: true,
-        default: 'fixed'
       },
       status: {
         type: 'varchar',

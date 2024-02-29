@@ -27,6 +27,15 @@ exports.up = (pgm) => {
       description: {
         type: 'varchar'
       },
+      details: {
+        type: 'varchar'
+      },
+      about: {
+        type: 'varchar'
+      },
+      excerpt: {
+        type: 'varchar'
+      },
       featured: {
         type: 'boolean',
         default: false,

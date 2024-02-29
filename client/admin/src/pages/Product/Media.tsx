@@ -37,13 +37,13 @@ const VariantMedia = () => {
   const [type, setType] = useState('image');
   const { enqueueSnackbar } = useSnackbar();
   const params = useParams();
-  const { variantId } = params;
+  const { variantId, productId } = params;
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
   const fileInputRef = useRef<any>(null);
-  const { isLoading, data } = retrieveProductMedia({ variantId });
+  const { isLoading, data } = retrieveProductMedia({ variantId, productId });
   const { media } = data || {};
   const dispatch = useDispatch();
 
@@ -95,7 +95,8 @@ const VariantMedia = () => {
             width,
             ordinance,
             type,
-            variantId: variantId!,
+            productId: productId!,
+            variantId: variantId || null,
             status: 'enabled',
             createdAt: '',
             updatedAt: ''
@@ -112,7 +113,8 @@ const VariantMedia = () => {
           width: 0,
           ordinance: media.length,
           type,
-          variantId: variantId!,
+          productId: productId!,
+          variantId: variantId || null,
           status: 'enabled',
           createdAt: '',
           updatedAt: ''

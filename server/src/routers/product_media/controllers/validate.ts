@@ -1,10 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import { HttpException, validations } from '../../../utils';
-import { database } from '../../../database';
 
-export const validateAddProductMedia = async (req: Request, resp: Response, next: NextFunction) => {
-  const { url, height, width, type, variantId, status } = req.body;
-  const { client } = resp.locals;
+export const validateAddProductMedia = async (req: Request, _: Response, next: NextFunction) => {
+  const { url, height, width, type, status } = req.body;
 
   if (!url || validations.blankCheck.test(url)) {
     return next(new HttpException(400, `URL required`));
@@ -18,16 +16,6 @@ export const validateAddProductMedia = async (req: Request, resp: Response, next
     return next(new HttpException(400, `Invalid media type`));
   } else if (!['enabled', 'disabled'].includes(status)) {
     return next(new HttpException(400, `Invalid status`));
-  }
-
-  const variant = await database.retrieve('product_variants', {
-    where: 'id = $1',
-    params: [variantId],
-    client
-  });
-
-  if (!variant.length) {
-    return next(new HttpException(400, `The variant does not exist`));
   }
 
   return next();

@@ -23,9 +23,6 @@ exports.up = (pgm) => {
         onUpdate: 'cascade',
         onDelete: 'set null'
       },
-      type: {
-        type: 'varchar'
-      },
       ordinance: {
         type: 'int'
       },

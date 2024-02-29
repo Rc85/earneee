@@ -72,7 +72,7 @@ export const useCreateProduct = (onSuccess?: (data: any) => void, onError?: (err
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (options: ProductsInterface) =>
+    mutationFn: (options: ProductsInterface | ProductVariantsInterface) =>
       axios({
         method: 'post',
         url: '/v1/auth/admin/product',
@@ -128,7 +128,7 @@ export const useCreateProductVariant = (onSuccess?: (data: any) => void, onError
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (options: ProductVariantsInterface) =>
+    mutationFn: (options: ProductVariantsInterface | ProductsInterface) =>
       axios({
         method: 'post',
         url: '/v1/auth/admin/product/variant',
@@ -361,7 +361,7 @@ export const useUploadProductMedia = (onSuccess?: (data: any) => void, onError?:
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (options: FormData | { variantId: string; image: string }) =>
+    mutationFn: (options: FormData | { productId?: string; variantId?: string; image: string }) =>
       axios({
         method: 'post',
         url: '/v1/auth/admin/product/media/upload',

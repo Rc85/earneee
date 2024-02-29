@@ -19,6 +19,36 @@ export const product = {
         name,
         parent_id
       FROM categories AS c
+    ),
+    pu AS (
+      SELECT
+        pu.id,
+        pu.url,
+        pu.product_id,
+        pu.country,
+        pu.price,
+        pu.currency,
+        pu.variant_id
+      FROM product_urls AS pu
+    ),
+    pv AS (
+      SELECT
+        pv.id,
+        pv.name,
+        pv.description,
+        pv.excerpt,
+        pv.featured,
+        pv.product_id,
+        pv.about,
+        pv.details,
+        pv.status,
+        COALESCE(pu.urls, '[]'::JSONB) AS urls
+      FROM product_variants AS pv
+      LEFT JOIN LATERAL (
+        SELECT JSONB_AGG(pu.*) AS urls
+        FROM pu
+        WHERE pu.variant_id = pv.id
+      ) AS pu ON true
     )
     
     SELECT
@@ -27,16 +57,29 @@ export const product = {
       p.description,
       p.category_id,
       p.excerpt,
+      p.about,
+      p.details,
       p.status,
-      p.type,
       p.brand_id,
-      c.category
+      c.category,
+      COALESCE(pu.urls, '[]'::JSONB) AS urls,
+      COALESCE(pv.variants, '[]'::JSONB) AS variants
     FROM products AS p
     LEFT JOIN LATERAL (
       SELECT TO_JSONB(c.*) AS category
       FROM c
       WHERE c.id = p.category_id
-    ) AS c ON TRUE
+    ) AS c ON true
+    LEFT JOIN LATERAL (
+      SELECT JSONB_AGG(pv.*) AS variants
+      FROM pv
+      WHERE pv.product_id = p.id
+    ) AS pv ON true
+    LEFT JOIN LATERAL (
+      SELECT JSONB_AGG(pu.*) AS urls
+      FROM pu
+      WHERE pu.product_id = p.id
+    ) AS pu ON true
     ${generateOptionString(options)}`;
 
     return await database
@@ -106,17 +149,10 @@ export const product = {
           pm.width,
           pm.height,
           pm.variant_id,
+          pm.product_id,
           pm.status
         FROM product_media AS pm
         ORDER BY pm.ordinance
-      ),
-      p AS (
-        SELECT
-          p.id,
-          p.name,
-          p.excerpt,
-          p.category_id
-        FROM products AS p
       ),
       a AS (
         SELECT
@@ -132,6 +168,7 @@ export const product = {
           pu.id,
           pu.url,
           pu.variant_id,
+          pu.product_id,
           pu.country,
           pu.price,
           pu.currency,
@@ -143,6 +180,26 @@ export const product = {
           FROM a
           WHERE a.id = pu.affiliate_id
         ) AS a ON true
+      ),
+      p AS (
+        SELECT
+          p.id,
+          p.name,
+          p.excerpt,
+          p.category_id,
+          COALESCE(pm.media, '[]'::JSONB) AS media,
+          COALESCE(pu.urls, '[]'::JSONB) AS urls
+        FROM products AS p
+        LEFT JOIN LATERAL (
+          SELECT JSONB_AGG(pu.*) AS urls
+          FROM pu
+          WHERE pu.product_id = p.id
+        ) AS pu ON true
+        LEFT JOIN LATERAL (
+          SELECT JSONB_AGG(pm.*) AS media
+          FROM pm
+          WHERE pm.product_id = p.id
+        ) AS pm ON true
       )
 
       SELECT

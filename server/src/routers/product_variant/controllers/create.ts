@@ -55,28 +55,39 @@ export const createVariant = async (req: Request, resp: Response, next: NextFunc
     }
   );
 
+  const urlIds = urls ? urls.map((url: ProductUrlsInterface) => url.id) : [];
+
+  await database.delete('product_urls', {
+    where: 'NOT (id = ANY($1)) AND variant_id = $2',
+    params: [urlIds, id],
+    client
+  });
+
   if (urls) {
-    const urlIds = urls.map((url: ProductUrlsInterface) => url.id);
-
-    await database.delete('product_urls', {
-      where: 'NOT (id = ANY($1)) AND variant_id = $2',
-      params: [urlIds, id],
-      client
-    });
-
     for (const url of urls) {
       await database.create(
         'product_urls',
-        ['id', 'url', 'country', 'variant_id', 'price', 'currency', 'affiliate_id'],
-        [url.id, url.url, url.country, id, url.price || 0, url.currency || 'cad', url.affiliateId || null],
+        ['id', 'url', 'country', 'variant_id', 'price', 'currency', 'affiliate_id', 'product_id', 'type'],
+        [
+          url.id,
+          url.url,
+          url.country,
+          id,
+          url.price || 0,
+          url.currency || 'cad',
+          url.affiliateId || null,
+          url.productId,
+          url.type || 'affiliate'
+        ],
         {
           conflict: {
-            columns: 'variant_id, country',
+            columns: 'id',
             do: `UPDATE SET
               url = EXCLUDED.url,
               price = EXCLUDED.price,
               currency = EXCLUDED.currency,
               affiliate_id = EXCLUDED.affiliate_id,
+              type = EXCLUDED.type,
               updated_at = NOW()`
           },
           client

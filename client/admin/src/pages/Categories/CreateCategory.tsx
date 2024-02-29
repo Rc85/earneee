@@ -19,7 +19,6 @@ const CreateCategory = ({ cancel, category }: Props) => {
     category || {
       id: 0,
       name: '',
-      type: null,
       parentId: parentId ? parseInt(parentId) : null,
       status: 'available',
       ordinance: 0,
@@ -73,12 +72,6 @@ const CreateCategory = ({ cancel, category }: Props) => {
         value={form.name}
         autoFocus
         ref={nameInputRef}
-      />
-
-      <TextField
-        label='Type'
-        onChange={(e) => setForm({ ...form, type: e.target.value })}
-        value={form.type || ''}
       />
     </Modal>
   );

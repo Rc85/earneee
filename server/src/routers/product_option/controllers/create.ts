@@ -4,12 +4,12 @@ import { OptionSelectionsInterface } from '../../../../../_shared/types';
 
 export const createProductOption = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
-  const { id, name, required, selections, variantId, status } = req.body;
+  const { id, name, required, selections, variantId, status, productId } = req.body;
 
   await database.create(
     'product_options',
-    ['id', 'name', 'required', 'variant_id', 'status'],
-    [id, name, required, variantId, status],
+    ['id', 'name', 'required', 'variant_id', 'status', 'product_id'],
+    [id, name, required, variantId || null, status, productId],
     {
       conflict: {
         columns: 'id',

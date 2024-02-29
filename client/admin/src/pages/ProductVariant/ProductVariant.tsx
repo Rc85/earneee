@@ -20,13 +20,13 @@ import {
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
-import VariantMedia from './VariantMedia';
+import VariantMedia from '../Product/Media';
 import EditVariant from './EditVariant';
-import VariantOptions from './VariantOptions';
-import Specifications from './Specifications';
+import VariantOptions from '../Product/Options';
+import Specifications from '../Product/Specifications';
 import { retrieveProductVariants, retrieveProducts } from '../../../../_shared/api';
-import About from './About';
-import Details from './Details';
+import About from '../Product/About';
+import Details from '../Product/Details';
 
 const ProductVariant = () => {
   const params = useParams();

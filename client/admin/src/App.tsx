@@ -101,6 +101,51 @@ const App = () => {
                       />
 
                       <Route
+                        path='/product/:productId/media'
+                        element={
+                          <AuthenticatedRoute>
+                            <Pages.Product.Media />
+                          </AuthenticatedRoute>
+                        }
+                      />
+
+                      <Route
+                        path='/product/:productId/options'
+                        element={
+                          <AuthenticatedRoute>
+                            <Pages.Product.Options />
+                          </AuthenticatedRoute>
+                        }
+                      />
+
+                      <Route
+                        path='/product/:productId/specifications'
+                        element={
+                          <AuthenticatedRoute>
+                            <Pages.Product.Specifications />
+                          </AuthenticatedRoute>
+                        }
+                      />
+
+                      <Route
+                        path='/product/:productId/about'
+                        element={
+                          <AuthenticatedRoute>
+                            <Pages.Product.About />
+                          </AuthenticatedRoute>
+                        }
+                      />
+
+                      <Route
+                        path='/product/:productId/details'
+                        element={
+                          <AuthenticatedRoute>
+                            <Pages.Product.Details />
+                          </AuthenticatedRoute>
+                        }
+                      />
+
+                      <Route
                         path='/product/:productId/variants'
                         element={
                           <AuthenticatedRoute>

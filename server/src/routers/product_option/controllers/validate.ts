@@ -3,7 +3,7 @@ import { HttpException, validations } from '../../../utils';
 import { database } from '../../../database';
 
 export const validateCreateProductOption = async (req: Request, resp: Response, next: NextFunction) => {
-  const { name, required, selections, variantId, status } = req.body;
+  const { name, required, selections, status, productId, variantId } = req.body;
   const { client } = resp.locals;
 
   if (!name || validations.blankCheck.test(name)) {
@@ -16,14 +16,25 @@ export const validateCreateProductOption = async (req: Request, resp: Response, 
     return next(new HttpException(400, `Invalid status`));
   }
 
-  const variant = await database.retrieve('product_variants', {
-    where: 'id = $1',
-    params: [variantId],
+  const params = [name, productId];
+  const where = [`name = $1`, `product_id = $2`];
+
+  if (variantId) {
+    params.push(variantId);
+
+    where.push(`variant_id = $${params.length}`);
+  } else {
+    where.push(`variant_id IS NULL`);
+  }
+
+  const option = await database.retrieve('product_options', {
+    where: where.join(' AND '),
+    params,
     client
   });
 
-  if (!variant.length) {
-    return next(new HttpException(400, `The variant does not exist`));
+  if (option.length) {
+    return next(new HttpException(400, `Option already exists`));
   }
 
   if (selections) {

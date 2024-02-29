@@ -72,8 +72,6 @@ const Main = ({ categoryId, subcategoryId, groupId }: Props) => {
   const { country } = useAppSelector((state) => state.App);
   const { isLoading } = p;
   const { variants, count = 0 } = p.data || {};
-  const categoryTypes = categories?.filter((category) => category.type) || [];
-  const categoryTypeLabels = [...new Set(categoryTypes.map((category) => category.type))];
   const s = retrieveProductSpecifications({ categoryId: groupId, enabled: Boolean(groupId) });
   const { specifications = [] } = s.data || {};
   const specificationLabels = [...new Set(specifications.map((specification) => specification.name))];
@@ -101,42 +99,23 @@ const Main = ({ categoryId, subcategoryId, groupId }: Props) => {
   return (
     <Box sx={{ display: 'flex' }}>
       <Box sx={{ width: '25%', minWidth: '200px', maxWidth: '300px', flexShrink: 0 }}>
-        {(categories || [])?.filter((category) => !category.type).length > 0 && (
+        {categories && categories.length > 0 && (
           <Box sx={{ mb: 2 }}>
             <Typography sx={{ fontWeight: 500, mb: 1 }}>Categories</Typography>
 
-            {categories
-              ?.filter((category) => !category.type)
-              .map((category) => {
-                const url = subcategoryId
-                  ? `/products/${categoryId}/${subcategoryId}/${category.id}`
-                  : `/products/${categoryId}/${category.id}`;
+            {categories?.map((category) => {
+              const url = subcategoryId
+                ? `/products/${categoryId}/${subcategoryId}/${category.id}`
+                : `/products/${categoryId}/${category.id}`;
 
-                return (
-                  <Box key={category.id}>
-                    <Link href={url}>{category.name}</Link>
-                  </Box>
-                );
-              })}
+              return (
+                <Box key={category.id}>
+                  <Link href={url}>{category.name}</Link>
+                </Box>
+              );
+            })}
           </Box>
         )}
-
-        {categoryTypeLabels.map((label) => (
-          <Box key={label} sx={{ mb: 2 }}>
-            <Typography sx={{ fontWeight: 500 }}>{label}</Typography>
-
-            {categoryTypes
-              .filter((category) => category.type === label)
-              .map((category) => (
-                <FormControlLabel
-                  key={category.id}
-                  label={category.name}
-                  control={<Checkbox color='info' />}
-                  sx={{ display: 'block' }}
-                />
-              ))}
-          </Box>
-        ))}
 
         {Boolean(filters.minPrice) && (
           <Chip

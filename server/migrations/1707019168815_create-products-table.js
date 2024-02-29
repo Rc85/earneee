@@ -15,6 +15,12 @@ exports.up = (pgm) => {
         notNull: true,
         unique: true
       },
+      price: {
+        type: 'double precision'
+      },
+      currency: {
+        type: 'varchar'
+      },
       category_id: {
         type: 'int',
         notNull: true,
@@ -31,18 +37,14 @@ exports.up = (pgm) => {
       description: {
         type: 'varchar'
       },
-      excerpt: {
+      details: {
         type: 'varchar'
       },
-      type: {
-        type: 'varchar',
-        notNull: true
+      about: {
+        type: 'varchar'
       },
-      affiliate_id: {
-        type: 'varchar',
-        references: 'affiliates (id)',
-        onUpdate: 'cascade',
-        onDelete: 'set null'
+      excerpt: {
+        type: 'varchar'
       },
       status: {
         type: 'varchar',

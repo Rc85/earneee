@@ -8,9 +8,10 @@ export const validateCreateProduct = async (req: Request, resp: Response, next: 
   const window = new JSDOM('').window;
   const purify = DOMPurify(window);
 
-  req.body.description = purify.sanitize(req.body.description);
+  req.body.about = purify.sanitize(req.body.about);
+  req.body.details = purify.sanitize(req.body.details);
 
-  const { name, excerpt, categoryId, type, brandId, description } = req.body;
+  const { name, excerpt, categoryId, brandId, description, about, details, price, currency, urls } = req.body;
   const { client } = resp.locals;
 
   if (!name || validations.blankCheck.test(name)) {
@@ -19,8 +20,6 @@ export const validateCreateProduct = async (req: Request, resp: Response, next: 
     return next(new HttpException(400, `Invalid name`));
   } else if (excerpt && typeof excerpt !== 'string') {
     return next(new HttpException(400, `Invalid excerpt`));
-  } else if (!['affiliate', 'dropship'].includes(type)) {
-    return next(new HttpException(400, `Invalid type`));
   } else if (description && typeof description !== 'string') {
     return next(new HttpException(400, `Invalid description`));
   } else if (brandId) {
@@ -29,12 +28,32 @@ export const validateCreateProduct = async (req: Request, resp: Response, next: 
     if (!brand.length) {
       return next(new HttpException(400, `The brand does not exist`));
     }
+  } else if (about && typeof about !== 'string') {
+    return next(new HttpException(400, `Invalid about`));
+  } else if (details && typeof details !== 'string') {
+    return next(new HttpException(400, `Invalid details`));
+  } else if (price && isNaN(parseFloat(price.toString()))) {
+    return next(new HttpException(400, `Invalid price`));
+  } else if (currency && !validations.currencyCheck.test(currency.toString())) {
+    return next(new HttpException(400, `Invalid currency`));
   }
 
   const category = await database.retrieve('categories', { where: 'id = $1', params: [categoryId], client });
 
   if (!category.length) {
     return next(new HttpException(400, `The category does not exist`));
+  }
+
+  if (urls) {
+    if (!(urls instanceof Array)) {
+      return next(new HttpException(400, `Invalid urls`));
+    }
+
+    for (const url of urls) {
+      if (!validations.urlCheck.test(url.url)) {
+        return next(new HttpException(400, `Invalid url`));
+      }
+    }
   }
 
   return next();

@@ -10,7 +10,6 @@ export const category = {
       const statement = `SELECT
         id,
         name,
-        type,
         status,
         parent_id,
         ordinance

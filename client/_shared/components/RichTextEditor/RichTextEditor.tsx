@@ -6,20 +6,24 @@ import { useState } from 'react';
 interface Props {
   editor: Editor | null;
   sx?: SxProps;
-  onHtmlChange: (html: string) => void;
-  rawHtml: string;
+  onHtmlChange?: (html: string) => void;
+  rawHtml?: string;
 }
 
 const RichTextEditor = ({ editor, rawHtml, onHtmlChange, sx }: Props) => {
   const [editHtml, setEditHtml] = useState(false);
 
   const handleEditorChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    onHtmlChange(e.target.value);
+    onHtmlChange?.(e.target.value);
   };
 
   return (
     <Box sx={sx}>
-      <EditorToolbar editor={editor} toggleEdit={() => setEditHtml(!editHtml)} editHtml={editHtml} />
+      <EditorToolbar
+        editor={editor}
+        toggleEdit={onHtmlChange ? () => setEditHtml(!editHtml) : undefined}
+        editHtml={onHtmlChange ? editHtml : undefined}
+      />
 
       {editHtml ? (
         <TextField

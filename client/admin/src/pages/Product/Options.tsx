@@ -11,8 +11,8 @@ import { retrieveProductOptions } from '../../../../_shared/api';
 const VariantOptions = () => {
   const [status, setStatus] = useState('');
   const params = useParams();
-  const { variantId } = params;
-  const { isLoading, data } = retrieveProductOptions({ variantId });
+  const { variantId, productId } = params;
+  const { isLoading, data } = retrieveProductOptions({ productId, variantId });
   const { options } = data || {};
 
   return isLoading ? (

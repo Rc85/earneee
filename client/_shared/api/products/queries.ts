@@ -74,7 +74,7 @@ export const retrieveProductVariants = (options?: {
   });
 };
 
-export const retrieveProductOptions = (options?: { variantId?: string }) => {
+export const retrieveProductOptions = (options?: { productId?: string; variantId?: string }) => {
   return useQuery<{ options: ProductOptionsInterface[] }>({
     queryKey: ['options', options?.variantId],
     queryFn: async () => {
@@ -91,6 +91,7 @@ export const retrieveProductOptions = (options?: { variantId?: string }) => {
 };
 
 export const retrieveProductSpecifications = (options?: {
+  productId?: string;
   variantId?: string;
   categoryId?: number;
   enabled: boolean;
@@ -111,9 +112,9 @@ export const retrieveProductSpecifications = (options?: {
   });
 };
 
-export const retrieveProductMedia = (options?: { variantId?: string }) => {
+export const retrieveProductMedia = (options?: { variantId?: string; productId?: string }) => {
   return useQuery<{ media: ProductMediaInterface[] }>({
-    queryKey: ['product media', options?.variantId],
+    queryKey: ['product media', options?.productId, options?.variantId],
     queryFn: async () => {
       const { data } = await axios({
         method: 'get',

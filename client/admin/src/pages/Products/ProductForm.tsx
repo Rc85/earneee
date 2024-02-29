@@ -1,13 +1,20 @@
-import { Box, Chip, CircularProgress, TextField, Typography } from '@mui/material';
+import { Box, Button, Chip, CircularProgress, TextField, Typography } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { Icon } from '@mdi/react';
-import { mdiArrowUpDropCircle, mdiTrashCan } from '@mdi/js';
+import { mdiArrowUpDropCircle, mdiPlusBox, mdiTrashCan } from '@mdi/js';
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { useSnackbar } from 'notistack';
-import { CategoriesInterface, ProductsInterface } from '../../../../../_shared/types';
+import { CategoriesInterface, ProductUrlsInterface, ProductsInterface } from '../../../../../_shared/types';
 import { useNavigate } from 'react-router-dom';
-import { retrieveCategories, retrieveProductBrands, useCreateProduct } from '../../../../_shared/api';
+import {
+  retrieveAffiliates,
+  retrieveCategories,
+  retrieveProductBrands,
+  useCreateProduct
+} from '../../../../_shared/api';
 import { generateKey } from '../../../../../_shared/utils';
+import AddUrl from '../Product/AddUrl';
+import UrlRow from '../Product/UrlRow';
 
 interface Props {
   product?: ProductsInterface;
@@ -18,14 +25,18 @@ const ProductForm = ({ product }: Props) => {
   const [form, setForm] = useState<ProductsInterface>({
     id: generateKey(1),
     name: '',
-    description: '',
-    type: '',
+    price: null,
+    currency: null,
+    description: null,
+    about: null,
+    details: null,
     categoryId: 0,
     brandId: '',
     excerpt: '',
     status: 'available',
     createdAt: '',
-    updatedAt: ''
+    updatedAt: '',
+    urls: []
   });
   const { enqueueSnackbar } = useSnackbar();
   const [selectedCategories, setSelectedCategories] = useState<CategoriesInterface[]>([]);
@@ -36,6 +47,8 @@ const ProductForm = ({ product }: Props) => {
   });
   const { brands } = b.data || {};
   const { categories } = c.data || {};
+  const a = retrieveAffiliates();
+  const { affiliates } = a.data || {};
 
   useEffect(() => {
     if (product) {
@@ -78,8 +91,6 @@ const ProductForm = ({ product }: Props) => {
 
     if (!form.name) {
       return enqueueSnackbar('Name required', { variant: 'error' });
-    } else if (!form.type) {
-      return enqueueSnackbar('Type required', { variant: 'error' });
     } else if (!categoryId) {
       return enqueueSnackbar('Category required', { variant: 'error' });
     }
@@ -111,8 +122,36 @@ const ProductForm = ({ product }: Props) => {
     setSelectedCategories(selected);
   };
 
+  const handleAddUrl = (url: ProductUrlsInterface) => {
+    const urls = form.urls ? [...form.urls] : [];
+    const index = urls.findIndex((u) => u.id === url.id);
+
+    if (index < 0) {
+      urls.push(url);
+    } else {
+      urls[index] = url;
+    }
+
+    setForm({ ...form, urls });
+
+    setStatus('');
+  };
+
+  const handleDeleteUrl = (index: number) => {
+    const urls = form.urls ? [...form.urls] : [];
+
+    if (index >= 0) {
+      urls.splice(index, 1);
+    }
+    setForm({ ...form, urls });
+  };
+
   return (
     <Box component='form' onSubmit={handleSubmit}>
+      {status === 'Add URL' && (
+        <AddUrl cancel={() => setStatus('')} submit={handleAddUrl} affiliates={affiliates || []} />
+      )}
+
       <TextField
         label='Name'
         required
@@ -124,6 +163,14 @@ const ProductForm = ({ product }: Props) => {
         label='Excerpt'
         onChange={(e) => handleChange('excerpt', e.target.value)}
         value={form.excerpt || ''}
+      />
+
+      <TextField
+        label='Description'
+        onChange={(e) => handleChange('description', e.target.value)}
+        value={form.description || ''}
+        multiline
+        rows={4}
       />
 
       {selectedCategories.length > 0 && (
@@ -169,19 +216,6 @@ const ProductForm = ({ product }: Props) => {
 
       <TextField
         select
-        label='Type'
-        required
-        SelectProps={{ native: true }}
-        onChange={(e) => handleChange('type', e.target.value)}
-        value={form.type || ''}
-      >
-        <option value=''></option>
-        <option value='affiliate'>Affiliate</option>
-        <option value='dropship'>Dropship</option>
-      </TextField>
-
-      <TextField
-        select
         label='Brand'
         SelectProps={{ native: true }}
         onChange={(e) => handleChange('brandId', e.target.value)}
@@ -194,6 +228,20 @@ const ProductForm = ({ product }: Props) => {
           </option>
         ))}
       </TextField>
+
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }} onClick={() => setStatus('Add URL')}>
+        <Button startIcon={<Icon path={mdiPlusBox} size={1} />}>Add URL</Button>
+      </Box>
+
+      {form.urls?.map((url, i) => (
+        <UrlRow
+          key={url.id}
+          url={url}
+          submit={handleAddUrl}
+          onDelete={() => handleDeleteUrl(i)}
+          affiliates={affiliates || []}
+        />
+      ))}
 
       <LoadingButton
         type='submit'

@@ -12,7 +12,7 @@ const EditVariant = () => {
 
   return (
     <Section title='EDIT' titleVariant='h3'>
-      <VariantForm variant={variant} />
+      {variant && <VariantForm variant={variant} />}
     </Section>
   );
 };

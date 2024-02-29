@@ -16,9 +16,11 @@ const Product = ({ variant, isLast }: Props) => {
   const [loaded, setLoaded] = useState(false);
   const containerRef = useRef<any>(null);
   const { country } = useAppSelector((state) => state.App);
-  const urls = variant.urls || [];
+  const urls = variant.urls && variant.urls.length > 0 ? variant.urls : variant.product?.urls || [];
   const countryCode = country || 'ca';
   const url = urls.find((url) => url.country.toLowerCase() === countryCode.toLowerCase()) || urls[0];
+  const media = variant.media?.[0] || variant.product?.media?.[0];
+  const mediaUrl = media?.url;
 
   useEffect(() => {
     if (containerRef.current) {
@@ -50,11 +52,8 @@ const Product = ({ variant, isLast }: Props) => {
           sx={{
             borderTopRightRadius: 4,
             borderTopLeftRadius: 4,
-            backgroundImage: loaded && variant.media?.[0]?.url ? `url('${variant.media[0].url}')` : undefined,
-            backgroundSize:
-              (variant.media?.[0]?.width || 0) / (variant.media?.[0]?.height || 0) > 1.5
-                ? 'cover'
-                : 'contain',
+            backgroundImage: loaded && mediaUrl ? `url('${mediaUrl}')` : undefined,
+            backgroundSize: (media?.width || 0) / (media?.height || 0) > 1.5 ? 'cover' : 'contain',
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'center top',
             height: '200px'

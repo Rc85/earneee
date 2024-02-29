@@ -2,7 +2,6 @@
 
 import Section from '../../../_shared/components/Section/Section';
 import { Box } from '@mui/material';
-import { HydrationBoundary, QueryClient, dehydrate } from '@tanstack/react-query';
 import Products from './Products';
 import { ProductVariantsInterface } from '../../../../_shared/types';
 
@@ -26,22 +25,19 @@ const ProductShowcase = async ({ categoryId, subcategoryId, groupId, type }: Pro
   }
 
   const res = await fetch(url + queries.join('&'), { credentials: 'include', next: { revalidate: 30 } });
-  const queryClient = new QueryClient();
   const data = await res.json();
   const variants: ProductVariantsInterface[] = data.variants;
 
   return variants.length > 0 ? (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <Section
-        title={type === 'new' ? 'NEW PRODUCTS' : 'POPULAR PRODUCTS'}
-        titleVariant='h4'
-        containerStyle={{ mb: 3 }}
-      >
-        <Box sx={{ display: 'flex', overflowX: 'auto', flexWrap: 'nowrap', py: 1 }}>
-          <Products variants={variants} />
-        </Box>
-      </Section>
-    </HydrationBoundary>
+    <Section
+      title={type === 'new' ? 'NEW PRODUCTS' : 'POPULAR PRODUCTS'}
+      titleVariant='h4'
+      containerStyle={{ mb: 3 }}
+    >
+      <Box sx={{ display: 'flex', overflowX: 'auto', flexWrap: 'nowrap', py: 1 }}>
+        <Products variants={variants} />
+      </Box>
+    </Section>
   ) : null;
 };
 

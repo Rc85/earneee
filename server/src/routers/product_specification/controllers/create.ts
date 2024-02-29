@@ -1,9 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
 import { database } from '../../../database';
+import { generateKey } from '../../../../../_shared/utils';
 
 export const createProductSpecification = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
-  const { id, name, value, variantId } = req.body;
+  const { id, name, value, variantId, productId } = req.body;
 
   const specification = await database.create('specifications', ['id', 'name', 'value'], [id, name, value], {
     conflict: {
@@ -14,10 +15,12 @@ export const createProductSpecification = async (req: Request, resp: Response, n
   });
 
   if (specification.length) {
+    const id = generateKey(1);
+
     await database.create(
       'product_specifications',
-      ['variant_id', 'specification_id'],
-      [variantId, specification[0].id],
+      ['id', 'product_id', 'specification_id', 'variant_id'],
+      [id, productId, specification[0].id, variantId || null],
       { client }
     );
   }

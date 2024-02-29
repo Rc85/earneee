@@ -29,28 +29,35 @@ const Main = ({ product }: Props) => {
   const [selectedVariant, setSelectVariant] = useState<ProductVariantsInterface | undefined>(
     variantId ? product.variants?.find((variant) => variant.id === variantId) : product.variants?.[0]
   );
-  const specifications = selectedVariant?.specifications || [];
+  const specifications =
+    selectedVariant?.specifications && selectedVariant.specifications.length > 0
+      ? selectedVariant.specifications
+      : product.specifications || [];
   const options = selectedVariant?.options || [];
   const hasSpecifications = Boolean(specifications.length);
-
-  console.log(selectedVariant);
+  const urls =
+    selectedVariant?.urls && selectedVariant.urls.length > 0 ? selectedVariant.urls : product.urls || [];
 
   return (
     <Box sx={{ display: 'flex' }}>
       <Box sx={{ flexGrow: 1 }}>
-        <Gallery media={selectedVariant?.media || []} />
+        <Gallery media={selectedVariant?.media || product.media || []} />
 
-        {Boolean(selectedVariant?.details) && (
+        {Boolean(selectedVariant?.details || product.details) && (
           <Box sx={{ mb: 3 }}>
             <Divider sx={{ mb: 1 }} />
 
             <Typography variant='h6'>Details</Typography>
 
-            {selectedVariant?.details && (
+            {selectedVariant?.details ? (
               <div
                 className='product-description'
                 dangerouslySetInnerHTML={{ __html: selectedVariant?.details }}
               />
+            ) : (
+              product.details && (
+                <div className='product-description' dangerouslySetInnerHTML={{ __html: product.details }} />
+              )
             )}
           </Box>
         )}
@@ -94,58 +101,70 @@ const Main = ({ product }: Props) => {
           </Box>
         )}
 
-        {Boolean(selectedVariant?.description) && (
+        {Boolean(selectedVariant?.description || product.description) && (
           <Box sx={{ mb: 3 }}>
             <Divider sx={{ mb: 1 }} />
 
             <Typography variant='h6'>Description</Typography>
 
-            {selectedVariant?.description && (
+            {selectedVariant?.description ? (
               <div
                 className='product-description'
                 dangerouslySetInnerHTML={{ __html: selectedVariant?.description }}
               />
+            ) : (
+              product.description && (
+                <div
+                  className='product-description'
+                  dangerouslySetInnerHTML={{ __html: product.description }}
+                />
+              )
             )}
           </Box>
         )}
       </Box>
 
       <Box sx={{ width: '25%', minWidth: '400px', maxWidth: '400px', ml: 2 }}>
-        {product.variants?.map((variant) => (
-          <Paper
-            key={variant.id}
-            onClick={() => setSelectVariant(variant)}
-            variant='outlined'
-            sx={{
-              display: 'flex',
-              opacity: selectedVariant?.id === variant.id ? 1 : 0.5,
-              mb: 1,
-              cursor: 'pointer'
-            }}
-          >
-            <Box
+        {product.variants?.map((variant) => {
+          const media = variant.media?.[0] || product.media?.[0];
+          const mediaUrl = media?.url;
+
+          return (
+            <Paper
+              key={variant.id}
+              onClick={() => setSelectVariant(variant)}
+              variant='outlined'
               sx={{
-                width: '75px',
-                height: '75px',
-                flexShrink: 0,
-                backgroundImage: variant.media?.[0]?.url ? `url('${variant.media[0].url}')` : undefined,
-                backgroundRepeat: 'no-repeat',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center center'
+                display: 'flex',
+                opacity: selectedVariant?.id === variant.id ? 1 : 0.5,
+                mb: 1,
+                cursor: 'pointer'
               }}
-            />
+            >
+              <Box
+                sx={{
+                  width: '75px',
+                  height: '75px',
+                  flexShrink: 0,
+                  backgroundImage: mediaUrl ? `url('${mediaUrl}')` : undefined,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center center'
+                }}
+              />
 
-            <Box sx={{ flexGrow: 1, p: 1 }}>
-              <Typography>{variant.name}</Typography>
-            </Box>
-          </Paper>
-        ))}
+              <Box sx={{ flexGrow: 1, p: 1 }}>
+                <Typography>{variant.name}</Typography>
+              </Box>
+            </Paper>
+          );
+        })}
 
-        {selectedVariant?.status === 'available' && (
+        {(selectedVariant?.status === 'available' || product.status === 'available') && (
           <>
-            {Boolean(selectedVariant.urls && selectedVariant.urls.length > 0) && (
+            {Boolean(urls.length > 0) && (
               <List disablePadding>
-                {selectedVariant.urls?.map((url) => (
+                {urls.map((url) => (
                   <ListItem
                     disableGutters
                     divider
@@ -165,7 +184,7 @@ const Main = ({ product }: Props) => {
                         </Typography>
                       </Box>
 
-                      {product.type === 'dropship'
+                      {url.type === 'dropship'
                         ? options.map((option) => (
                             <Box key={option.id}>
                               <Typography variant='h6'>
@@ -175,7 +194,7 @@ const Main = ({ product }: Props) => {
 
                               {option.selections?.map((selection) => (
                                 <Box key={selection.id}>
-                                  {product?.type === 'affiliate' ? (
+                                  {url?.type === 'affiliate' ? (
                                     <ListItemText
                                       primary={selection.name}
                                       secondary={`+$${url.price.toFixed(2)} ${url.currency.toUpperCase()}`}
@@ -222,13 +241,15 @@ const Main = ({ product }: Props) => {
         )}
 
         <Box sx={{ mt: 3 }}>
-          {Boolean(selectedVariant?.excerpt) && <Typography>{selectedVariant?.excerpt}</Typography>}
+          {Boolean(selectedVariant?.excerpt || product.excerpt) && (
+            <Typography>{selectedVariant?.excerpt || product.excerpt}</Typography>
+          )}
 
-          {Boolean(selectedVariant?.about) && (
+          {Boolean(selectedVariant?.about || product.about) && (
             <>
               <Typography variant='h6'>About this item</Typography>
 
-              <div dangerouslySetInnerHTML={{ __html: selectedVariant?.about! }} />
+              <div dangerouslySetInnerHTML={{ __html: (selectedVariant?.about || product.about)! }} />
             </>
           )}
         </Box>

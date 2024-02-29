@@ -47,8 +47,8 @@ import ColorPicker, { ColorObject } from 'react-pick-color';
 
 interface Props {
   editor: Editor | null;
-  toggleEdit: () => void;
-  editHtml: boolean;
+  toggleEdit?: () => void;
+  editHtml?: boolean;
 }
 
 const EditorToolbar = ({ editor, toggleEdit, editHtml }: Props) => {
@@ -357,21 +357,23 @@ const EditorToolbar = ({ editor, toggleEdit, editHtml }: Props) => {
         <ToggleButton
           value='video'
           size='small'
-          sx={{ borderColor: '#4f4f4f', flexGrow: 1 }}
+          sx={{ borderColor: '#4f4f4f', borderBottomRightRadius: toggleEdit ? undefined : 0, flexGrow: 1 }}
           onClick={handleYoutubeClick}
         >
           <Icon path={mdiYoutube} size={1} />
         </ToggleButton>
 
-        <ToggleButton
-          selected={editHtml}
-          value='html'
-          size='small'
-          sx={{ borderColor: '#4f4f4f', borderBottomRightRadius: 0, flexGrow: 1 }}
-          onClick={toggleEdit}
-        >
-          <Icon path={mdiApplicationEdit} size={1} />
-        </ToggleButton>
+        {toggleEdit && (
+          <ToggleButton
+            selected={editHtml}
+            value='html'
+            size='small'
+            sx={{ borderColor: '#4f4f4f', borderBottomRightRadius: 0, flexGrow: 1 }}
+            onClick={toggleEdit}
+          >
+            <Icon path={mdiApplicationEdit} size={1} />
+          </ToggleButton>
+        )}
       </ToggleButtonGroup>
 
       <Popover

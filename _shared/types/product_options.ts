@@ -3,7 +3,8 @@ import { OptionSelectionsInterface } from '.';
 export interface ProductOptionsInterface {
   id: string;
   name: string;
-  variantId: string;
+  productId: string | null;
+  variantId: string | null;
   required: boolean;
   status: string;
   createdAt: string;

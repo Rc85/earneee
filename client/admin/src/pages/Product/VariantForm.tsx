@@ -1,7 +1,7 @@
 import { TextField, FormControlLabel, Checkbox, Box, CircularProgress, Button, List } from '@mui/material';
 import { ProductUrlsInterface, ProductVariantsInterface } from '../../../../../_shared/types';
 import { FormEvent, useEffect, useState } from 'react';
-import { deepEqual, generateKey } from '../../../../../_shared/utils';
+import { deepEqual } from '../../../../../_shared/utils';
 import { useSnackbar } from 'notistack';
 import { Icon } from '@mdi/react';
 import { mdiArrowUpDropCircle, mdiPlusBox, mdiRefresh } from '@mdi/js';
@@ -12,7 +12,7 @@ import AddUrl from './AddUrl';
 import UrlRow from './UrlRow';
 
 interface Props {
-  variant?: ProductVariantsInterface;
+  variant: ProductVariantsInterface;
 }
 
 const VariantForm = ({ variant }: Props) => {
@@ -20,23 +20,8 @@ const VariantForm = ({ variant }: Props) => {
   const { productId } = params;
   const navigate = useNavigate();
   const [status, setStatus] = useState('');
-  const initialVariant: ProductVariantsInterface = {
-    id: generateKey(1),
-    name: '',
-    ordinance: 0,
-    excerpt: null,
-    description: null,
-    about: null,
-    details: null,
-    featured: false,
-    productId: productId!,
-    status: 'available',
-    createdAt: new Date().toISOString(),
-    updatedAt: null,
-    urls: []
-  };
-  const [initialState, setInitialState] = useState<ProductVariantsInterface>(initialVariant);
-  const [form, setForm] = useState<ProductVariantsInterface>(initialVariant);
+  const [initialState, setInitialState] = useState<ProductVariantsInterface>(variant);
+  const [form, setForm] = useState<ProductVariantsInterface>(variant);
   const { enqueueSnackbar } = useSnackbar();
   const { data } = retrieveAffiliates();
   const { affiliates } = data || {};
@@ -63,8 +48,6 @@ const VariantForm = ({ variant }: Props) => {
 
   useEffect(() => {
     if (variant) {
-      console.log('variant', variant);
-
       setInitialState(JSON.parse(JSON.stringify(variant)));
 
       setForm(JSON.parse(JSON.stringify(variant)));
