@@ -118,11 +118,13 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
       SELECT JSONB_AGG(pm.*) AS media
       FROM pm
       WHERE pm.product_id = pr.id
+      AND pm.variant_id IS NULL
     ) AS pm ON true
     LEFT JOIN LATERAL (
       SELECT JSONB_AGG(pu.*) AS urls
       FROM pu
       WHERE pu.product_id = pr.id
+      AND pu.variant_id IS NULL
     ) AS pu ON true
   )
 
@@ -370,21 +372,25 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
       SELECT JSONB_AGG(pm.*) AS media
       FROM pm
       WHERE pm.product_id = p.id
+      AND pm.variant_id IS NULL
     ) AS pm ON true
     LEFT JOIN LATERAL (
       SELECT JSONB_AGG(po.*) AS options
       FROM po
       WHERE po.product_id = p.id
+      AND po.variant_id IS NULL
     ) AS po ON true
     LEFT JOIN LATERAL (
       SELECT JSONB_AGG(ps.*) AS specifications
       FROM ps
       WHERE ps.product_id = p.id
+      AND ps.variant_id IS NULL
     ) AS ps ON true
     LEFT JOIN LATERAL (
       SELECT JSONB_AGG(pu.*) AS urls
       FROM pu
       WHERE pu.product_id = p.id
+      AND pu.variant_id IS NULL
     ) AS pu ON true
     WHERE p.id = $1
     ORDER BY ac.depth desc

@@ -78,7 +78,7 @@ export const product = {
     LEFT JOIN LATERAL (
       SELECT JSONB_AGG(pu.*) AS urls
       FROM pu
-      WHERE pu.product_id = p.id
+      WHERE pu.product_id = p.id AND pu.variant_id IS NULL
     ) AS pu ON true
     ${generateOptionString(options)}`;
 
@@ -194,11 +194,13 @@ export const product = {
           SELECT JSONB_AGG(pu.*) AS urls
           FROM pu
           WHERE pu.product_id = p.id
+          AND pu.variant_id IS NULL
         ) AS pu ON true
         LEFT JOIN LATERAL (
           SELECT JSONB_AGG(pm.*) AS media
           FROM pm
           WHERE pm.product_id = p.id
+          AND pm.variant_id IS NULL
         ) AS pm ON true
       )
 
