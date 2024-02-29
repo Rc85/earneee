@@ -18,6 +18,7 @@ export const retrieveProductMedia = async (req: Request, resp: Response, next: N
   const media = await database.retrieve('product_media', {
     where: where.join(' AND '),
     params,
+    orderBy: 'ordinance',
     client
   });
 
