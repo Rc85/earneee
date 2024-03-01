@@ -25,8 +25,8 @@ import { useState } from 'react';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
 import {
   retrieveCategories,
-  retrieveMarketplaceProducts,
-  retrieveProductSpecifications
+  retrieveMarketplaceProductSpecifications,
+  retrieveMarketplaceProducts
 } from '../../../../_shared/api';
 import Link from 'next/link';
 import { ProductSpecificationsInterface } from '../../../../../_shared/types';
@@ -47,7 +47,8 @@ const Main = ({ categoryId, subcategoryId, groupId }: Props) => {
   const [page, setPage] = useState(0);
   const id = groupId || subcategoryId || categoryId;
   const { data } = retrieveCategories({
-    parentId: id
+    parentId: id,
+    hasProducts: true
   });
   const [orderBy, setOrderBy] = useState('newest');
   const [view, setView] = useState('grid');
@@ -72,7 +73,7 @@ const Main = ({ categoryId, subcategoryId, groupId }: Props) => {
   const { country } = useAppSelector((state) => state.App);
   const { isLoading } = p;
   const { variants, count = 0 } = p.data || {};
-  const s = retrieveProductSpecifications({ categoryId: groupId, enabled: Boolean(groupId) });
+  const s = retrieveMarketplaceProductSpecifications({ categoryId: groupId, enabled: Boolean(groupId) });
   const { specifications = [] } = s.data || {};
   const specificationLabels = [...new Set(specifications.map((specification) => specification.name))];
   const router = useRouter();

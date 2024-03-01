@@ -29,12 +29,10 @@ const Main = ({ product }: Props) => {
   const [selectedVariant, setSelectVariant] = useState<ProductVariantsInterface | undefined>(
     variantId ? product.variants?.find((variant) => variant.id === variantId) : product.variants?.[0]
   );
-  const specifications =
-    selectedVariant?.specifications && selectedVariant.specifications.length > 0
-      ? selectedVariant.specifications
-      : product.specifications || [];
+  const selectedVariantSpecifications = selectedVariant?.specifications || [];
+  const productSpecifications = product.specifications || [];
+  const specifications = [...selectedVariantSpecifications, ...productSpecifications];
   const options = selectedVariant?.options || [];
-  const hasSpecifications = Boolean(specifications.length);
   const urls =
     selectedVariant?.urls && selectedVariant.urls.length > 0 ? selectedVariant.urls : product.urls || [];
 
@@ -62,7 +60,7 @@ const Main = ({ product }: Props) => {
           </Box>
         )}
 
-        {hasSpecifications && (
+        {specifications.length > 0 && (
           <Box sx={{ mb: 3 }}>
             <Divider sx={{ mb: 1 }} />
 

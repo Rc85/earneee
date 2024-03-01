@@ -5,10 +5,10 @@ import { CategoriesInterface } from '../../../../_shared/types';
 export const retrieveCategories = (options?: {
   categoryId?: number;
   parentId?: number | null;
-  level?: number;
+  hasProducts?: boolean;
 }) => {
   return useQuery<{ categories: CategoriesInterface[] }>({
-    queryKey: ['categories', options?.categoryId, options?.parentId, options?.level],
+    queryKey: ['categories', options?.categoryId, options?.parentId, options?.hasProducts],
     queryFn: async () => {
       const { data } = await axios({
         method: 'get',

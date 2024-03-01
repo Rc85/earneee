@@ -38,4 +38,11 @@ router.get(
   response
 );
 
+router.get(
+  '/v1/marketplace/product/specification',
+  dbConnect,
+  middleware(controllers.retrieveMarketplaceProductSpecifications),
+  response
+);
+
 export default router;

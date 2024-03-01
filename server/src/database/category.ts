@@ -7,7 +7,9 @@ export const category = {
   retrieve: {
     1: async (options?: DatabaseRetrieveOptions): Promise<CategoriesInterface[]> => {
       const database = options?.client || db;
-      const statement = `SELECT
+      const statement = `
+      
+      SELECT
         id,
         name,
         status,
@@ -76,55 +78,7 @@ export const category = {
     },
     3: async (options?: DatabaseRetrieveOptions) => {
       const database = options?.client || db;
-      const statement = `WITH
-      c2 AS (
-        SELECT
-          c.id,
-          c.name,
-          c.parent_id
-        FROM categories AS c
-        LEFT JOIN LATERAL (
-          SELECT COUNT(p.*) AS product
-          FROM products AS p
-          WHERE p.category_id = c.id
-        ) AS p ON true
-		    WHERE p.product > 0
-      ),
-      c1 AS (
-        SELECT
-          c.id,
-          c.name,
-          c.parent_id,
-          COALESCE(c2.subcategories, '[]'::JSONB) AS subcategories
-        FROM categories AS c
-        LEFT JOIN LATERAL (
-          SELECT JSONB_AGG(c2.*) AS subcategories
-          FROM c2
-          WHERE c2.parent_id = c.id
-        ) AS c2 ON true
-		    LEFT JOIN LATERAL (
-          SELECT COUNT(p.*) AS product
-          FROM products AS p
-          WHERE p.category_id = c.id
-        ) AS p ON true
-        WHERE JSONB_ARRAY_LENGTH(c2.subcategories) > 0 OR p.product > 0
-      )
-      
-      SELECT
-        c.id,
-        c.name,
-        COALESCE(c1.subcategories, '[]'::JSONB) AS subcategories
-      FROM categories AS c
-      LEFT JOIN LATERAL (
-        SELECT JSONB_AGG(c1.*) AS subcategories
-        FROM c1
-        WHERE c1.parent_id = c.id
-      ) AS c1 ON true
-      LEFT JOIN LATERAL (
-        SELECT COUNT(p.*) AS product
-        FROM products AS p
-        WHERE p.category_id = c.id
-      ) AS p ON true
+      const statement = `
       ${generateOptionString(options)}`;
 
       return await database

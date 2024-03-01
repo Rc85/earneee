@@ -112,6 +112,26 @@ export const retrieveProductSpecifications = (options?: {
   });
 };
 
+export const retrieveMarketplaceProductSpecifications = (options?: {
+  categoryId?: number;
+  enabled: boolean;
+}) => {
+  return useQuery<{ specifications: ProductSpecificationsInterface[] }>({
+    enabled: options?.enabled,
+    queryKey: ['marketplace specifications', options?.categoryId],
+    queryFn: async () => {
+      const { data } = await axios({
+        method: 'get',
+        url: '/v1/marketplace/product/specification',
+        params: options,
+        withCredentials: true
+      });
+
+      return data;
+    }
+  });
+};
+
 export const retrieveProductMedia = (options?: { variantId?: string; productId?: string }) => {
   return useQuery<{ media: ProductMediaInterface[] }>({
     queryKey: ['product media', options?.productId, options?.variantId],
