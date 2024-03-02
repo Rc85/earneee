@@ -11,7 +11,7 @@ export const validateCreateProduct = async (req: Request, resp: Response, next: 
   req.body.about = purify.sanitize(req.body.about);
   req.body.details = purify.sanitize(req.body.details);
 
-  const { name, excerpt, categoryId, brandId, description, about, details, price, currency, urls } = req.body;
+  const { name, excerpt, categoryId, brandId, description, about, details } = req.body;
   const { client } = resp.locals;
 
   if (!name || validations.blankCheck.test(name)) {
@@ -32,28 +32,12 @@ export const validateCreateProduct = async (req: Request, resp: Response, next: 
     return next(new HttpException(400, `Invalid about`));
   } else if (details && typeof details !== 'string') {
     return next(new HttpException(400, `Invalid details`));
-  } else if (price && isNaN(parseFloat(price.toString()))) {
-    return next(new HttpException(400, `Invalid price`));
-  } else if (currency && !validations.currencyCheck.test(currency.toString())) {
-    return next(new HttpException(400, `Invalid currency`));
   }
 
   const category = await database.retrieve('categories', { where: 'id = $1', params: [categoryId], client });
 
   if (!category.length) {
     return next(new HttpException(400, `The category does not exist`));
-  }
-
-  if (urls) {
-    if (!(urls instanceof Array)) {
-      return next(new HttpException(400, `Invalid urls`));
-    }
-
-    for (const url of urls) {
-      if (!validations.urlCheck.test(url.url)) {
-        return next(new HttpException(400, `Invalid url`));
-      }
-    }
   }
 
   return next();

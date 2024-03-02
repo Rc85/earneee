@@ -25,14 +25,14 @@ router.put(
 router.delete('/v1/auth/admin/product/variant', dbConnect, middleware(controllers.deleteVariant), response);
 
 router.get(
-  '/v1/auth/marketplace/product',
+  '/v1/auth/marketplace/products',
   dbConnect,
   middleware(controllers.retrieveMarketplaceProducts),
   response
 );
 
 router.get(
-  '/v1/auth/marketplace/product/:id',
+  '/v1/auth/marketplace/product',
   dbConnect,
   middleware(controllers.retrieveMarketplaceProduct),
   response
@@ -42,6 +42,13 @@ router.get(
   '/v1/marketplace/product/specification',
   dbConnect,
   middleware(controllers.retrieveMarketplaceProductSpecifications),
+  response
+);
+
+router.get(
+  '/v1/auth/marketplace/variants',
+  dbConnect,
+  middleware(controllers.retrieveMarketplaceVariants),
   response
 );
 

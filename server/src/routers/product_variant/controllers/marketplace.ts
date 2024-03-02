@@ -1,14 +1,17 @@
 import { NextFunction, Request, Response } from 'express';
 import { database } from '../../../database';
-import { ProductSpecificationsInterface } from '../../../../../_shared/types';
+import { ProductSpecificationsInterface, ProductVariantsInterface } from '../../../../../_shared/types';
 
 export const retrieveMarketplaceProducts = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
-  const { groupId, subcategoryId, categoryId } = req.query;
+  const { groupId, subcategoryId, categoryId, country } = req.query;
   const id = groupId || subcategoryId || categoryId;
   const offset = req.query.offset?.toString() || '0';
-  const params: any = [id];
+  const params: any = [id, country];
   const sort = req.query.orderBy?.toString() || 'newest';
+  //const specificationIds: string[] = [];
+
+  console.log('received');
 
   let orderBy = `pr.product->>'created_at' DESC`;
 
@@ -21,16 +24,16 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
   } else if (sort === 'name_desc') {
     orderBy = `pr.product->>'name' DESC`;
   } else if (sort === 'price_asc') {
-    orderBy = `pv.price ASC`;
+    orderBy = `pu.price ASC`;
   } else if (sort === 'price_desc') {
-    orderBy = `pv.price DESC`;
+    orderBy = `pu.price DESC NULLS LAST`;
   }
 
   let filters: {
     minPrice: string | undefined;
     maxPrice: string | undefined;
     specifications: {
-      [key: string]: ProductSpecificationsInterface;
+      [key: string]: ProductSpecificationsInterface[];
     };
   } = { minPrice: undefined, maxPrice: undefined, specifications: {} };
 
@@ -38,25 +41,25 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
     filters = JSON.parse(JSON.stringify(req.query.filters));
   }
 
-  if (filters.minPrice) {
+  /* if (filters.minPrice) {
     params.push(filters.minPrice);
   }
 
   if (filters.maxPrice) {
     params.push(filters.maxPrice);
-  }
+  } */
 
-  if (filters.specifications && Object.keys(filters.specifications).length) {
-    const specificationIds = [];
+  /* if (filters.specifications && Object.keys(filters.specifications).length) {
+    //const specificationIds = [];
 
     for (const key in filters.specifications) {
       specificationIds.push(filters.specifications[key].id);
     }
 
-    params.push(specificationIds);
-  }
+    //params.push(specificationIds);
+  } */
 
-  const statement = `WITH RECURSIVE
+  /* const statement = `WITH RECURSIVE
   p AS (
     SELECT
       id,
@@ -119,6 +122,15 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
       WHERE pu.product_id = pr.id
       AND pu.variant_id IS NULL
     ) AS pu ON true
+  ),
+  s AS (
+    SELECT
+      s.id,
+      ps.variant_id,
+      ps.product_id
+    FROM specifications AS s
+    LEFT JOIN product_specifications AS ps
+    ON ps.specification_id = s.id
   )
 
   SELECT
@@ -147,6 +159,16 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
     FROM pu
     WHERE pu.variant_id = pv.id
   ) AS pu ON true
+  LEFT JOIN LATERAL (
+    SELECT JSONB_AGG(s.id) AS specifications
+    FROM s
+    WHERE
+    CASE WHEN
+      s.variant_id IS NULL
+      THEN s.product_id = pv.product_id
+      ELSE s.variant_id = pv.id
+    END
+  ) AS s ON true
   WHERE (pr.product->>'category_id')::INT IN (SELECT id FROM p)
   ${filters.minPrice ? `AND pv.price >= $2` : ''}
   ${filters.maxPrice ? `AND pv.price <= ${!filters.minPrice ? '$2' : '$3'}` : ''}
@@ -157,9 +179,135 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
   }
   ORDER BY ${orderBy}
   OFFSET ${offset}
-  LIMIT 20`;
+  LIMIT 20`; */
 
-  const variants = await database.query(statement, params, client);
+  const statement = `WITH RECURSIVE
+  p AS (
+    SELECT
+      id,
+      name,
+      parent_id
+    FROM categories
+    WHERE id = $1
+    UNION ALL
+    SELECT
+      c.id,
+      c.name,
+      c.parent_id
+    FROM categories AS c
+    JOIN p ON p.id = c.parent_id
+  ),
+  pm AS (
+    SELECT
+      pm.id,
+      pm.url,
+      pm.width,
+      pm.height,
+      pm.variant_id,
+      pm.product_id,
+      pm.type
+    FROM product_media AS pm
+    WHERE pm.status = 'enabled'
+    ORDER BY pm.ordinance
+  ),
+  pu AS (
+    SELECT
+      pu.url,
+      pu.variant_id,
+      pu.price,
+      pu.currency
+    FROM product_urls AS pu
+    WHERE LOWER(pu.country) = LOWER($2)
+    ORDER BY pu.price DESC
+  ),
+  s AS (
+    SELECT
+      s.id,
+      s.name,
+      s.value,
+      ps.variant_id,
+      ps.product_id
+    FROM specifications AS s
+    LEFT JOIN product_specifications AS ps
+    ON ps.specification_id = s.id
+  ),
+  pr AS (
+    SELECT
+      pr.id,
+      pr.name,
+      pr.excerpt,
+      pr.category_id,
+      pr.created_at,
+      COALESCE(pm.media, '[]'::JSONB) AS media,
+      COALESCE(s.specifications, '[]'::JSONB) AS specifications
+    FROM products AS pr
+    LEFT JOIN LATERAL (
+      SELECT JSONB_AGG(pm.*) AS media
+      FROM pm
+      WHERE pm.product_id = pr.id
+      AND pm.variant_id IS NULL
+    ) AS pm ON true
+    LEFT JOIN LATERAL (
+      SELECT JSONB_AGG(JSONB_BUILD_OBJECT(
+        'id', s.id,
+        'name', s.name,
+        'value', s.value
+      )) AS specifications
+      FROM s
+      WHERE s.product_id = pr.id
+      AND s.variant_id IS NULL
+    ) AS s ON true
+  )
+
+  SELECT
+    pv.id,
+    pv.name,
+    pv.description,
+    pv.excerpt,
+    pv.product_id,
+    pv.status,
+    pr.product,
+    pu.price,
+    pu.currency,
+    COALESCE(pm.media, '[]'::JSONB) AS media,
+    COALESCE(s.specifications, '[]'::JSONB) AS specifications
+  FROM product_variants AS pv
+  LEFT JOIN LATERAL (
+    SELECT JSONB_AGG(pm.*) AS media
+    FROM pm
+    WHERE pm.variant_id = pv.id
+  ) AS pm ON true
+  LEFT JOIN pu ON pu.variant_id = pv.id
+  LEFT JOIN LATERAL (
+    SELECT JSONB_AGG(JSONB_BUILD_OBJECT(
+      'id', s.id,
+      'name', s.name,
+      'value', s.value
+    )) AS specifications
+    FROM s
+    WHERE s.variant_id = pv.id
+  ) AS s ON true
+  LEFT JOIN LATERAL (
+    SELECT TO_JSONB(pr.*) AS product
+    FROM pr
+    WHERE pr.id = pv.product_id
+  ) AS pr ON true
+  WHERE (pr.product->>'category_id')::INT IN (SELECT id FROM p)
+  ORDER BY ${orderBy}
+  OFFSET ${offset}
+  LIMIT 20`;
+  /* ${filters.minPrice ? `AND (pv.price >= $2${!filters.maxPrice ? ')' : ''}` : ''}
+  ${filters.maxPrice ? `AND pv.price <= ${!filters.minPrice ? '$2' : '$3)'}` : ''}
+  ${
+    filters.specifications && Object.keys(filters.specifications).length
+      ? `AND CASE
+          WHEN pv.variants #> '{specifications}' ?& $${params.length} IS false
+          THEN s.specifications ?& $${params.length}
+        END`
+      : ''
+  } */
+
+  const variants: ProductVariantsInterface[] = await database.query(statement, params, client);
 
   const count = await database.query(
     `WITH RECURSIVE
@@ -169,7 +317,7 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
         name,
         parent_id
       FROM categories
-      where ${groupId ? `id = $1` : subcategoryId ? `id = $1` : `id = $1`}
+      WHERE id = $1
       UNION ALL
       SELECT
         c.id,
@@ -177,28 +325,60 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
         c.parent_id
       FROM categories AS c
       JOIN p ON p.id = c.parent_id
+    ),
+    s AS (
+      SELECT
+        s.id,
+        s.name,
+        s.value,
+        ps.variant_id,
+        ps.product_id
+      FROM specifications AS s
+      LEFT JOIN product_specifications AS ps
+      ON ps.specification_id = s.id
     )
 
     SELECT
-      pv.id
+      pv.id,
+      pv.name,
+      pv.description,
+      pv.excerpt,
+      pv.product_id,
+      pv.status,
+      COALESCE(s.specifications, '[]'::JSONB) AS specifications
     FROM product_variants AS pv
+    LEFT JOIN products AS pr
+    ON pv.product_id = pr.id
     LEFT JOIN LATERAL (
-      SELECT TO_JSONB(p.*) AS product
-      FROM products AS p
-      WHERE p.id = pv.product_id
-    ) AS p ON true
-    WHERE (p.product->>'category_id')::INT IN (SELECT id FROM p)`,
+      SELECT JSONB_AGG(JSONB_BUILD_OBJECT(
+        'id', s.id,
+        'name', s.name,
+        'value', s.value
+      )) AS specifications
+      FROM s
+      WHERE s.variant_id = pv.id
+    ) AS s ON true
+    WHERE pr.category_id IN (SELECT id FROM p)`,
     [id],
     client
   );
 
-  resp.locals.response = { data: { variants, count: count.length } };
+  let results = filterBySpecifications(variants, filters.specifications);
+  let finalCount = filterBySpecifications(count, filters.specifications);
+
+  if (filters.minPrice || filters.maxPrice) {
+    results = filterByPrice(results, filters);
+
+    finalCount = filterByPrice(finalCount, filters);
+  }
+
+  resp.locals.response = { data: { variants: results, count: finalCount.length } };
 
   return next();
 };
 
 export const retrieveMarketplaceProduct = async (req: Request, resp: Response, next: NextFunction) => {
-  const { id } = req.params;
+  const { productId, country } = req.query;
   const { client } = resp.locals;
 
   const product = await database.query(
@@ -248,7 +428,6 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
         po.id,
         po.name,
         po.variant_id,
-        po.product_id,
         COALESCE(os.selections, '[]'::JSONB) AS selections
       FROM product_options AS po
       LEFT JOIN LATERAL (
@@ -268,13 +447,12 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
     ),
     pu AS (
       SELECT
-        pu.id,
         pu.url,
         pu.variant_id,
-        pu.product_id,
         pu.country,
         pu.price,
         pu.currency,
+        pu.type,
         a.affiliate
       FROM product_urls AS pu
       LEFT JOIN LATERAL (
@@ -282,6 +460,7 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
         FROM a
         WHERE a.id = pu.affiliate_id
       ) AS a ON true
+      WHERE pu.country = $2
     ),
     ps AS (
       SELECT
@@ -305,11 +484,18 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
         pv.details,
         pv.product_id,
         pv.status,
+        pu.price,
+        pu.currency,
+        pu.country,
+        pu.affiliate,
+        pu.type,
+        pu.url,
         COALESCE(pm.media, '[]'::JSONB) AS media,
         COALESCE(po.options, '[]'::JSONB) AS options,
-        COALESCE(ps.specifications, '[]'::JSONB) AS specifications,
-        COALESCE(pu.urls, '[]'::JSONB) AS urls
+        COALESCE(ps.specifications, '[]'::JSONB) AS specifications
       FROM product_variants AS pv
+      LEFT JOIN pu
+      ON pu.variant_id = pv.id
       LEFT JOIN LATERAL (
         SELECT JSONB_AGG(pm.*) AS media
         FROM pm
@@ -325,11 +511,6 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
         FROM ps
         WHERE ps.variant_id = pv.id
       ) AS ps ON true
-      LEFT JOIN LATERAL (
-        SELECT JSONB_AGG(pu.*) AS urls
-        FROM pu
-        WHERE pu.variant_id = pv.id
-      ) AS pu ON true
       ORDER BY pv.ordinance
     )
     
@@ -344,9 +525,7 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
       ac.ancestors,
       COALESCE(pv.variants, '[]'::JSONB) AS variants,
       COALESCE(pm.media, '[]'::JSONB) AS media,
-      COALESCE(po.options, '[]'::JSONB) AS options,
-      COALESCE(ps.specifications, '[]'::JSONB) AS specifications,
-      COALESCE(pu.urls, '[]'::JSONB) AS urls
+      COALESCE(ps.specifications, '[]'::JSONB) AS specifications
     FROM products AS p
     LEFT JOIN LATERAL (
       SELECT ac.ancestors, ac.depth FROM ac
@@ -364,31 +543,102 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
       AND pm.variant_id IS NULL
     ) AS pm ON true
     LEFT JOIN LATERAL (
-      SELECT JSONB_AGG(po.*) AS options
-      FROM po
-      WHERE po.product_id = p.id
-      AND po.variant_id IS NULL
-    ) AS po ON true
-    LEFT JOIN LATERAL (
       SELECT JSONB_AGG(ps.*) AS specifications
       FROM ps
       WHERE ps.product_id = p.id
       AND ps.variant_id IS NULL
     ) AS ps ON true
-    LEFT JOIN LATERAL (
-      SELECT JSONB_AGG(pu.*) AS urls
-      FROM pu
-      WHERE pu.product_id = p.id
-      AND pu.variant_id IS NULL
-    ) AS pu ON true
     WHERE p.id = $1
     ORDER BY ac.depth desc
     LIMIT 1`,
-    [id],
+    [productId, country],
     client
   );
 
   resp.locals.response = { data: { product: product[0] } };
+
+  return next();
+};
+
+export const retrieveMarketplaceVariants = async (req: Request, resp: Response, next: NextFunction) => {
+  const { featured, country } = req.query;
+  const { client } = resp.locals;
+  const limit = req.query.limit?.toString() || undefined;
+
+  const variants = await database.query(
+    `WITH
+    pm AS (
+      SELECT
+        pm.id,
+        pm.url,
+        pm.width,
+        pm.height,
+        pm.variant_id,
+        pm.product_id,
+        pm.type
+      FROM product_media AS pm
+      WHERE pm.status = 'enabled'
+      ORDER BY pm.ordinance
+    ),
+    pu AS (
+      SELECT
+        pu.variant_id,
+        pu.price,
+        pu.currency
+      FROM product_urls AS pu
+      WHERE LOWER(pu.country) = LOWER($2)
+      ORDER BY pu.price DESC
+    ),
+    pr AS (
+      SELECT
+        pr.id,
+        pr.name,
+        pr.excerpt,
+        pr.category_id,
+        pr.created_at,
+        COALESCE(pm.media, '[]'::JSONB) AS media
+      FROM products AS pr
+      LEFT JOIN LATERAL (
+        SELECT JSONB_AGG(pm.*) AS media
+        FROM pm
+        WHERE pm.product_id = pr.id
+        AND pm.variant_id IS NULL
+      ) AS pm ON true
+    )
+
+    SELECT
+      pv.id,
+      pv.name,
+      pv.description,
+      pv.excerpt,
+      pv.product_id,
+      pv.status,
+      pu.price,
+      pu.currency,
+      pr.product,
+      COALESCE(pm.media, '[]'::JSONB) AS media
+    FROM product_variants AS pv
+    LEFT JOIN LATERAL (
+      SELECT JSONB_AGG(pm.*) AS media
+      FROM pm
+      WHERE pm.variant_id = pv.id
+    ) AS pm ON true
+    LEFT JOIN pu
+    ON pu.variant_id = pv.id
+    LEFT JOIN LATERAL (
+      SELECT TO_JSONB(pr.*) AS product
+      FROM pr
+      WHERE pr.id = pv.product_id
+    ) AS pr ON true
+    WHERE pv.featured = $1
+    ORDER BY pr.product->>'created_at' DESC
+    LIMIT $3
+    `,
+    [featured, country, limit],
+    client
+  );
+
+  resp.locals.response = { data: { variants } };
 
   return next();
 };
@@ -453,4 +703,81 @@ export const retrieveMarketplaceProductSpecifications = async (
   resp.locals.response = { data: { specifications } };
 
   return next();
+};
+
+const matchingKeys = (requestedKeys: string[], lookupKeys: string[]) => {
+  requestedKeys.sort();
+  lookupKeys.sort();
+
+  const matched =
+    (requestedKeys.length === lookupKeys.length &&
+      JSON.stringify(requestedKeys) === JSON.stringify(lookupKeys)) ||
+    (requestedKeys.length < lookupKeys.length && lookupKeys.some((key) => requestedKeys.includes(key)));
+
+  return matched;
+};
+
+const filterBySpecifications = (
+  variants: ProductVariantsInterface[],
+  filters: { [key: string]: ProductSpecificationsInterface[] }
+) => {
+  const results: ProductVariantsInterface[] = [];
+
+  for (const variant of variants) {
+    const specificationFilters = filters && Object.keys(filters).length;
+
+    if (!specificationFilters) {
+      results.push(variant);
+    } else {
+      if (specificationFilters) {
+        const specifications = variant.specifications || [];
+        const specificationNames = Array.from(
+          new Set(specifications.map((specification) => specification.name))
+        );
+        const filteredSpecificationNames = Array.from(new Set(Object.keys(filters)));
+
+        if (matchingKeys(filteredSpecificationNames, specificationNames)) {
+          const matches = [];
+
+          for (const name in filters) {
+            let match = false;
+
+            for (const spec of filters[name]) {
+              const m = Boolean(specifications.find((s) => s.id === spec.id));
+
+              if (m) {
+                match = true;
+
+                break;
+              }
+            }
+
+            matches.push(match);
+          }
+          const exist = results.find((v: any) => v.id === variant.id);
+
+          if (!matches.includes(false) && !exist) {
+            results.push(variant);
+          }
+        }
+      }
+    }
+  }
+
+  return results;
+};
+
+const filterByPrice = (
+  variants: ProductVariantsInterface[],
+  filters: { minPrice: string | undefined; maxPrice: string | undefined }
+) => {
+  return variants.filter(
+    (variant) =>
+      (!filters.maxPrice && filters.minPrice && (variant.price || 0) >= parseFloat(filters.minPrice)) ||
+      (!filters.minPrice && filters.maxPrice && (variant.price || 0) <= parseFloat(filters.maxPrice)) ||
+      (filters.minPrice &&
+        filters.maxPrice &&
+        (variant.price || 0) >= parseFloat(filters.minPrice) &&
+        (variant.price || 0) <= parseFloat(filters.maxPrice))
+  );
 };

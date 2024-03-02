@@ -5,7 +5,8 @@ export { deleteVariant } from './delete';
 export {
   retrieveMarketplaceProducts,
   retrieveMarketplaceProduct,
-  retrieveMarketplaceProductSpecifications
+  retrieveMarketplaceProductSpecifications,
+  retrieveMarketplaceVariants
 } from './marketplace';
 
 export * from './validate';

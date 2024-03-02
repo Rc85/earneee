@@ -67,7 +67,7 @@ export const createVariant = async (req: Request, resp: Response, next: NextFunc
     for (const url of urls) {
       await database.create(
         'product_urls',
-        ['id', 'url', 'country', 'variant_id', 'price', 'currency', 'affiliate_id', 'product_id', 'type'],
+        ['id', 'url', 'country', 'variant_id', 'price', 'currency', 'affiliate_id', 'type'],
         [
           url.id,
           url.url,
@@ -76,7 +76,6 @@ export const createVariant = async (req: Request, resp: Response, next: NextFunc
           url.price || 0,
           url.currency || 'cad',
           url.affiliateId || null,
-          url.productId,
           url.type || 'affiliate'
         ],
         {

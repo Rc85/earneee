@@ -1,4 +1,4 @@
-import { ProductSpecificationsInterface, ProductUrlsInterface } from '.';
+import { AffiliatesInterface, ProductSpecificationsInterface, ProductUrlsInterface } from '.';
 import { ProductMediaInterface } from './product_media';
 import { ProductOptionsInterface } from './product_options';
 import { ProductsInterface } from './products';
@@ -6,6 +6,8 @@ import { ProductsInterface } from './products';
 export interface ProductVariantsInterface {
   id: string;
   name: string;
+  price?: number | null;
+  currency?: string | null;
   productId: string;
   featured: boolean;
   excerpt: string | null;
@@ -14,6 +16,9 @@ export interface ProductVariantsInterface {
   details: string | null;
   ordinance: number;
   status: string;
+  country?: string | null;
+  url?: string | null;
+  type?: string | null;
   createdAt: string;
   updatedAt: string | null;
   options?: ProductOptionsInterface[];
@@ -21,4 +26,5 @@ export interface ProductVariantsInterface {
   product?: ProductsInterface;
   specifications?: ProductSpecificationsInterface[];
   urls?: ProductUrlsInterface[];
+  affiliate?: AffiliatesInterface;
 }

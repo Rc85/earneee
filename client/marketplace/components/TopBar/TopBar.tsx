@@ -39,13 +39,18 @@ const TopBar = () => {
   const { statuses } = s.data || {};
   const loginStatus = statuses?.find((status) => status.name === 'login');
   const registrationStatus = statuses?.find((status) => status.name === 'registration');
-  const [_, setSelectedCountry] = useState('CA');
   const dispatch = useDispatch();
   const { country } = useAppSelector((state) => state.App);
 
   useEffect(() => {
     if (user) {
-      setSelectedCountry(user.country);
+      dispatch(setCountry(user.country));
+    } else {
+      setTimeout(() => {
+        const country = localStorage.getItem('earneee.country');
+
+        dispatch(setCountry(country || 'CA'));
+      }, 250);
     }
   }, [user]);
 

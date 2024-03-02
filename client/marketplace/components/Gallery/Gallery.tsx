@@ -123,7 +123,7 @@ const Gallery = ({ media }: Props) => {
           <IconButton
             size='small'
             onClick={() => setMediaIndex(mediaIndex === media.length - 1 ? mediaIndex : mediaIndex + 1)}
-            disabled={!Boolean(mediaIndex !== media.length - 1)}
+            disabled={Boolean(media.length === 0 || mediaIndex === media.length - 1)}
           >
             <Icon path={mdiChevronRight} size={2} />
           </IconButton>

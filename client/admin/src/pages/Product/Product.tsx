@@ -14,7 +14,6 @@ import { grey } from '@mui/material/colors';
 import { Icon } from '@mdi/react';
 import {
   mdiDetails,
-  mdiFormatListBulleted,
   mdiImage,
   mdiImageText,
   mdiInformation,
@@ -29,7 +28,6 @@ import { retrieveProducts } from '../../../../_shared/api';
 import { Loading } from '../../../../_shared/components';
 import About from './About';
 import Media from './Media';
-import Options from './Options';
 import Specifications from './Specifications';
 import Details from './Details';
 
@@ -81,16 +79,6 @@ const Product = () => {
               </ListItemIcon>
 
               <ListItemText primary='Main Details' />
-            </ListItemButton>
-          </ListItem>
-
-          <ListItem disablePadding disableGutters>
-            <ListItemButton onClick={() => navigate(`/product/${productId}/options`)}>
-              <ListItemIcon>
-                <Icon path={mdiFormatListBulleted} size={1} />
-              </ListItemIcon>
-
-              <ListItemText primary='Options' />
             </ListItemButton>
           </ListItem>
 
@@ -154,7 +142,6 @@ Product.Variants = ProductVariants;
 Product.AddVariant = AddVariant;
 Product.About = About;
 Product.Media = Media;
-Product.Options = Options;
 Product.Specifications = Specifications;
 Product.Details = Details;
 

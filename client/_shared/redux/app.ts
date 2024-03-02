@@ -25,6 +25,8 @@ const appSlice = createSlice({
       state.isLoading = loading.payload;
     },
     setCountry(state, country: PayloadAction<string>) {
+      localStorage.setItem('earneee.country', country.payload);
+
       state.country = country.payload;
     }
   }

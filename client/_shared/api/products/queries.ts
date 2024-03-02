@@ -49,6 +49,7 @@ export const retrieveProductVariants = (options?: {
   categoryId?: number;
   subcategoryId?: number;
   groupId?: number;
+  country?: string;
 }) => {
   return useQuery<{ variants: ProductVariantsInterface[] }>({
     queryKey: [
@@ -59,7 +60,8 @@ export const retrieveProductVariants = (options?: {
       options?.productId,
       options?.categoryId,
       options?.subcategoryId,
-      options?.groupId
+      options?.groupId,
+      options?.country
     ],
     queryFn: async () => {
       const { data } = await axios({
@@ -155,10 +157,11 @@ export const retrieveMarketplaceProducts = (options?: {
     minPrice: string | undefined;
     maxPrice: string | undefined;
     specifications: {
-      [key: string]: ProductSpecificationsInterface;
+      [key: string]: ProductSpecificationsInterface[];
     };
   };
   orderBy: string;
+  country: string;
 }) => {
   return useQuery<{ variants: ProductVariantsInterface[]; count: number }>({
     queryKey: [
@@ -166,8 +169,26 @@ export const retrieveMarketplaceProducts = (options?: {
       options?.categoryId,
       options?.offset,
       options?.filters,
-      options?.orderBy
+      options?.orderBy,
+      options?.country
     ],
+    queryFn: async () => {
+      const { data } = await axios({
+        method: 'get',
+        url: '/v1/auth/marketplace/products',
+        params: options,
+        withCredentials: true
+      });
+
+      return data;
+    },
+    staleTime: 30000
+  });
+};
+
+export const retrieveMarketplaceProduct = (options?: { productId: string; country: string }) => {
+  return useQuery<{ product: ProductsInterface }>({
+    queryKey: ['marketplace product', options?.productId, options?.country],
     queryFn: async () => {
       const { data } = await axios({
         method: 'get',
@@ -177,7 +198,29 @@ export const retrieveMarketplaceProducts = (options?: {
       });
 
       return data;
-    }
+    },
+    staleTime: 30000
+  });
+};
+
+export const retrieveMarketplaceVariants = (options?: {
+  featured?: boolean;
+  limit?: number;
+  country: string;
+}) => {
+  return useQuery<{ variants: ProductVariantsInterface[] }>({
+    queryKey: ['marketplace variants', options?.featured, options?.limit, options?.country],
+    queryFn: async () => {
+      const { data } = await axios({
+        method: 'get',
+        url: '/v1/auth/marketplace/variants',
+        params: options,
+        withCredentials: true
+      });
+
+      return data;
+    },
+    staleTime: 15000
   });
 };
 

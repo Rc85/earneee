@@ -16,13 +16,12 @@ interface Props {
 const AddOption = ({ cancel, option }: Props) => {
   const [status, setStatus] = useState('');
   const params = useParams();
-  const { productId, variantId } = params;
+  const { variantId } = params;
   const [form, setForm] = useState<ProductOptionsInterface>({
     id: generateKey(1),
     name: '',
     required: true,
-    productId: productId!,
-    variantId: variantId || null,
+    variantId: variantId!,
     status: 'available',
     createdAt: '',
     updatedAt: '',

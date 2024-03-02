@@ -24,7 +24,6 @@ export const product = {
       SELECT
         pu.id,
         pu.url,
-        pu.product_id,
         pu.country,
         pu.price,
         pu.currency,
@@ -62,7 +61,6 @@ export const product = {
       p.status,
       p.brand_id,
       c.category,
-      COALESCE(pu.urls, '[]'::JSONB) AS urls,
       COALESCE(pv.variants, '[]'::JSONB) AS variants
     FROM products AS p
     LEFT JOIN LATERAL (
@@ -75,11 +73,6 @@ export const product = {
       FROM pv
       WHERE pv.product_id = p.id
     ) AS pv ON true
-    LEFT JOIN LATERAL (
-      SELECT JSONB_AGG(pu.*) AS urls
-      FROM pu
-      WHERE pu.product_id = p.id AND pu.variant_id IS NULL
-    ) AS pu ON true
     ${generateOptionString(options)}`;
 
     return await database
@@ -168,7 +161,6 @@ export const product = {
           pu.id,
           pu.url,
           pu.variant_id,
-          pu.product_id,
           pu.country,
           pu.price,
           pu.currency,
@@ -187,15 +179,8 @@ export const product = {
           p.name,
           p.excerpt,
           p.category_id,
-          COALESCE(pm.media, '[]'::JSONB) AS media,
-          COALESCE(pu.urls, '[]'::JSONB) AS urls
+          COALESCE(pm.media, '[]'::JSONB) AS media
         FROM products AS p
-        LEFT JOIN LATERAL (
-          SELECT JSONB_AGG(pu.*) AS urls
-          FROM pu
-          WHERE pu.product_id = p.id
-          AND pu.variant_id IS NULL
-        ) AS pu ON true
         LEFT JOIN LATERAL (
           SELECT JSONB_AGG(pm.*) AS media
           FROM pm

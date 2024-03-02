@@ -57,20 +57,21 @@ const Main = ({ categoryId, subcategoryId, groupId }: Props) => {
     minPrice: string | undefined;
     maxPrice: string | undefined;
     specifications: {
-      [key: string]: ProductSpecificationsInterface;
+      [key: string]: ProductSpecificationsInterface[];
     };
   }>({
     minPrice: undefined,
     maxPrice: undefined,
     specifications: {}
   });
+  const { country } = useAppSelector((state) => state.App);
   const p = retrieveMarketplaceProducts({
     categoryId: id,
     offset: page * 20,
     filters,
-    orderBy
+    orderBy,
+    country
   });
-  const { country } = useAppSelector((state) => state.App);
   const { isLoading } = p;
   const { variants, count = 0 } = p.data || {};
   const s = retrieveMarketplaceProductSpecifications({ categoryId: groupId, enabled: Boolean(groupId) });
@@ -78,13 +79,25 @@ const Main = ({ categoryId, subcategoryId, groupId }: Props) => {
   const specificationLabels = [...new Set(specifications.map((specification) => specification.name))];
   const router = useRouter();
 
+  console.log(variants, count);
+
   const handleSpecificationChange = (specification: ProductSpecificationsInterface) => {
     const specifications = { ...filters.specifications };
 
-    if (specifications[specification.name]?.id === specification.id) {
-      delete specifications[specification.name];
+    if (specifications[specification.name]) {
+      const index = specifications[specification.name].findIndex((s) => s.id === specification.id);
+
+      if (index >= 0) {
+        specifications[specification.name].splice(index, 1);
+
+        if (specifications[specification.name].length === 0) {
+          delete specifications[specification.name];
+        }
+      } else {
+        specifications[specification.name].push(specification);
+      }
     } else {
-      specifications[specification.name] = specification;
+      specifications[specification.name] = [specification];
     }
 
     setFilters({ ...filters, specifications });
@@ -95,6 +108,10 @@ const Main = ({ categoryId, subcategoryId, groupId }: Props) => {
   const handleSortChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setOrderBy(e.target.value);
     setPage(0);
+  };
+
+  const handleClearAllClick = () => {
+    setFilters({ minPrice: undefined, maxPrice: undefined, specifications: {} });
   };
 
   return (
@@ -118,54 +135,51 @@ const Main = ({ categoryId, subcategoryId, groupId }: Props) => {
           </Box>
         )}
 
-        {Boolean(filters.minPrice) && (
-          <Chip
-            label={`Min Price: $${filters.minPrice}`}
-            onDelete={() => setFilters({ ...filters, minPrice: undefined })}
-            sx={{ mb: 2, mr: 1 }}
-          />
-        )}
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+          {Boolean(filters.minPrice) && (
+            <Chip
+              label={`Min Price: $${filters.minPrice}`}
+              onDelete={() => setFilters({ ...filters, minPrice: undefined })}
+              sx={{ mb: 2, mr: 1 }}
+            />
+          )}
 
-        {Boolean(filters.maxPrice) && (
-          <Chip
-            label={`Max Price: $${filters.maxPrice}`}
-            onDelete={() => setFilters({ ...filters, maxPrice: undefined })}
-            sx={{ mb: 2, mr: 1 }}
-          />
-        )}
-
-        {/* filters.specifications.map((specification) => (
-          <Chip
-            key={specification.id}
-            label={specification.value}
-            onDelete={() => handleSpecificationChange(specification)}
-            sx={{ mb: 2, mr: 1 }}
-          />
-        )) */}
-
-        {Object.keys(filters.specifications).length > 0 && (
-          <>
-            {Object.keys(filters.specifications).map((key) => (
-              <Chip
-                key={key}
-                label={`${filters.specifications[key].name}: ${filters.specifications[key].value}`}
-                onDelete={() => handleSpecificationChange(filters.specifications[key])}
-                sx={{ mb: 2, mr: 1 }}
-              />
-            ))}
-
-            <Button
-              variant='contained'
-              color='error'
-              fullWidth
-              startIcon={<Icon path={mdiCloseBoxMultiple} size={1} />}
-              onClick={() => setFilters({ ...filters, specifications: {} })}
+          {Boolean(filters.maxPrice) && (
+            <Chip
+              label={`Max Price: $${filters.maxPrice}`}
+              onDelete={() => setFilters({ ...filters, maxPrice: undefined })}
               sx={{ mb: 2 }}
-            >
-              Clear All
-            </Button>
-          </>
-        )}
+            />
+          )}
+
+          {(Object.keys(filters.specifications).length > 0 || filters.minPrice || filters.maxPrice) && (
+            <>
+              {Object.keys(filters.specifications).map((key) => {
+                const specifications = filters.specifications[key];
+
+                return specifications.map((specification) => (
+                  <Chip
+                    key={specification.id}
+                    label={`${specification.name}: ${specification.value}`}
+                    onDelete={() => handleSpecificationChange(specification)}
+                    sx={{ mb: 2 }}
+                  />
+                ));
+              })}
+
+              <Button
+                variant='contained'
+                color='error'
+                fullWidth
+                startIcon={<Icon path={mdiCloseBoxMultiple} size={1} />}
+                onClick={handleClearAllClick}
+                sx={{ mb: 2 }}
+              >
+                Clear All
+              </Button>
+            </>
+          )}
+        </Box>
 
         <PriceFilter apply={(minPrice, maxPrice) => setFilters({ ...filters, minPrice, maxPrice })} />
 
@@ -198,7 +212,9 @@ const Main = ({ categoryId, subcategoryId, groupId }: Props) => {
                         control={<Checkbox color='info' />}
                         sx={{ display: 'block' }}
                         onChange={() => handleSpecificationChange(specification)}
-                        checked={Boolean(filters.specifications[label]?.id === specification.id)}
+                        checked={Boolean(
+                          filters.specifications[label]?.find((s) => s.id === specification.id)
+                        )}
                       />
                     ))}
                   </>
@@ -256,123 +272,123 @@ const Main = ({ categoryId, subcategoryId, groupId }: Props) => {
 
             {view === 'grid' ? (
               <Grid2 container spacing={1}>
-                {variants?.map((variant) => {
-                  const urls = variant.urls || [];
-                  const countryCode = country || 'ca';
-                  const url =
-                    urls.find((url) => url.country.toLowerCase() === countryCode.toLowerCase()) || urls[0];
-
-                  return (
-                    <Grid2 key={variant.id} xs={12} sm={6} md={4} xl={3}>
-                      <Paper
-                        variant='outlined'
-                        className='product-card'
-                        onClick={() => router.push(`/product/${variant.product?.id}?variant=${variant.id}`)}
-                        sx={{ width: 0, minWidth: '100%', cursor: 'pointer' }}
+                {variants?.map((variant) => (
+                  <Grid2 key={variant.id} xs={12} sm={6} md={4} xl={3}>
+                    <Paper
+                      variant='outlined'
+                      className='product-card'
+                      onClick={() => router.push(`/product/${variant.product?.id}?variant=${variant.id}`)}
+                      sx={{ width: 0, minWidth: '100%', cursor: 'pointer' }}
+                    >
+                      <Box
+                        sx={{
+                          width: '100%',
+                          height: '200px',
+                          borderTopRightRadius: '3px',
+                          borderTopLeftRadius: '3px',
+                          backgroundImage: variant.media?.[0]?.url
+                            ? `url('${variant.media[0].url}')`
+                            : undefined,
+                          backgroundRepeat: 'no-repeat',
+                          backgroundSize: 'contain',
+                          backgroundColor: variant.media?.[0]?.url ? 'transparent' : grey[300],
+                          display: 'flex',
+                          justifyContent: 'center',
+                          alignItems: 'center'
+                        }}
                       >
-                        <Box
-                          sx={{
-                            width: '100%',
-                            height: '200px',
-                            borderTopRightRadius: '3px',
-                            borderTopLeftRadius: '3px',
-                            backgroundImage: variant.media?.[0]?.url
-                              ? `url('${variant.media[0].url}')`
-                              : undefined,
-                            backgroundRepeat: 'no-repeat',
-                            backgroundSize: 'contain',
-                            backgroundColor: variant.media?.[0]?.url ? 'transparent' : grey[300],
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center'
-                          }}
-                        >
-                          {!variant.media?.[0]?.url && <Icon path={mdiImageOff} size={5} color={grey[500]} />}
-                        </Box>
+                        {!variant.media?.[0]?.url && <Icon path={mdiImageOff} size={5} color={grey[500]} />}
+                      </Box>
 
+                      <Box sx={{ p: 1 }}>
+                        <Typography sx={{ fontWeight: 'bold' }}>{variant.product?.name}</Typography>
+
+                        <Typography color='GrayText'>{variant.name}</Typography>
+                      </Box>
+
+                      {Boolean(variant.excerpt || variant.product?.excerpt) && (
                         <Box sx={{ p: 1 }}>
-                          <Typography sx={{ fontWeight: 'bold' }}>{variant.product?.name}</Typography>
-
-                          <Typography variant='body2' color='GrayText'>
-                            {variant.name}
+                          <Typography
+                            sx={{
+                              display: '-webkit-box',
+                              WebkitBoxOrient: 'vertical',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              WebkitLineClamp: 3
+                            }}
+                          >
+                            {variant.excerpt || variant.product?.excerpt}
                           </Typography>
                         </Box>
+                      )}
 
-                        {Boolean(variant.product?.excerpt) && (
+                      {variant.price != null && (
+                        <>
+                          <Divider />
+
                           <Box sx={{ p: 1 }}>
-                            <Typography
-                              sx={{
-                                display: '-webkit-box',
-                                WebkitBoxOrient: 'vertical',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                WebkitLineClamp: 3
-                              }}
-                            >
-                              {variant.excerpt || variant.product?.excerpt}
+                            <Typography sx={{ textAlign: 'right' }}>
+                              ${variant.price.toFixed(2)} {variant.currency?.toUpperCase()}
                             </Typography>
                           </Box>
-                        )}
-
-                        {Boolean(url) && (
-                          <>
-                            <Divider />
-
-                            <Box sx={{ p: 1 }}>
-                              <Typography sx={{ textAlign: 'right' }}>
-                                ${url.price.toFixed(2)} {url.currency.toUpperCase()}
-                              </Typography>
-                            </Box>
-                          </>
-                        )}
-                      </Paper>
-                    </Grid2>
-                  );
-                })}
+                        </>
+                      )}
+                    </Paper>
+                  </Grid2>
+                ))}
               </Grid2>
             ) : (
               <List disablePadding>
-                {variants?.map((variant) => {
-                  const urls = variant.urls || [];
-                  const countryCode = country || 'ca';
-                  const url =
-                    urls.find((url) => url.country.toLowerCase() === countryCode.toLowerCase()) || urls[0];
+                {variants?.map((variant) => (
+                  <ListItem key={variant.id} disableGutters divider>
+                    <ListItemButton
+                      sx={{ alignItems: 'flex-start' }}
+                      onClick={() => router.push(`/product/${variant.product?.id}?variant=${variant.id}`)}
+                    >
+                      <ListItemIcon sx={{ mr: 1 }}>
+                        <Avatar
+                          src={variant.media?.[0]?.url || '/broken.jpg'}
+                          variant='rounded'
+                          alt={variant.name}
+                          sx={{ width: 100, height: 100, backgroundColor: grey[300] }}
+                        >
+                          <Icon path={mdiImageOff} size={1} color={grey[500]} />
+                        </Avatar>
+                      </ListItemIcon>
 
-                  return (
-                    <ListItem key={variant.id} disableGutters divider>
-                      <ListItemButton
-                        sx={{ alignItems: 'flex-start' }}
-                        onClick={() => router.push(`/product/${variant.product?.id}?variant=${variant.id}`)}
-                      >
-                        <ListItemIcon sx={{ mr: 1 }}>
-                          <Avatar
-                            src={variant.media?.[0]?.url || '/broken.jpg'}
-                            variant='rounded'
-                            alt={variant.name}
-                            sx={{ width: 100, height: 100, backgroundColor: grey[300] }}
-                          >
-                            <Icon path={mdiImageOff} size={1} color={grey[500]} />
-                          </Avatar>
-                        </ListItemIcon>
+                      <Box>
+                        <ListItemText primary={variant.product?.name} secondary={variant.name} />
 
-                        <ListItemText
-                          primary={`${variant.product?.name} - ${variant.name}`}
-                          secondary={variant.excerpt || variant.product?.excerpt}
-                        />
-                      </ListItemButton>
-
-                      {Boolean(url) && (
-                        <Typography variant='h6'>
-                          ${url.price.toFixed(2)} {url.currency.toUpperCase()}
+                        <Typography
+                          sx={{
+                            display: '-webkit-box',
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            WebkitLineClamp: 3
+                          }}
+                        >
+                          {variant.excerpt || variant.product?.excerpt} Lorem ipsum dolor sit amet
+                          consectetur, adipisicing elit. Vero natus nesciunt, numquam commodi nam saepe facere
+                          ex, illo blanditiis quis similique modi corrupti et sit aut corporis recusandae at
+                          placeat? Lorem ipsum dolor sit amet consectetur adipisicing elit. Sint doloribus
+                          pariatur numquam fuga? Quis veritatis error debitis fugit commodi distinctio magni
+                          ducimus ipsam inventore quas, modi sit nemo perspiciatis ea.
                         </Typography>
-                      )}
-                    </ListItem>
-                  );
-                })}
+                      </Box>
+                    </ListItemButton>
+
+                    {variant.price != null && (
+                      <Typography variant='h6' sx={{ flexShrink: 0 }}>
+                        ${variant.price.toFixed(2)} {variant.currency?.toUpperCase()}
+                      </Typography>
+                    )}
+                  </ListItem>
+                ))}
               </List>
             )}
 
-            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
               <Pagination
                 count={Math.ceil(count / 30)}
                 page={page + 1}

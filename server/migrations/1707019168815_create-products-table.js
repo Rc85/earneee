@@ -15,12 +15,6 @@ exports.up = (pgm) => {
         notNull: true,
         unique: true
       },
-      price: {
-        type: 'double precision'
-      },
-      currency: {
-        type: 'varchar'
-      },
       category_id: {
         type: 'int',
         notNull: true,

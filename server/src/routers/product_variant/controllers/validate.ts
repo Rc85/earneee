@@ -2,10 +2,8 @@ import { NextFunction, Request, Response } from 'express';
 import { HttpException, validations } from '../../../utils';
 import DOMPurify from 'dompurify';
 import { JSDOM } from 'jsdom';
-import { database } from '../../../database';
 
-export const validateCreateVariant = async (req: Request, resp: Response, next: NextFunction) => {
-  const { client } = resp.locals;
+export const validateCreateVariant = async (req: Request, _: Response, next: NextFunction) => {
   const window = new JSDOM('').window;
   const purify = DOMPurify(window);
 
@@ -34,22 +32,7 @@ export const validateCreateVariant = async (req: Request, resp: Response, next: 
 
   if (urls) {
     for (const url of urls) {
-      const params = [url.productId, url.id];
-      const where = [`product_id = $1`, `NOT id = $2`];
-
-      if (url.variantId) {
-        params.push(url.variantId);
-
-        where.push(`variant_id = $3`);
-      } else {
-        where.push(`variant_id IS NULL`);
-      }
-
-      const exist = await database.retrieve('product_urls', { where: where.join(' AND '), params, client });
-
-      if (exist.length) {
-        return next(new HttpException(400, `URL already exists`));
-      } else if (!validations.urlCheck.test(url.url)) {
+      if (!validations.urlCheck.test(url.url)) {
         return next(new HttpException(400, `Invalid URL`));
       } else if (!url.url || validations.blankCheck.test(url.url)) {
         return next(new HttpException(400, `URL required`));

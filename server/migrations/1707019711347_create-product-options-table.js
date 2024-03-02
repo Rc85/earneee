@@ -14,15 +14,9 @@ exports.up = (pgm) => {
         type: 'varchar',
         notNull: true
       },
-      product_id: {
-        type: 'varchar',
-        notNull: true,
-        references: 'products (id)',
-        onUpdate: 'cascade',
-        onDelete: 'cascade'
-      },
       variant_id: {
         type: 'varchar',
+        notNull: true,
         references: 'product_variants (id)',
         onUpdate: 'cascade',
         onDelete: 'cascade'
@@ -45,20 +39,9 @@ exports.up = (pgm) => {
       updated_at: {
         type: 'timestamptz'
       }
-    }
+    },
+    { constraints: { unique: ['name', 'variant_id'] } }
   );
-
-  pgm.createIndex({ name: 'product_options', schema: 'public' }, ['name', 'product_id', 'variant_id'], {
-    name: 'product_options_unique_name_product_id_variant_id',
-    unique: true,
-    where: 'variant_id IS NOT NULL'
-  });
-
-  pgm.createIndex({ name: 'product_options', schema: 'public' }, ['name', 'product_id'], {
-    name: 'product_options_unique_name_product_id',
-    unique: true,
-    where: 'variant_id IS NULL'
-  });
 };
 
 exports.down = (pgm) => {

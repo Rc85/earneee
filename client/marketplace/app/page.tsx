@@ -23,8 +23,6 @@ const Index = async () => {
           <FeaturedProducts />
 
           <ProductShowcase type='new' />
-
-          <ProductShowcase type='popular' />
         </Box>
 
         <Box sx={{ width: '25%', minWidth: '200px', maxWidth: '300px', ml: 2 }}>

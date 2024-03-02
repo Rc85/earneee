@@ -2,8 +2,7 @@ import { AffiliatesInterface } from './affiliates';
 
 export interface ProductUrlsInterface {
   id: string;
-  productId: string | null;
-  variantId: string | null;
+  variantId: string;
   url: string;
   country: string;
   price: number;

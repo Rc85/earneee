@@ -4,19 +4,16 @@ import { Modal } from '../../../../_shared/components';
 import { useState } from 'react';
 import { generateKey } from '../../../../../_shared/utils';
 import { countries } from '../../../../../_shared';
-import { useParams } from 'react-router-dom';
 
 interface Props {
   cancel: () => void;
   submit: (url: ProductUrlsInterface) => void;
   url?: ProductUrlsInterface;
   affiliates: AffiliatesInterface[];
-  variantId?: string;
+  variantId: string;
 }
 
 const AddUrl = ({ cancel, url, submit, affiliates, variantId }: Props) => {
-  const params = useParams();
-  const { productId } = params;
   const [form, setForm] = useState<ProductUrlsInterface>(
     url || {
       id: generateKey(1),
@@ -26,8 +23,7 @@ const AddUrl = ({ cancel, url, submit, affiliates, variantId }: Props) => {
       country: 'CA',
       type: 'affiliate',
       affiliateId: null,
-      variantId: variantId || null,
-      productId: productId || null,
+      variantId,
       createdAt: new Date().toISOString(),
       updatedAt: null
     }
@@ -120,7 +116,7 @@ const AddUrl = ({ cancel, url, submit, affiliates, variantId }: Props) => {
           select
           SelectProps={{ native: true }}
           onChange={handleAffiliateChange}
-          value={form.affiliateId}
+          value={form.affiliateId || ''}
         >
           <option value=''></option>
 

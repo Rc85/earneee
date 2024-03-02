@@ -1,20 +1,52 @@
+'use client';
+
 import Section from '../../../../_shared/components/Section/Section';
-import { Box, Breadcrumbs, CircularProgress, Typography } from '@mui/material';
+import {
+  Box,
+  Breadcrumbs,
+  Button,
+  Checkbox,
+  Divider,
+  FormControlLabel,
+  ListItemText,
+  Paper,
+  Typography
+} from '@mui/material';
 import Link from 'next/link';
-import { ProductsInterface } from '../../../../../_shared/types';
-import Main from './main';
+import { ProductVariantsInterface } from '../../../../../_shared/types';
+import { Loading } from '../../../../_shared/components';
+import { retrieveMarketplaceProduct } from '../../../../_shared/api';
+import Grid2 from '@mui/material/Unstable_Grid2';
+import { useState, Fragment, useEffect } from 'react';
+import { Gallery } from '../../../components';
+import { useSearchParams } from 'next/navigation';
+import { useAppSelector } from '../../../../_shared/redux/store';
 
 interface Props {
   params: { id: string };
 }
 
-const Product = async ({ params: { id } }: Props) => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/v1/auth/marketplace/product/${id}`, {
-    next: { revalidate: 5 },
-    credentials: 'include'
-  });
-  const data = await res.json();
-  const product: ProductsInterface = data.product;
+const Product = ({ params: { id } }: Props) => {
+  const searchParams = useSearchParams();
+  const variantId = searchParams.get('variant');
+  const { country } = useAppSelector((state) => state.App);
+  const { isLoading, data } = retrieveMarketplaceProduct({ productId: id, country });
+  const product = data?.product;
+  const [selectedVariant, setSelectVariant] = useState<ProductVariantsInterface | undefined>(
+    variantId ? product?.variants?.find((variant) => variant.id === variantId) : product?.variants?.[0]
+  );
+  const selectedVariantSpecifications = selectedVariant?.specifications || [];
+  const productSpecifications = product?.specifications || [];
+  const specifications = [...selectedVariantSpecifications, ...productSpecifications];
+  const options = selectedVariant?.options || [];
+
+  useEffect(() => {
+    if (variantId) {
+      setSelectVariant(product?.variants?.find((variant) => variant.id === variantId));
+    } else {
+      setSelectVariant(product?.variants?.[0]);
+    }
+  }, [product]);
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -33,11 +65,216 @@ const Product = async ({ params: { id } }: Props) => {
       </Breadcrumbs>
 
       <Section title={product?.name} titleVariant='h3' maxWidth='xl' disableGutters>
-        {product ? (
-          <Main product={product} />
+        {isLoading ? (
+          <Loading />
         ) : (
-          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-            <CircularProgress sx={{ mx: 'auto' }} />
+          <Box sx={{ display: 'flex' }}>
+            <Box sx={{ flexGrow: 1 }}>
+              <Gallery media={selectedVariant?.media || product?.media || []} />
+
+              {Boolean(selectedVariant?.details || product?.details) && (
+                <Box sx={{ mb: 3 }}>
+                  <Divider sx={{ mb: 1 }} />
+
+                  <Typography variant='h6'>Details</Typography>
+
+                  {selectedVariant?.details ? (
+                    <div
+                      className='product-description'
+                      dangerouslySetInnerHTML={{ __html: selectedVariant?.details }}
+                    />
+                  ) : (
+                    product?.details && (
+                      <div
+                        className='product-description'
+                        dangerouslySetInnerHTML={{ __html: product.details }}
+                      />
+                    )
+                  )}
+                </Box>
+              )}
+
+              {specifications.length > 0 && (
+                <Box sx={{ mb: 3 }}>
+                  <Divider sx={{ mb: 1 }} />
+
+                  <Typography variant='h6'>Specifications</Typography>
+
+                  <Grid2
+                    container
+                    sx={{
+                      '--Grid-borderWidth': '1px',
+                      borderTop: 'var(--Grid-borderWidth) solid',
+                      borderLeft: 'var(--Grid-borderWidth) solid',
+                      borderColor: 'divider',
+                      '& > div': {
+                        borderRight: 'var(--Grid-borderWidth) solid',
+                        borderBottom: 'var(--Grid-borderWidth) solid',
+                        borderColor: 'divider'
+                      },
+                      mb: 3
+                    }}
+                  >
+                    {specifications.map((specification) => (
+                      <Fragment key={specification.name}>
+                        <Grid2 xs={4}>
+                          <Typography sx={{ margin: 2 }}>{specification.name}</Typography>
+                        </Grid2>
+
+                        <Grid2 xs={8}>
+                          <div
+                            style={{ margin: '16px' }}
+                            dangerouslySetInnerHTML={{ __html: specification.value }}
+                          />
+                        </Grid2>
+                      </Fragment>
+                    ))}
+                  </Grid2>
+                </Box>
+              )}
+
+              {Boolean(selectedVariant?.description || product?.description) && (
+                <Box sx={{ mb: 3 }}>
+                  <Divider sx={{ mb: 1 }} />
+
+                  <Typography variant='h6'>Description</Typography>
+
+                  {selectedVariant?.description ? (
+                    <div
+                      className='product-description'
+                      dangerouslySetInnerHTML={{ __html: selectedVariant?.description }}
+                    />
+                  ) : (
+                    product?.description && (
+                      <div
+                        className='product-description'
+                        dangerouslySetInnerHTML={{ __html: product.description }}
+                      />
+                    )
+                  )}
+                </Box>
+              )}
+            </Box>
+            <Box sx={{ width: '25%', minWidth: '400px', maxWidth: '400px', ml: 2 }}>
+              {product?.variants?.map((variant) => {
+                const media = variant.media?.[0] || product?.media?.[0];
+                const mediaUrl = media?.url;
+
+                return (
+                  <Paper
+                    key={variant.id}
+                    onClick={() => setSelectVariant(variant)}
+                    variant='outlined'
+                    sx={{
+                      display: 'flex',
+                      opacity: selectedVariant?.id === variant.id ? 1 : 0.5,
+                      mb: 1,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        width: '75px',
+                        height: '75px',
+                        flexShrink: 0,
+                        backgroundImage: mediaUrl ? `url('${mediaUrl}')` : undefined,
+                        backgroundRepeat: 'no-repeat',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center center'
+                      }}
+                    />
+
+                    <Box sx={{ flexGrow: 1, p: 1 }}>
+                      <Typography>{variant.name}</Typography>
+                    </Box>
+                  </Paper>
+                );
+              })}
+
+              {selectedVariant?.status === 'available' && selectedVariant.price != null && (
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                      <img
+                        src={`${
+                          process.env.NEXT_PUBLIC_STORAGE_URL
+                        }/images/countries/${selectedVariant.country?.toLowerCase()}.png`}
+                      />
+
+                      <Typography sx={{ fontWeight: 500, ml: 1 }}>
+                        ${selectedVariant.price.toFixed(2)} {selectedVariant.currency?.toUpperCase()}
+                      </Typography>
+                    </Box>
+
+                    {selectedVariant.type === 'dropship'
+                      ? options.map((option) => (
+                          <Box key={option.id}>
+                            <Typography variant='h6'>
+                              {option.name} {option.required && <Typography color='red'>Required</Typography>}
+                            </Typography>
+
+                            {option.selections?.map((selection) => (
+                              <Box key={selection.id}>
+                                {selectedVariant.type === 'affiliate' ? (
+                                  <ListItemText
+                                    primary={selection.name}
+                                    secondary={`+$${selectedVariant.price?.toFixed(
+                                      2
+                                    )} ${selectedVariant.currency?.toUpperCase()}`}
+                                  />
+                                ) : (
+                                  <FormControlLabel
+                                    label={
+                                      <ListItemText
+                                        primary={selection.name}
+                                        secondary={`+$${selection.price?.toFixed(
+                                          2
+                                        )} ${selectedVariant.currency?.toUpperCase()}`}
+                                      />
+                                    }
+                                    control={<Checkbox color='info' />}
+                                  />
+                                )}
+                              </Box>
+                            ))}
+                          </Box>
+                        ))
+                      : selectedVariant.affiliate && (
+                          <Typography>
+                            Sold on{' '}
+                            {Boolean(selectedVariant.affiliate.url) ? (
+                              <Link href={selectedVariant.affiliate.url!} target='_blank'>
+                                {selectedVariant.affiliate.name}
+                              </Link>
+                            ) : (
+                              selectedVariant.affiliate.name
+                            )}
+                          </Typography>
+                        )}
+                  </Box>
+
+                  {selectedVariant.url && (
+                    <Button variant='contained' onClick={() => window.open(selectedVariant.url!, '_blank')}>
+                      Buy Now
+                    </Button>
+                  )}
+                </Box>
+              )}
+
+              <Box sx={{ mt: 3 }}>
+                {Boolean(selectedVariant?.excerpt || product?.excerpt) && (
+                  <Typography>{selectedVariant?.excerpt || product?.excerpt}</Typography>
+                )}
+
+                {Boolean(selectedVariant?.about || product?.about) && (
+                  <>
+                    <Typography variant='h6'>About this item</Typography>
+
+                    <div dangerouslySetInnerHTML={{ __html: (selectedVariant?.about || product?.about)! }} />
+                  </>
+                )}
+              </Box>
+            </Box>
           </Box>
         )}
       </Section>
