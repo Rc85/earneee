@@ -16,7 +16,8 @@ export const offer = {
       logo_height,
       status,
       start_date,
-      end_date
+      end_date,
+      details
     FROM offers AS o
     ${generateOptionString(options)}`;
 

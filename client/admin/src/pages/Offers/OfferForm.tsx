@@ -2,13 +2,15 @@ import { mdiArrowUpDropCircle, mdiTrashCan, mdiUpload } from '@mdi/js';
 import { Icon } from '@mdi/react';
 import { Box, Button, CircularProgress, IconButton, TextField, useTheme } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { OffersInterface } from '../../../../../_shared/types';
 import { deepEqual, generateKey } from '../../../../../_shared/utils';
 import { LoadingButton } from '@mui/lab';
 import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
 import { useCreateOffer } from '../../../../_shared/api';
+import AddLogo from './AddLogo';
+import dayjs from 'dayjs';
 
 interface Props {
   offer?: OffersInterface;
@@ -16,7 +18,6 @@ interface Props {
 
 const OfferForm = ({ offer }: Props) => {
   const theme = useTheme();
-  const fileInputRef = useRef<any>();
   const initial = {
     id: generateKey(1),
     name: '',
@@ -73,26 +74,6 @@ const OfferForm = ({ offer }: Props) => {
     setForm({ ...form, logoUrl: '' });
   };
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-
-    if (file) {
-      const fileReader = new FileReader();
-
-      fileReader.onload = (e) => {
-        const data = e.target?.result;
-
-        if (data && typeof data === 'string') {
-          setForm({ ...form, logoUrl: data });
-
-          fileInputRef.current.value = '';
-        }
-      };
-
-      fileReader.readAsDataURL(file);
-    }
-  };
-
   const handleSubmit = (e?: FormEvent) => {
     e?.preventDefault();
 
@@ -101,8 +82,18 @@ const OfferForm = ({ offer }: Props) => {
     createOffer.mutate(form);
   };
 
+  const handleLogoChange = (logoUrl: string, width: number, height: number) => {
+    console.log(width, height);
+
+    setForm({ ...form, logoUrl, logoWidth: width, logoHeight: height });
+
+    setStatus('');
+  };
+
   return (
     <Box component='form' onSubmit={handleSubmit}>
+      {status === 'Add Logo' && <AddLogo cancel={() => setStatus('')} submit={handleLogoChange} />}
+
       <Box sx={{ display: 'flex' }}>
         {Boolean(form?.logoUrl) ? (
           <Box
@@ -113,7 +104,7 @@ const OfferForm = ({ offer }: Props) => {
               backgroundImage: `url(${form?.logoUrl})`,
               backgroundSize: 'contain',
               width: '300px',
-              height: '450px',
+              height: '300px',
               flexShrink: 0,
               borderRadius: 5,
               mr: 1,
@@ -139,7 +130,7 @@ const OfferForm = ({ offer }: Props) => {
               borderRadius: 5,
               color: grey[600],
               width: '300px',
-              height: '450px',
+              height: '300px',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',
@@ -147,14 +138,12 @@ const OfferForm = ({ offer }: Props) => {
               mr: 1,
               flexShrink: 0
             }}
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => setStatus('Add Logo')}
           >
             <Icon path={mdiUpload} size={1} />
-            Upload logo
+            Add logo
           </Button>
         )}
-
-        <input type='file' ref={fileInputRef} hidden onChange={handleFileChange} />
 
         <Box sx={{ flexGrow: 1 }}>
           <TextField
@@ -176,7 +165,7 @@ const OfferForm = ({ offer }: Props) => {
             type='datetime-local'
             label='Start Date'
             onChange={(e) => setForm({ ...form, startDate: e.target.value })}
-            value={form?.startDate ? form.startDate.split('+')[0] : ''}
+            value={form?.startDate ? dayjs(form.startDate).format('YYYY-MM-DD[T]hh:mm') : ''}
             InputLabelProps={{ shrink: true }}
           />
 
@@ -184,7 +173,7 @@ const OfferForm = ({ offer }: Props) => {
             type='datetime-local'
             label='End Date'
             onChange={(e) => setForm({ ...form, endDate: e.target.value })}
-            value={form?.endDate ? form.endDate.split('+')[0] : ''}
+            value={form?.endDate ? dayjs(form.endDate).format('YYYY-MM-DD[T]hh:mm') : ''}
             InputLabelProps={{ shrink: true }}
           />
 

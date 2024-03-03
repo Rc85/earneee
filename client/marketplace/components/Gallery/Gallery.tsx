@@ -130,7 +130,7 @@ const Gallery = ({ media }: Props) => {
         </Box>
       </Box>
 
-      <Box sx={{ display: 'flex', justifyContent: 'center', overflowX: 'auto', mt: 1 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', overflowX: 'auto', my: 1 }}>
         {media.map((media, i) =>
           media.type === 'image' ? (
             <Box

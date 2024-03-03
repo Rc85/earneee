@@ -3,7 +3,6 @@
 import Section from '../../../_shared/components/Section/Section';
 import { Box, Divider, Paper, Typography } from '@mui/material';
 import { retrieveProductVariants } from '../../../_shared/api';
-import { useState, useRef, useEffect } from 'react';
 import { useAppSelector } from '../../../_shared/redux/store';
 import { useRouter } from 'next/navigation';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
@@ -20,14 +19,6 @@ const ProductShowcase = ({ categoryId, subcategoryId, groupId, type }: Props) =>
   const { data } = retrieveProductVariants({ type, categoryId, subcategoryId, groupId, country });
   const { variants } = data || {};
   const router = useRouter();
-  const [loaded, setLoaded] = useState(false);
-  const containerRef = useRef<any>(null);
-
-  useEffect(() => {
-    if (containerRef.current) {
-      setLoaded(true);
-    }
-  }, [containerRef.current]);
 
   const handleProductClick = (url: string) => {
     router.push(url);
@@ -56,12 +47,10 @@ const ProductShowcase = ({ categoryId, subcategoryId, groupId, type }: Props) =>
                 onClick={() => handleProductClick(`/product/${variant.product?.id}?variant=${variant.id}`)}
               >
                 <Box
-                  ref={containerRef}
                   sx={{
                     borderTopRightRadius: 4,
                     borderTopLeftRadius: 4,
-                    backgroundImage:
-                      loaded && variant.media?.[0]?.url ? `url('${variant.media[0].url}')` : undefined,
+                    backgroundImage: variant.media?.[0]?.url ? `url('${variant.media[0].url}')` : undefined,
                     backgroundSize:
                       (variant.media?.[0]?.width || 0) / (variant.media?.[0]?.height || 0) > 1.5
                         ? 'cover'

@@ -35,7 +35,7 @@ const AddSpecification = ({ cancel, specification }: Props) => {
       enqueueSnackbar('Specification updated', { variant: 'success' });
     }
 
-    cancel();
+    setStatus('');
   };
 
   const handleError = (err: any) => {
