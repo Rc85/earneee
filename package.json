@@ -2,7 +2,6 @@
   "name": "earneee",
   "version": "1.0.0",
   "scripts": {
-    "supabase": "supabase",
     "server:start": "nodemon -r source-map-support/register -w server/dist server/dist/index.js",
     "migrate": "node-pg-migrate --migrations-dir ./server/migrations --envPath ./.env",
     "webpack": "webpack --config ./webpack.server.config.js --mode development"

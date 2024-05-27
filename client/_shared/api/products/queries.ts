@@ -25,6 +25,22 @@ export const retrieveProducts = (options?: { productId?: string; offset?: number
   });
 };
 
+export const retrieveProductShowcase = (options?: { type: string; country: string }) => {
+  return useQuery<{ products: ProductsInterface[]; count: number }>({
+    queryKey: ['product showcase', options?.type, options?.country],
+    queryFn: async () => {
+      const { data } = await axios({
+        method: 'get',
+        url: '/v1/product/showcase',
+        params: options,
+        withCredentials: true
+      });
+
+      return data;
+    }
+  });
+};
+
 export const retrieveProductBrands = (options?: { brandId: string; offset?: number }) => {
   return useQuery<{ brands: ProductBrandsInterface[]; count: number }>({
     queryKey: ['brands', options?.brandId, options?.offset],

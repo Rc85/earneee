@@ -24,4 +24,6 @@ router.get(
   response
 );
 
+router.get('/v1/product/showcase', dbConnect, middleware(controllers.retrieveProductShowcase), response);
+
 export default router;

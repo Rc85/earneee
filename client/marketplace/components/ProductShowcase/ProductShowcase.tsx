@@ -2,104 +2,105 @@
 
 import Section from '../../../_shared/components/Section/Section';
 import { Box, Divider, Paper, Typography } from '@mui/material';
-import { retrieveProductVariants } from '../../../_shared/api';
+import { retrieveProductShowcase } from '../../../_shared/api';
 import { useAppSelector } from '../../../_shared/redux/store';
 import { useRouter } from 'next/navigation';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
 
 interface Props {
-  categoryId?: number;
-  subcategoryId?: number;
-  groupId?: number;
   type: 'new' | 'popular';
 }
 
-const ProductShowcase = ({ categoryId, subcategoryId, groupId, type }: Props) => {
+const ProductShowcase = ({ type }: Props) => {
   const { country } = useAppSelector((state) => state.App);
-  const { data } = retrieveProductVariants({ type, categoryId, subcategoryId, groupId, country });
-  const { variants } = data || {};
+  const { data } = retrieveProductShowcase({ type, country });
+  const { products } = data || {};
   const router = useRouter();
 
   const handleProductClick = (url: string) => {
     router.push(url);
   };
 
-  return variants && variants.length > 0 ? (
+  return products && products.length > 0 ? (
     <Section
       title={type === 'new' ? 'RECENTLY ADDED' : 'POPULAR PRODUCTS'}
       titleVariant='h4'
       containerStyle={{ mb: 3 }}
     >
       <Grid2 container spacing={1}>
-        {variants?.map((variant, i) => (
-          <Grid2 key={variant.id} xs={12} sm={4}>
-            <Paper
-              variant='outlined'
-              sx={{
-                cursor: 'pointer',
-                display: 'flex',
-                flexDirection: 'column',
-                flexShrink: 0
-              }}
-              className='product-card'
-            >
-              <Box
-                onClick={() => handleProductClick(`/product/${variant.product?.id}?variant=${variant.id}`)}
+        {products?.map((product) => {
+          const variant = product.variants?.[0];
+          const media = product.media?.[0] || variant?.media?.[0];
+          const mediaUrl = media?.url;
+          const mediaWidth = media?.width || 0;
+          const mediaHeight = media?.height || 0;
+          const excerpt = product.excerpt || variant?.excerpt;
+
+          return (
+            <Grid2 key={product.id} xs={12} sm={4}>
+              <Paper
+                variant='outlined'
+                sx={{
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  flexShrink: 0
+                }}
+                className='product-card'
               >
-                <Box
-                  sx={{
-                    borderTopRightRadius: 4,
-                    borderTopLeftRadius: 4,
-                    backgroundImage: variant.media?.[0]?.url ? `url('${variant.media[0].url}')` : undefined,
-                    backgroundSize:
-                      (variant.media?.[0]?.width || 0) / (variant.media?.[0]?.height || 0) > 1.5
-                        ? 'cover'
-                        : 'contain',
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'center top',
-                    height: '200px'
-                  }}
-                />
+                <Box onClick={() => handleProductClick(`/product/${product.id}?variant=${variant?.id}`)}>
+                  <Box
+                    sx={{
+                      borderTopRightRadius: 4,
+                      borderTopLeftRadius: 4,
+                      backgroundImage: mediaUrl ? `url('${mediaUrl}')` : undefined,
+                      backgroundSize: mediaWidth / mediaHeight > 1.5 ? 'cover' : 'contain',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'center top',
+                      height: '200px'
+                    }}
+                  />
 
-                <Box sx={{ p: 2, flexGrow: 1 }}>
-                  <Typography variant='h6' sx={{ mb: 0 }}>
-                    {variant.product?.name}
-                  </Typography>
+                  <Box sx={{ p: 2, flexGrow: 1 }}>
+                    <Typography variant='h6' sx={{ mb: 0 }}>
+                      {product.name}
+                    </Typography>
 
-                  <Typography>{variant.name}</Typography>
+                    <Typography>{product.name}</Typography>
 
-                  {Boolean(variant.excerpt || variant.product?.excerpt) && (
-                    <>
-                      <Divider sx={{ my: 1 }} />
+                    {Boolean(excerpt) && (
+                      <>
+                        <Divider sx={{ my: 1 }} />
 
-                      <Typography
-                        sx={{
-                          display: '-webkit-box',
-                          WebkitBoxOrient: 'vertical',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          WebkitLineClamp: 3
-                        }}
-                      >
-                        {variant.excerpt || variant.product?.excerpt}
+                        <Typography
+                          sx={{
+                            display: '-webkit-box',
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            WebkitLineClamp: 3
+                          }}
+                        >
+                          {excerpt}
+                        </Typography>
+                      </>
+                    )}
+                  </Box>
+
+                  <Divider />
+
+                  {variant?.price != null && (
+                    <Box sx={{ p: 2, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                      <Typography variant='h6' sx={{ mb: 0 }}>
+                        ${variant.price.toFixed(2)} {variant.currency?.toUpperCase()}
                       </Typography>
-                    </>
+                    </Box>
                   )}
                 </Box>
-
-                <Divider />
-
-                {variant.price != null && (
-                  <Box sx={{ p: 2, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-                    <Typography variant='h6' sx={{ mb: 0 }}>
-                      ${variant.price.toFixed(2)} {variant.currency?.toUpperCase()}
-                    </Typography>
-                  </Box>
-                )}
-              </Box>
-            </Paper>
-          </Grid2>
-        ))}
+              </Paper>
+            </Grid2>
+          );
+        })}
       </Grid2>
     </Section>
   ) : null;

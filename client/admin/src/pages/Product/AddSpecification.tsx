@@ -1,7 +1,7 @@
 import { TextField } from '@mui/material';
 import { Modal } from '../../../../_shared/components';
 import { ProductSpecificationsInterface } from '../../../../../_shared/types';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useRef, useState } from 'react';
 import { generateKey } from '../../../../../_shared/utils';
 import { useSnackbar } from 'notistack';
 import { useParams } from 'react-router-dom';
@@ -29,10 +29,28 @@ const AddSpecification = ({ cancel, specification }: Props) => {
     }
   );
   const { enqueueSnackbar } = useSnackbar();
+  const nameInputRef = useRef<any>(null);
 
   const handleSuccess = () => {
     if (specification) {
       enqueueSnackbar('Specification updated', { variant: 'success' });
+    }
+
+    if (specification) {
+      cancel();
+    } else {
+      setForm({
+        id: generateKey(1),
+        name: '',
+        value: '',
+        productId: productId!,
+        variantId: variantId || null,
+        ordinance: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: null
+      });
+
+      nameInputRef.current?.focus();
     }
 
     setStatus('');
@@ -67,6 +85,7 @@ const AddSpecification = ({ cancel, specification }: Props) => {
       component='form'
     >
       <TextField
+        inputRef={nameInputRef}
         label='Name'
         required
         autoFocus

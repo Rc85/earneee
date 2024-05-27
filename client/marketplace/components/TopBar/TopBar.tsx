@@ -9,14 +9,12 @@ import {
   Button,
   CircularProgress,
   useTheme,
-  Badge,
-  MenuItem,
-  TextField
+  Badge
 } from '@mui/material';
 import Search from '../Search/Search';
 import { SnackbarProvider } from 'notistack';
 import Icon from '@mdi/react';
-import { mdiAccountCircle, mdiAccountPlus, mdiEmail, mdiLogin, mdiLogoutVariant, mdiMenu } from '@mdi/js';
+import { mdiAccountCircle, mdiEmail, mdiLogoutVariant, mdiMenu } from '@mdi/js';
 import { useEffect, useState } from 'react';
 import Categories from '../Categories/Categories';
 import { brandName } from '../../../_shared/constants';
@@ -25,7 +23,6 @@ import { authenticate, useLogout } from '../../../_shared/api';
 import { retrieveStatuses } from '../../../_shared/api/statuses/queries';
 import Link from 'next/link';
 import { useDispatch } from 'react-redux';
-import { useAppSelector } from '../../../_shared/redux/store';
 import { setCountry } from '../../../_shared/redux/app';
 
 const TopBar = () => {
@@ -40,7 +37,6 @@ const TopBar = () => {
   const loginStatus = statuses?.find((status) => status.name === 'login');
   const registrationStatus = statuses?.find((status) => status.name === 'registration');
   const dispatch = useDispatch();
-  const { country } = useAppSelector((state) => state.App);
 
   useEffect(() => {
     if (user) {
@@ -85,7 +81,7 @@ const TopBar = () => {
 
           <Search />
 
-          <TextField
+          {/* <TextField
             select
             sx={{ mb: '0 !important', width: 75, mr: 1 }}
             value={country}
@@ -120,7 +116,7 @@ const TopBar = () => {
                 {country.name}
               </MenuItem>
             ))}
-          </TextField>
+          </TextField> */}
 
           {isLoading ? (
             <CircularProgress size={20} />
@@ -156,13 +152,13 @@ const TopBar = () => {
                     marginRight: registrationStatus?.online ? '10px' : 0
                   }}
                 >
-                  <Icon path={mdiLogin} size={1} style={{ marginRight: '5px' }} /> Login
+                  Login
                 </Link>
               )}
 
               {registrationStatus?.online && (
                 <Link href='/register' style={{ color: 'black', display: 'flex', alignItems: 'center' }}>
-                  <Icon path={mdiAccountPlus} size={1} style={{ marginRight: '5px' }} /> Create Account
+                  Create Account
                 </Link>
               )}
             </Box>

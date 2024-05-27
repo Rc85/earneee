@@ -19,7 +19,9 @@ export const retrieveProductSpecification = async (req: Request, resp: Response,
     `SELECT
       s.id,
       s.name,
-      s.value
+      s.value,
+      ps.product_id,
+      ps.variant_id
     FROM specifications AS s
     LEFT JOIN product_specifications AS ps
     ON ps.specification_id = s.id

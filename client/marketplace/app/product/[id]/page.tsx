@@ -39,6 +39,9 @@ const Product = ({ params: { id } }: Props) => {
   const productSpecifications = product?.specifications || [];
   const specifications = [...selectedVariantSpecifications, ...productSpecifications];
   const options = selectedVariant?.options || [];
+  const selectedVariantMedia = selectedVariant?.media || [];
+  const productMedia = product?.media || [];
+  const media = [...selectedVariantMedia, ...productMedia];
 
   useEffect(() => {
     if (variantId) {
@@ -70,7 +73,7 @@ const Product = ({ params: { id } }: Props) => {
         ) : (
           <Box sx={{ display: 'flex' }}>
             <Box sx={{ flexGrow: 1 }}>
-              <Gallery media={selectedVariant?.media || product?.media || []} />
+              <Gallery media={media} />
 
               {Boolean(selectedVariant?.details || product?.details) && (
                 <Box sx={{ mb: 3 }}>
