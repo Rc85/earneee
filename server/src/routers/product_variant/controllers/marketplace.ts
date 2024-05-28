@@ -150,19 +150,9 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
     WHERE pr.id = pv.product_id
   ) AS pr ON true
   WHERE (pr.product->>'category_id')::INT IN (SELECT id FROM p)
-  ORDER BY ${orderBy}
+  ORDER BY ${orderBy}, pv.ordinance
   OFFSET ${offset}
   LIMIT 20`;
-  /* ${filters.minPrice ? `AND (pv.price >= $2${!filters.maxPrice ? ')' : ''}` : ''}
-  ${filters.maxPrice ? `AND pv.price <= ${!filters.minPrice ? '$2' : '$3)'}` : ''}
-  ${
-    filters.specifications && Object.keys(filters.specifications).length
-      ? `AND CASE
-          WHEN pv.variants #> '{specifications}' ?& $${params.length} IS false
-          THEN s.specifications ?& $${params.length}
-        END`
-      : ''
-  } */
 
   const variants: ProductVariantsInterface[] = await database.query(statement, params, client);
 

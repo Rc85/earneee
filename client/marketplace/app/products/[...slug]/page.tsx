@@ -1,4 +1,3 @@
-import Section from '../../../../_shared/components/Section/Section';
 import { CategoriesInterface } from '../../../../../_shared/types';
 import Link from 'next/link';
 import { Box, Breadcrumbs } from '@mui/material';
@@ -77,9 +76,7 @@ const CategoryContainer = async ({ params: { slug } }: Props) => {
         )
       )}
 
-      <Section title={name?.toUpperCase()} titleVariant='h3' maxWidth='xl' disableGutters>
-        <Main categoryId={categoryId} subcategoryId={subcategoryId} groupId={groupId} />
-      </Section>
+      <Main name={name} categoryId={categoryId} subcategoryId={subcategoryId} groupId={groupId} />
     </Box>
   );
 };

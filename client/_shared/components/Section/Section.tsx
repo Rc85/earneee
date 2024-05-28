@@ -43,6 +43,7 @@ interface Props {
   containerStyle?: SxProps;
   position?: 'left' | 'center' | 'right';
   disableGutters?: boolean;
+  truncateTitle?: boolean;
 }
 
 const Section = ({
@@ -60,7 +61,8 @@ const Section = ({
   titleStyle,
   containerStyle,
   position = 'left',
-  disableGutters
+  disableGutters,
+  truncateTitle
 }: Props) => {
   let titleStyles: any = {};
 
@@ -91,8 +93,16 @@ const Section = ({
     >
       <Paper elevation={elevation} variant={variant} sx={sx} component={component} onSubmit={onSubmit}>
         <Box sx={{ display: 'flex' }}>
-          <Box sx={{ flexGrow: 1 }}>
-            <Typography variant={titleVariant} sx={titleStyles}>
+          <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
+            <Typography
+              variant={titleVariant}
+              sx={[
+                titleStyles,
+                truncateTitle
+                  ? { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
+                  : undefined
+              ]}
+            >
               {title}
             </Typography>
 

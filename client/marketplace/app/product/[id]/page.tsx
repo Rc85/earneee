@@ -37,11 +37,26 @@ const Product = ({ params: { id } }: Props) => {
   );
   const selectedVariantSpecifications = selectedVariant?.specifications || [];
   const productSpecifications = product?.specifications || [];
-  const specifications = [...selectedVariantSpecifications, ...productSpecifications];
+  const allSpecifications = [...selectedVariantSpecifications, ...productSpecifications];
   const options = selectedVariant?.options || [];
   const selectedVariantMedia = selectedVariant?.media || [];
   const productMedia = product?.media || [];
   const media = [...selectedVariantMedia, ...productMedia];
+  const excerpt = selectedVariant?.excerpt || product?.excerpt || '';
+  const about = selectedVariant?.about || product?.about;
+  const details = selectedVariant?.details || product?.details;
+  const description = selectedVariant?.description || product?.description;
+  const specifications: { name: string; value: string[] }[] = [];
+
+  for (const specification of allSpecifications) {
+    const index = specifications.findIndex((s) => s.name === specification.name);
+
+    if (index >= 0) {
+      specifications[index].value.push(specification.value);
+    } else {
+      specifications.push({ name: specification.name, value: [specification.value] });
+    }
+  }
 
   useEffect(() => {
     if (variantId) {
@@ -67,7 +82,7 @@ const Product = ({ params: { id } }: Props) => {
         <Typography>{product?.name}</Typography>
       </Breadcrumbs>
 
-      <Section title={product?.name} titleVariant='h3' maxWidth='xl' disableGutters>
+      <Section title={product?.name} subtitle={excerpt} titleVariant='h3' maxWidth='xl' disableGutters>
         {isLoading ? (
           <Loading />
         ) : (
@@ -75,7 +90,7 @@ const Product = ({ params: { id } }: Props) => {
             <Box sx={{ flexGrow: 1 }}>
               <Gallery media={media} />
 
-              {Boolean(selectedVariant?.details || product?.details) && (
+              {Boolean(details) && (
                 <Box sx={{ mb: 3 }}>
                   <Divider sx={{ mb: 1 }} />
 
@@ -125,10 +140,7 @@ const Product = ({ params: { id } }: Props) => {
                         </Grid2>
 
                         <Grid2 xs={8}>
-                          <div
-                            style={{ margin: '16px' }}
-                            dangerouslySetInnerHTML={{ __html: specification.value }}
-                          />
+                          <Typography sx={{ margin: 2 }}>{specification.value.join(', ')}</Typography>
                         </Grid2>
                       </Fragment>
                     ))}
@@ -136,7 +148,7 @@ const Product = ({ params: { id } }: Props) => {
                 </Box>
               )}
 
-              {Boolean(selectedVariant?.description || product?.description) && (
+              {Boolean(description) && (
                 <Box sx={{ mb: 3 }}>
                   <Divider sx={{ mb: 1 }} />
 
@@ -265,15 +277,13 @@ const Product = ({ params: { id } }: Props) => {
               )}
 
               <Box sx={{ mt: 3 }}>
-                {Boolean(selectedVariant?.excerpt || product?.excerpt) && (
-                  <Typography>{selectedVariant?.excerpt || product?.excerpt}</Typography>
-                )}
+                {Boolean(excerpt) && <Typography>{excerpt}</Typography>}
 
-                {Boolean(selectedVariant?.about || product?.about) && (
+                {Boolean(about) && (
                   <>
                     <Typography variant='h6'>About this item</Typography>
 
-                    <div dangerouslySetInnerHTML={{ __html: (selectedVariant?.about || product?.about)! }} />
+                    <div dangerouslySetInnerHTML={{ __html: about! }} />
                   </>
                 )}
               </Box>

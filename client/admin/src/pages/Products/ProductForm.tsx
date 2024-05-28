@@ -104,6 +104,11 @@ const ProductForm = ({ product }: Props) => {
 
   const handleDeleteSelectedCategory = (index: number) => {
     const categories = [...selectedCategories];
+    const category = categories[index];
+
+    if (category && product && product.categoryId === category.id) {
+      setForm({ ...form, categoryId: 0 });
+    }
 
     const selected = categories.slice(0, index);
 
