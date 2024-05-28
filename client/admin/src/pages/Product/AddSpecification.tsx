@@ -1,7 +1,7 @@
-import { TextField } from '@mui/material';
+import { Alert, Chip, TextField } from '@mui/material';
 import { Modal } from '../../../../_shared/components';
 import { ProductSpecificationsInterface } from '../../../../../_shared/types';
-import { FormEvent, useRef, useState } from 'react';
+import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from 'react';
 import { generateKey } from '../../../../../_shared/utils';
 import { useSnackbar } from 'notistack';
 import { useParams } from 'react-router-dom';
@@ -16,41 +16,32 @@ const AddSpecification = ({ cancel, specification }: Props) => {
   const params = useParams();
   const { productId, variantId } = params;
   const [status, setStatus] = useState('');
-  const [form, setForm] = useState<ProductSpecificationsInterface>(
-    specification || {
-      id: generateKey(1),
-      name: '',
-      value: '',
-      productId: productId!,
-      variantId: variantId || null,
-      ordinance: null,
-      createdAt: new Date().toISOString(),
-      updatedAt: null
-    }
-  );
+  const [name, setName] = useState('');
   const { enqueueSnackbar } = useSnackbar();
   const nameInputRef = useRef<any>(null);
+  const [specifications, setSpecifications] = useState<ProductSpecificationsInterface[]>([]);
+  const [value, setValue] = useState('');
+  const [shiftDown, setShiftDown] = useState(false);
+
+  useEffect(() => {
+    if (specification) {
+      setName(specification.name);
+      setSpecifications([specification]);
+    }
+  }, [specification]);
 
   const handleSuccess = () => {
     if (specification) {
-      enqueueSnackbar('Specification updated', { variant: 'success' });
-    }
-
-    if (specification) {
       cancel();
+
+      enqueueSnackbar('Specification updated', { variant: 'success' });
     } else {
-      setForm({
-        id: generateKey(1),
-        name: '',
-        value: '',
-        productId: productId!,
-        variantId: variantId || null,
-        ordinance: null,
-        createdAt: new Date().toISOString(),
-        updatedAt: null
-      });
+      setName('');
+      setValue('');
 
       nameInputRef.current?.focus();
+
+      setSpecifications([]);
     }
 
     setStatus('');
@@ -71,7 +62,49 @@ const AddSpecification = ({ cancel, specification }: Props) => {
 
     setStatus('Loading');
 
-    createProductSpecification.mutate(form);
+    createProductSpecification.mutate(specifications);
+  };
+
+  const handleKeyUp = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      if (shiftDown) {
+        return handleSubmit();
+      } else {
+        if (!value) {
+          return enqueueSnackbar('Value required', { variant: 'error' });
+        }
+
+        const specification = {
+          id: generateKey(1),
+          name,
+          value,
+          productId: productId!,
+          variantId: variantId || null,
+          ordinance: null,
+          createdAt: new Date().toISOString(),
+          updatedAt: null
+        };
+
+        setSpecifications([...specifications, specification]);
+        setValue('');
+      }
+    } else if (e.key === 'Shift') {
+      setShiftDown(false);
+    }
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Shift') {
+      setShiftDown(true);
+    }
+  };
+
+  const handleDeleteValue = (index: number) => {
+    const specs = [...specifications];
+
+    specs.splice(index, 1);
+
+    setSpecifications(specs);
   };
 
   return (
@@ -82,23 +115,38 @@ const AddSpecification = ({ cancel, specification }: Props) => {
       cancel={cancel}
       disableBackdropClick
       loading={status === 'Loading'}
-      component='form'
     >
       <TextField
         inputRef={nameInputRef}
         label='Name'
         required
         autoFocus
-        onChange={(e) => setForm({ ...form, name: e.target.value })}
-        value={form.name}
+        onChange={(e) => setName(e.target.value)}
+        value={name}
       />
 
       <TextField
         label='Value'
-        required
-        onChange={(e) => setForm({ ...form, value: e.target.value })}
-        value={form.value}
+        placeholder='Press enter to add'
+        onChange={(e) => setValue(e.target.value)}
+        value={value}
+        onKeyUp={handleKeyUp}
+        onKeyDown={handleKeyDown}
       />
+
+      {specifications.length === 0 ? (
+        <Alert severity='error'>Add a specification</Alert>
+      ) : (
+        specifications.map((specification, i) => (
+          <Chip
+            key={specification.id}
+            onDelete={() => handleDeleteValue(i)}
+            size='small'
+            label={specification.value}
+            sx={{ mr: 1, mb: 1 }}
+          />
+        ))
+      )}
     </Modal>
   );
 };

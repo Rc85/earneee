@@ -271,12 +271,14 @@ export const useCreateProductSpecification = (
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (options: ProductSpecificationsInterface) =>
+    mutationFn: (options: ProductSpecificationsInterface[]) =>
       axios({
         method: 'post',
         url: '/v1/auth/admin/product/specification',
         withCredentials: true,
-        data: options
+        data: {
+          specifications: options
+        }
       }),
 
     onSuccess: (data) => {
