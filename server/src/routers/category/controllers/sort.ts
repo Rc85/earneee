@@ -5,6 +5,8 @@ export const sortCategories = async (req: Request, resp: Response, next: NextFun
   const { client } = resp.locals;
   const { categories } = req.body;
 
+  console.log('categories', categories);
+
   if (categories) {
     for (const index in categories) {
       const ordinance = parseInt(index) + 1;

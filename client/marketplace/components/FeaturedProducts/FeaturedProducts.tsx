@@ -124,9 +124,12 @@ const FeaturedProducts = () => {
             <>
               {variants.map((variant, i) => {
                 const urls = variant.urls || [];
-                const countryCode = country || 'ca';
-                const url =
-                  urls.find((url) => url.country.toLowerCase() === countryCode.toLowerCase()) || urls[0];
+
+                urls.sort((a, b) => (a.price < b.price ? -1 : 1));
+
+                const lowestPrice = urls[0]?.price || 0;
+                const highestPrice = urls.length > 1 ? urls[urls.length - 1]?.price : 0;
+                const currency = urls[0]?.currency || 'cad';
                 const media = variant.media?.[0] || variant.product?.media?.[0];
                 const mediaUrl = media?.url;
 
@@ -161,11 +164,11 @@ const FeaturedProducts = () => {
                         backgroundColor: 'rgba(0, 0, 0, 0.6)',
                         width: '100%',
                         display: 'flex',
-                        alignItems: 'flex-start',
+                        alignItems: 'center',
                         p: 2
                       }}
                     >
-                      <Box sx={{ flexGrow: 1 }}>
+                      <Box sx={{ flexGrow: 1, mr: 1 }}>
                         <Typography variant='h5' color='white'>
                           {variant.product?.name} - {variant.name}
                         </Typography>
@@ -184,11 +187,10 @@ const FeaturedProducts = () => {
                         </Typography>
                       </Box>
 
-                      {url && (
-                        <Typography sx={{ ml: 1, flexShrink: 0 }} color='white' variant='h4'>
-                          ${url.price.toFixed(2)} {url.currency.toUpperCase()}
-                        </Typography>
-                      )}
+                      <Typography sx={{ ml: 1, flexShrink: 0 }} color='white' variant='h4'>
+                        ${lowestPrice.toFixed(2)}
+                        {highestPrice ? ` - ${highestPrice.toFixed(2)}` : ''} {currency.toUpperCase()}
+                      </Typography>
                     </Box>
                   </Box>
                 );

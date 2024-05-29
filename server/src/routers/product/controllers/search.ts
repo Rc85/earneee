@@ -44,27 +44,41 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
         b.logo_url
       FROM product_brands AS b
     ),
+    pm AS (
+      SELECT
+        pm.id,
+        pm.url,
+        pm.variant_id,
+        pm.product_id
+      FROM product_media AS pm
+      ORDER BY pm.ordinance
+    ),
+    pu AS (
+      SELECT
+        pu.price,
+        pu.currency,
+        pu.variant_id
+      FROM product_urls AS pu   
+    ),
     p AS (
       SELECT
         p.id,
         p.name,
         p.excerpt,
         p.category_id,
-        b.brand
+        b.brand,
+        COALESCE(pm.media, '[]'::JSONB) AS media
       FROM products AS p
       LEFT JOIN LATERAL (
         SELECT TO_JSONB(b.*) AS brand
         FROM b
         WHERE b.id = p.brand_id
       ) AS b ON true
-    ),
-    pm AS (
-      SELECT
-        pm.id,
-        pm.url,
-        pm.variant_id
-      FROM product_media AS pm
-      ORDER BY pm.ordinance
+      LEFT JOIN LATERAL (
+        SELECT JSONB_AGG(pm.*) AS media
+        FROM pm
+        WHERE pm.product_id = p.id
+      ) AS pm ON true
     )
     
     SELECT
@@ -76,7 +90,8 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
       p.product,
       WORD_SIMILARITY(p.product->>'name', $1) AS product_similarity,
       WORD_SIMILARITY(pv.name, $1) AS variant_similarity,
-      COALESCE(pm.media, '[]'::JSONB) AS media
+      COALESCE(pm.media, '[]'::JSONB) AS media,
+      COALESCE(pu.urls, '[]'::JSONB) AS urls
     FROM product_variants AS pv
     LEFT JOIN LATERAL (
       SELECT TO_JSONB(p) AS product
@@ -88,7 +103,16 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
       FROM pm
       WHERE pm.variant_id = pv.id
     ) AS pm ON true
-    WHERE (WORD_SIMILARITY(p.product->>'name', $1) > 0.5 OR WORD_SIMILARITY(pv.name, $1) > 0.5 OR p.product->>'name' ILIKE '%' || $1 || '%' OR pv.name ILIKE '%' || $1 || '%')
+    LEFT JOIN LATERAL (
+      SELECT JSONB_AGG(pu.*) AS urls
+      FROM pu
+      WHERE pu.variant_id = pv.id
+    ) AS pu ON true
+    WHERE (WORD_SIMILARITY(p.product->>'name', $1) > 0.5
+    OR WORD_SIMILARITY(pv.name, $1) > 0.5
+    OR p.product->>'name' ILIKE '%' || $1 || '%'
+    OR pv.name ILIKE '%' || $1 || '%'
+    OR p.product->'brand'->>'name' ILIKE '%' || $1 || '%')
     ${category ? `AND (p.product->>'category_id')::INT IN (SELECT id FROM pc)` : ''}
     ORDER BY WORD_SIMILARITY(p.product->>'name', $1) DESC, WORD_SIMILARITY(pv.name, $1) DESC
     OFFSET ${offset}
@@ -136,7 +160,13 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
       FROM p
       WHERE p.id = pv.product_id
     ) AS p ON true
-    WHERE (WORD_SIMILARITY(p.product->>'name', $1) > 0.5 OR WORD_SIMILARITY(pv.name, $1) > 0.5 OR p.product->>'name' ILIKE '%' || $1 || '%' OR pv.name ILIKE '%' || $1 || '%')`,
+    WHERE (WORD_SIMILARITY(p.product->>'name', $1) > 0.5
+    OR WORD_SIMILARITY(pv.name, $1) > 0.5
+    OR p.product->>'name' ILIKE '%' || $1 || '%'
+    OR pv.name ILIKE '%' || $1 || '%'
+    OR p.product->'brand'->>'name' ILIKE '%' || $1 || '%')
+    ${category ? `AND (p.product->>'category_id')::INT IN (SELECT id FROM pc)` : ''}
+    ORDER BY WORD_SIMILARITY(p.product->>'name', $1) DESC, WORD_SIMILARITY(pv.name, $1) DESC`,
     params,
     client
   );

@@ -2,6 +2,7 @@ import { ProductSpecificationsInterface } from './product_specifications';
 import { CategoriesInterface } from './categories';
 import { ProductMediaInterface } from './product_media';
 import { ProductVariantsInterface } from './product_variants';
+import { ProductBrandsInterface } from './product_brands';
 
 export interface ProductsInterface {
   id: string;
@@ -19,5 +20,6 @@ export interface ProductsInterface {
   media?: ProductMediaInterface[];
   variants?: ProductVariantsInterface[];
   ancestors?: { id: number; name: string }[];
+  brand?: ProductBrandsInterface;
   specifications?: ProductSpecificationsInterface[];
 }

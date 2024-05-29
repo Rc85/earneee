@@ -460,23 +460,25 @@ export const retrieveMarketplaceVariants = async (req: Request, resp: Response, 
       pv.excerpt,
       pv.product_id,
       pv.status,
-      pu.price,
-      pu.currency,
       pr.product,
-      COALESCE(pm.media, '[]'::JSONB) AS media
+      COALESCE(pm.media, '[]'::JSONB) AS media,
+      COALESCE(pu.urls, '[]'::JSONB) AS urls
     FROM product_variants AS pv
     LEFT JOIN LATERAL (
       SELECT JSONB_AGG(pm.*) AS media
       FROM pm
       WHERE pm.variant_id = pv.id
     ) AS pm ON true
-    LEFT JOIN pu
-    ON pu.variant_id = pv.id
     LEFT JOIN LATERAL (
       SELECT TO_JSONB(pr.*) AS product
       FROM pr
       WHERE pr.id = pv.product_id
     ) AS pr ON true
+    LEFT JOIN LATERAL (
+      SELECT JSONB_AGG(pu.*) AS urls
+      FROM pu
+      WHERE pu.variant_id = pv.id
+    ) AS pu ON true
     WHERE pv.featured = $1
     ORDER BY pr.product->>'created_at' DESC
     LIMIT $3

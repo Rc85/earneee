@@ -8,7 +8,7 @@ export const createProductSpecification = async (req: Request, resp: Response, n
 
   for (const spec of specifications) {
     let specification = await database.retrieve('specifications', {
-      where: 'id = $1 OR (name = $2 AND value = $3)',
+      where: 'id = $1 OR (LOWER(name) = LOWER($2) AND LOWER(value) = LOWER($3))',
       params: [spec.id, spec.name, spec.value],
       client
     });

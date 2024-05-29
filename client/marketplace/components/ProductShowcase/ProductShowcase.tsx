@@ -35,6 +35,13 @@ const ProductShowcase = ({ type }: Props) => {
           const mediaWidth = media?.width || 0;
           const mediaHeight = media?.height || 0;
           const excerpt = product.excerpt || variant?.excerpt;
+          const urls = variant?.urls || [];
+
+          urls.sort((a, b) => (a.price < b.price ? -1 : 1));
+
+          const lowestPrice = urls[0]?.price || 0;
+          const highestPrice = urls.length > 1 ? urls[urls.length - 1]?.price : 0;
+          const currency = urls[0]?.currency || 'cad';
 
           return (
             <Grid2 key={product.id} xs={12} sm={4}>
@@ -89,13 +96,12 @@ const ProductShowcase = ({ type }: Props) => {
 
                   <Divider />
 
-                  {variant?.price != null && (
-                    <Box sx={{ p: 2, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-                      <Typography variant='h6' sx={{ mb: 0 }}>
-                        ${variant.price.toFixed(2)} {variant.currency?.toUpperCase()}
-                      </Typography>
-                    </Box>
-                  )}
+                  <Box sx={{ p: 2, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                    <Typography variant='h6' sx={{ mb: 0 }}>
+                      ${lowestPrice.toFixed(2)}
+                      {highestPrice ? ` - ${highestPrice.toFixed(2)}` : ''} {currency.toUpperCase()}
+                    </Typography>
+                  </Box>
                 </Box>
               </Paper>
             </Grid2>

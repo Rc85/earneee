@@ -69,3 +69,19 @@ a:hover {
 .search-category-select:focus-visible {
   outline: none;
 }
+
+.vertical-align-top {
+  vertical-align: top;
+}
+
+.w-25 {
+  width: 25%;
+}
+
+.w-35 {
+  width: 35%;
+}
+
+.w-50 {
+  width: 50%;
+}

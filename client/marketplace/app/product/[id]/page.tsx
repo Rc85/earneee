@@ -82,7 +82,7 @@ const Product = ({ params: { id } }: Props) => {
         <Typography>{product?.name}</Typography>
       </Breadcrumbs>
 
-      <Section title={product?.name} subtitle={excerpt} titleVariant='h3' maxWidth='xl' disableGutters>
+      <Section title={product?.name} titleVariant='h3' maxWidth='xl' disableGutters>
         {isLoading ? (
           <Loading />
         ) : (

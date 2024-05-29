@@ -39,6 +39,7 @@ export const retrieveCategories = async (req: Request, resp: Response, next: Nex
         WHERE p.category_id = c.id
       ) AS p ON true
       ${hasProducts ? `WHERE p.product > 0` : ''}
+      ORDER BY c.name
     ),
     c1 AS (
       SELECT
@@ -59,6 +60,7 @@ export const retrieveCategories = async (req: Request, resp: Response, next: Nex
         WHERE p.category_id = c.id
       ) AS p ON true
       ${hasProducts ? `WHERE JSONB_ARRAY_LENGTH(c2.subcategories) > 0 OR p.product > 0` : ''}
+      ORDER BY c.name
     )
     
     SELECT
@@ -77,7 +79,8 @@ export const retrieveCategories = async (req: Request, resp: Response, next: Nex
       FROM products AS p
       WHERE p.category_id = c.id
     ) AS p ON true
-    ${where.length > 0 ? `WHERE ${where.join(' AND ')}` : ''}`,
+    ${where.length > 0 ? `WHERE ${where.join(' AND ')}` : ''}
+    ORDER BY c.name`,
     params,
     client
   );

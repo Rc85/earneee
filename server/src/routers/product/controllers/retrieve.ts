@@ -32,7 +32,7 @@ export const retrieveProducts = async (req: Request, resp: Response, next: NextF
 
 export const retrieveProductShowcase = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
-  const { type } = req.query;
+  const { type, country } = req.query;
 
   const products = await database.query(
     `WITH
@@ -45,7 +45,16 @@ export const retrieveProductShowcase = async (req: Request, resp: Response, next
         pm.variant_id,
         pm.product_id
       FROM product_media AS pm
-      ORDER BY pm.ordinance
+      ORDER BY pm.created_at
+    ),
+    pu AS (
+      SELECT
+        pu.price,
+        pu.currency,
+        pu.variant_id
+      FROM product_urls AS pu
+      WHERE LOWER(pu.country) = LOWER($1)
+      ORDER BY pu.created_at
     ),
     pv AS (
       SELECT
@@ -56,14 +65,19 @@ export const retrieveProductShowcase = async (req: Request, resp: Response, next
         pv.description,
         pv.excerpt,
         pv.product_id,
-        COALESCE(pm.media, '[]'::JSONB) AS media
+        COALESCE(pm.media, '[]'::JSONB) AS media,
+        COALESCE(pu.urls, '[]'::JSONB) AS urls
       FROM product_variants AS pv
       LEFT JOIN LATERAL (
         SELECT JSONB_AGG(pm.*) AS media
         FROM pm
         WHERE pm.variant_id = pv.id
       ) AS pm ON TRUE
-      LIMIT 1
+      LEFT JOIN LATERAL (
+        SELECT JSONB_AGG(pu.*) AS urls
+        FROM pu
+        WHERE pu.variant_id = pv.id
+      ) AS pu ON TRUE
     )
     
     SELECT
@@ -85,10 +99,13 @@ export const retrieveProductShowcase = async (req: Request, resp: Response, next
       WHERE pv.product_id = p.id
     ) AS pv ON TRUE
     ${type === 'new' ? `WHERE p.created_at > NOW() - INTERVAL '30 days'` : ''}
+    ORDER BY p.created_at DESC
     LIMIT 6`,
-    [],
+    [country],
     client
   );
+
+  console.log(products);
 
   resp.locals.response = { data: { products } };
 

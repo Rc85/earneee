@@ -6,22 +6,7 @@ import { useState } from 'react';
 import CreateCategory from './CreateCategory';
 import CategoryRow from './CategoryRow';
 import { useParams } from 'react-router-dom';
-import {
-  DndContext,
-  DragEndEvent,
-  KeyboardSensor,
-  MouseSensor,
-  closestCenter,
-  useSensor,
-  useSensors
-} from '@dnd-kit/core';
-import {
-  SortableContext,
-  arrayMove,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy
-} from '@dnd-kit/sortable';
-import { retrieveCategories, useSortCategories } from '../../../../_shared/api';
+import { retrieveCategories } from '../../../../_shared/api';
 
 const Categories = () => {
   const [status, setStatus] = useState('');
@@ -31,11 +16,11 @@ const Categories = () => {
     parentId: parentId ? parseInt(parentId) : undefined
   });
   const { categories } = data || {};
-  const sensors = useSensors(
+  /* const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
-  const sortCategories = useSortCategories();
+  const sortCategories = useSortCategories(); */
 
   const handleCreateClick = () => {
     setStatus('Create');
@@ -45,7 +30,7 @@ const Categories = () => {
     setStatus('');
   };
 
-  const handleDragEnd = async (e: DragEndEvent) => {
+  /* const handleDragEnd = async (e: DragEndEvent) => {
     const { active, over } = e;
 
     if (active.id !== over?.id && categories) {
@@ -61,9 +46,11 @@ const Categories = () => {
         category.ordinance = index + 1;
       }
 
+      console.log(sortedCategories);
+
       sortCategories.mutate({ categories: sortedCategories });
     }
-  };
+  }; */
 
   return isLoading ? (
     <Loading />
@@ -81,15 +68,15 @@ const Categories = () => {
     >
       {status === 'Create' && <CreateCategory cancel={handleCancelClick} />}
 
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={categories || []} strategy={verticalListSortingStrategy}>
-          <List disablePadding>
-            {categories?.map((category) => (
-              <CategoryRow key={category.id} category={category} />
-            ))}
-          </List>
-        </SortableContext>
-      </DndContext>
+      {/* <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={categories || []} strategy={verticalListSortingStrategy}> */}
+      <List disablePadding>
+        {categories?.map((category) => (
+          <CategoryRow key={category.id} category={category} />
+        ))}
+      </List>
+      {/* </SortableContext>
+      </DndContext> */}
     </Section>
   );
 };

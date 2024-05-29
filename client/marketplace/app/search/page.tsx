@@ -5,6 +5,7 @@ import Section from '../../../_shared/components/Section/Section';
 import { retrieveCategories, searchProducts } from '../../../_shared/api';
 import {
   Avatar,
+  Box,
   List,
   ListItem,
   ListItemButton,
@@ -12,7 +13,6 @@ import {
   ListItemText,
   Typography
 } from '@mui/material';
-import { useAppSelector } from '../../../_shared/redux/store';
 
 const Search = () => {
   const searchParams = useSearchParams();
@@ -22,7 +22,6 @@ const Search = () => {
   const { categories } = c.data || {};
   const { data } = searchProducts({ value: searchValue, category });
   const { variants } = data || {};
-  const { country } = useAppSelector((state) => state.App);
   const router = useRouter();
 
   return (
@@ -34,37 +33,57 @@ const Search = () => {
       {variants && variants.length > 0 ? (
         <List>
           {variants.map((variant) => {
-            const urls = variant.urls || [];
-            const countryCode = country || 'ca';
-            const url =
-              urls.find((url) => url.country.toLowerCase() === countryCode.toLowerCase()) || urls[0];
+            const urls = variant?.urls || [];
+
+            urls.sort((a, b) => (a.price < b.price ? -1 : 1));
+
+            const lowestPrice = urls[0]?.price || 0;
+            const highestPrice = urls.length > 1 ? urls[urls.length - 1]?.price : 0;
+            const currency = urls[0]?.currency || 'cad';
+            const variantMedia = variant.media || [];
+            const productMedia = variant.product?.media || [];
+            const media = [...variantMedia, ...productMedia];
 
             return (
-              <ListItem key={variant.id} disableGutters disablePadding divider>
+              <ListItem
+                key={variant.id}
+                disableGutters
+                disablePadding
+                divider
+                sx={{ alignItems: 'flex-start' }}
+              >
                 <ListItemButton
                   sx={{ alignItems: 'flex-start' }}
                   onClick={() => router.push(`/product/${variant.product?.id}?variant=${variant.id}`)}
                 >
                   <ListItemIcon>
                     <Avatar
-                      src={variant.media?.[0]?.url || '/broken.jpg'}
+                      src={media?.[0]?.url || '/broken.jpg'}
                       alt={`${variant.product?.name} || ${variant.name}`}
                       variant='square'
                       sx={{ mr: 2, width: 100, height: 100 }}
+                      imgProps={{ sx: { objectFit: 'contain' } }}
                     />
                   </ListItemIcon>
 
-                  <ListItemText
-                    primary={`${variant.product?.name} - ${variant.name}`}
-                    secondary={variant.excerpt || variant.product?.excerpt}
-                  />
+                  <Box>
+                    <ListItemText
+                      primary={`${variant.product?.name} - ${variant.name}`}
+                      secondary={variant.product?.brand?.name}
+                    />
+
+                    <Typography>
+                      Lorem ipsum dolor, sit amet consectetur adipisicing elit. Aperiam, dolorem corporis
+                      reiciendis eveniet sint, incidunt at eaque perferendis sunt velit nostrum, recusandae
+                      fuga magni a mollitia dolor repellendus deleniti magnam.
+                    </Typography>
+                  </Box>
                 </ListItemButton>
 
-                {Boolean(url) && (
-                  <Typography variant='h6'>
-                    ${url.price.toFixed(2)} {url.currency.toUpperCase()}
-                  </Typography>
-                )}
+                <Typography variant='h6' sx={{ flexShrink: 0, ml: 1 }}>
+                  ${lowestPrice.toFixed(2)}
+                  {highestPrice ? ` - ${highestPrice.toFixed(2)}` : ''} {currency.toUpperCase()}
+                </Typography>
               </ListItem>
             );
           })}

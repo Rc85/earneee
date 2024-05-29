@@ -78,7 +78,9 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
   const { variants, count = 0 } = p.data || {};
   const s = retrieveMarketplaceProductSpecifications({ categoryId: groupId, enabled: Boolean(groupId) });
   const { specifications = [] } = s.data || {};
-  const specificationLabels = [...new Set(specifications.map((specification) => specification.name))];
+  const specificationLabels = [
+    ...new Set(specifications.map((specification) => specification.name.toUpperCase()))
+  ];
   const router = useRouter();
 
   const handleSpecificationChange = (specification: ProductSpecificationsInterface) => {
@@ -199,7 +201,7 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
             <Box sx={{ overflowY: 'auto', maxHeight: '750px' }}>
               {specificationLabels.map((label) => {
                 const filteredSpecifications = specifications.filter(
-                  (specification) => specification.name === label
+                  (specification) => specification.name.toUpperCase() === label
                 );
                 const specs = [];
 
