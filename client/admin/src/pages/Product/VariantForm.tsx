@@ -10,10 +10,15 @@ import { LoadingButton } from '@mui/lab';
 import { retrieveAffiliates, useCreateProductVariant } from '../../../../_shared/api';
 import AddUrl from './AddUrl';
 import UrlRow from './UrlRow';
+import { useEditor } from '@tiptap/react';
+import { editorExtensions } from '../../../../_shared/constants';
+import { RichTextEditor } from '../../../../_shared/components';
 
 interface Props {
   variant?: ProductVariantsInterface;
 }
+
+const editorStyle = { mb: 1.5 };
 
 const VariantForm = ({ variant }: Props) => {
   const params = useParams();
@@ -44,6 +49,16 @@ const VariantForm = ({ variant }: Props) => {
   const { enqueueSnackbar } = useSnackbar();
   const { data } = retrieveAffiliates();
   const { affiliates } = data || {};
+  const editor = useEditor(
+    {
+      content: variant?.description || undefined,
+      extensions: editorExtensions,
+      onUpdate: ({ editor }) => {
+        setForm({ ...form, description: editor.getHTML() });
+      }
+    },
+    [variant]
+  );
 
   const handleSuccess = () => {
     setStatus('');
@@ -134,12 +149,11 @@ const VariantForm = ({ variant }: Props) => {
         value={form.excerpt || ''}
       />
 
-      <TextField
-        label='Description'
-        onChange={(e) => setForm({ ...form, description: e.target.value })}
-        value={form.description || ''}
-        multiline
-        rows={4}
+      <RichTextEditor
+        sx={editorStyle}
+        editor={editor}
+        onHtmlChange={(html) => setForm({ ...form, details: html })}
+        rawHtml={form.details || ''}
       />
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

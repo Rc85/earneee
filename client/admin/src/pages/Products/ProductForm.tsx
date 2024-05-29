@@ -8,10 +8,15 @@ import { CategoriesInterface, ProductsInterface } from '../../../../../_shared/t
 import { useNavigate } from 'react-router-dom';
 import { retrieveCategories, retrieveProductBrands, useCreateProduct } from '../../../../_shared/api';
 import { generateKey } from '../../../../../_shared/utils';
+import { RichTextEditor } from '../../../../_shared/components';
+import { editorExtensions } from '../../../../_shared/constants';
+import { useEditor } from '@tiptap/react';
 
 interface Props {
   product?: ProductsInterface;
 }
+
+const editorStyle = { mb: 1.5 };
 
 const ProductForm = ({ product }: Props) => {
   const [status, setStatus] = useState('');
@@ -37,6 +42,16 @@ const ProductForm = ({ product }: Props) => {
   });
   const { brands } = b.data || {};
   const { categories } = c.data || {};
+  const editor = useEditor(
+    {
+      content: product?.description || undefined,
+      extensions: editorExtensions,
+      onUpdate: ({ editor }) => {
+        setForm({ ...form, description: editor.getHTML() });
+      }
+    },
+    [product]
+  );
 
   useEffect(() => {
     if (product) {
@@ -130,12 +145,11 @@ const ProductForm = ({ product }: Props) => {
         value={form.excerpt || ''}
       />
 
-      <TextField
-        label='Description'
-        onChange={(e) => handleChange('description', e.target.value)}
-        value={form.description || ''}
-        multiline
-        rows={4}
+      <RichTextEditor
+        sx={editorStyle}
+        editor={editor}
+        onHtmlChange={(html) => setForm({ ...form, details: html })}
+        rawHtml={form.details || ''}
       />
 
       {selectedCategories.length > 0 && (

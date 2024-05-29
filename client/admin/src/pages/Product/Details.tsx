@@ -46,8 +46,6 @@ const Details = () => {
   const initialProduct: ProductsInterface = {
     id: generateKey(1),
     name: '',
-    price: null,
-    currency: null,
     description: null,
     about: null,
     details: null,
@@ -84,8 +82,6 @@ const Details = () => {
       content: productId && !variantId ? product?.details : variant?.details || undefined,
       extensions: editorExtensions,
       onUpdate: ({ editor }) => {
-        console.log('update');
-
         setForm({ ...form, details: editor.getHTML() });
       }
     },
