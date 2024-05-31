@@ -73,8 +73,6 @@ const ProductShowcase = ({ type }: Props) => {
                       {product.name}
                     </Typography>
 
-                    <Typography>{product.name}</Typography>
-
                     {Boolean(excerpt) && (
                       <>
                         <Divider sx={{ my: 1 }} />

@@ -44,6 +44,8 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
       <head>
         <title>{brandName}</title>
 
+        <script dangerouslySetInnerHTML={{ __html: `<!-- 8D38E63E-BD75-4651-AAE2-F2A241D269D2 -->` }} />
+
         <link
           rel='stylesheet'
           href='https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap'
