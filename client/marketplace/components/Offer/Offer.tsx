@@ -18,7 +18,11 @@ const Offer = ({ offer }: Props) => {
   return (
     <Box key={offer.id} sx={{ mb: 1, position: 'relative' }}>
       <Modal open={status === 'Details'} title='Details' cancel={() => setStatus('')} cancelText='Close'>
-        <Typography>{offer.details}</Typography>
+        {Boolean(offer.details) && (
+          <Typography>
+            <div dangerouslySetInnerHTML={{ __html: offer.details! }} />
+          </Typography>
+        )}
       </Modal>
 
       <Link href={offer.url}>

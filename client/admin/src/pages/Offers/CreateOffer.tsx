@@ -15,7 +15,7 @@ const CreateOffer = () => {
   return isLoading ? (
     <Loading />
   ) : (
-    <Container disableGutters sx={{ p: 2 }}>
+    <Container disableGutters sx={{ p: 2, overflow: 'hidden' }}>
       <Breadcrumbs>
         <Link onClick={() => navigate('/offers')}>Offers</Link>
 

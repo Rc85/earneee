@@ -11,10 +11,15 @@ import { useNavigate } from 'react-router-dom';
 import { useCreateOffer } from '../../../../_shared/api';
 import AddLogo from './AddLogo';
 import dayjs from 'dayjs';
+import { RichTextEditor } from '../../../../_shared/components';
+import { editorExtensions } from '../../../../_shared/constants';
+import { useEditor } from '@tiptap/react';
 
 interface Props {
   offer?: OffersInterface;
 }
+
+const editorStyle = { mb: 1.5 };
 
 const OfferForm = ({ offer }: Props) => {
   const theme = useTheme();
@@ -39,6 +44,17 @@ const OfferForm = ({ offer }: Props) => {
   const [status, setStatus] = useState('');
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
+
+  const editor = useEditor(
+    {
+      content: offer?.details || undefined,
+      extensions: editorExtensions,
+      onUpdate: ({ editor }) => {
+        setForm({ ...form, details: editor.getHTML() });
+      }
+    },
+    [offer]
+  );
 
   useEffect(() => {
     if (offer) {
@@ -83,8 +99,6 @@ const OfferForm = ({ offer }: Props) => {
   };
 
   const handleLogoChange = (logoUrl: string, width: number, height: number) => {
-    console.log(width, height);
-
     setForm({ ...form, logoUrl, logoWidth: width, logoHeight: height });
 
     setStatus('');
@@ -177,12 +191,11 @@ const OfferForm = ({ offer }: Props) => {
             InputLabelProps={{ shrink: true }}
           />
 
-          <TextField
-            label='Details'
-            multiline
-            rows={6}
-            onChange={(e) => setForm({ ...form, details: e.target.value })}
-            value={form?.details || ''}
+          <RichTextEditor
+            sx={editorStyle}
+            editor={editor}
+            onHtmlChange={(html) => setForm({ ...form, details: html })}
+            rawHtml={form.details || ''}
           />
         </Box>
       </Box>

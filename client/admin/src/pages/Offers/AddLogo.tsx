@@ -57,7 +57,9 @@ const AddLogo = ({ cancel, submit }: Props) => {
 
       <TextField label='URL' onChange={(e) => setUrl(e.target.value)} value={url} />
 
-      <Button fullWidth>Browse</Button>
+      <Button fullWidth onClick={() => fileInputRef.current.click()}>
+        Browse
+      </Button>
     </Modal>
   );
 };
