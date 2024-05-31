@@ -60,6 +60,7 @@ export const product = {
       p.details,
       p.status,
       p.brand_id,
+      p.type,
       c.category,
       COALESCE(pv.variants, '[]'::JSONB) AS variants
     FROM products AS p

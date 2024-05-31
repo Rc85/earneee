@@ -8,6 +8,7 @@ export interface ProductsInterface {
   id: string;
   name: string;
   categoryId: number;
+  type: string;
   brandId: string | null;
   excerpt: string | null;
   description: string | null;

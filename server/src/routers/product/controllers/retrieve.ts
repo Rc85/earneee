@@ -85,6 +85,7 @@ export const retrieveProductShowcase = async (req: Request, resp: Response, next
       p.name,
       p.description,
       p.excerpt,
+      p.type,
       COALESCE(pm.media, '[]'::JSONB) AS media,
       COALESCE(pv.variants, '[]'::JSONB) AS variants
     FROM products AS p

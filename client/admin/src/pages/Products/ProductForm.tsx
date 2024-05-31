@@ -23,6 +23,7 @@ const ProductForm = ({ product }: Props) => {
   const [form, setForm] = useState<ProductsInterface>({
     id: generateKey(1),
     name: '',
+    type: 'affiliate',
     description: null,
     about: null,
     details: null,
@@ -105,10 +106,6 @@ const ProductForm = ({ product }: Props) => {
     }
   };
 
-  const handleChange = (key: keyof ProductsInterface, value: string) => {
-    setForm({ ...form, [key]: value });
-  };
-
   const handleCategoryChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const category = categories?.find((category) => category.id === parseInt(e.target.value));
 
@@ -135,22 +132,36 @@ const ProductForm = ({ product }: Props) => {
       <TextField
         label='Name'
         required
-        onChange={(e) => handleChange('name', e.target.value)}
+        onChange={(e) => setForm({ ...form, name: e.target.value })}
         value={form.name}
       />
 
       <TextField
-        label='Excerpt'
-        onChange={(e) => handleChange('excerpt', e.target.value)}
-        value={form.excerpt || ''}
-      />
+        select
+        SelectProps={{ native: true }}
+        value={form.type}
+        onChange={(e) => setForm({ ...form, type: e.target.value })}
+      >
+        <option value='affiliate'>Affiliate Product</option>
+        <option value='dropship'>Dropship Product</option>
+        <option value='direct'>Direct Sale Product</option>
+      </TextField>
 
-      <RichTextEditor
-        sx={editorStyle}
-        editor={editor}
-        onHtmlChange={(html) => setForm({ ...form, details: html })}
-        rawHtml={form.details || ''}
-      />
+      {form.type !== 'affiliate' && (
+        <>
+          <TextField
+            label='Excerpt'
+            onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
+            value={form.excerpt || ''}
+          />
+          <RichTextEditor
+            sx={editorStyle}
+            editor={editor}
+            onHtmlChange={(html) => setForm({ ...form, details: html })}
+            rawHtml={form.details || ''}
+          />{' '}
+        </>
+      )}
 
       {selectedCategories.length > 0 && (
         <Box sx={{ mb: 2 }}>
@@ -197,7 +208,7 @@ const ProductForm = ({ product }: Props) => {
         select
         label='Brand'
         SelectProps={{ native: true }}
-        onChange={(e) => handleChange('brandId', e.target.value)}
+        onChange={(e) => setForm({ ...form, brandId: e.target.value })}
         value={form.brandId || ''}
       >
         <option value=''></option>

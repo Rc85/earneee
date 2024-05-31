@@ -7,12 +7,12 @@ import { Icon } from '@mdi/react';
 import { mdiArrowUpDropCircle, mdiPlusBox, mdiRefresh } from '@mdi/js';
 import { useNavigate, useParams } from 'react-router-dom';
 import { LoadingButton } from '@mui/lab';
-import { retrieveAffiliates, useCreateProductVariant } from '../../../../_shared/api';
+import { retrieveAffiliates, retrieveProducts, useCreateProductVariant } from '../../../../_shared/api';
 import AddUrl from './AddUrl';
 import UrlRow from './UrlRow';
 import { useEditor } from '@tiptap/react';
 import { editorExtensions } from '../../../../_shared/constants';
-import { RichTextEditor } from '../../../../_shared/components';
+import { Loading, RichTextEditor } from '../../../../_shared/components';
 
 interface Props {
   variant?: ProductVariantsInterface;
@@ -23,6 +23,9 @@ const editorStyle = { mb: 1.5 };
 const VariantForm = ({ variant }: Props) => {
   const params = useParams();
   const { productId } = params;
+  const productData = retrieveProducts({ productId });
+  const { products } = productData.data || {};
+  const product = products?.[0];
   const navigate = useNavigate();
   const [status, setStatus] = useState('');
   const initialVariant = {
@@ -125,7 +128,9 @@ const VariantForm = ({ variant }: Props) => {
     setForm({ ...form, urls });
   };
 
-  return (
+  return productData.isLoading ? (
+    <Loading />
+  ) : (
     <Box component='form' onSubmit={handleSubmit}>
       {status === 'Add URL' && (
         <AddUrl
@@ -143,18 +148,22 @@ const VariantForm = ({ variant }: Props) => {
         autoFocus
       />
 
-      <TextField
-        label='Excerpt'
-        onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
-        value={form.excerpt || ''}
-      />
+      {product?.type !== 'affiliate' && (
+        <>
+          <TextField
+            label='Excerpt'
+            onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
+            value={form.excerpt || ''}
+          />
 
-      <RichTextEditor
-        sx={editorStyle}
-        editor={editor}
-        onHtmlChange={(html) => setForm({ ...form, details: html })}
-        rawHtml={form.details || ''}
-      />
+          <RichTextEditor
+            sx={editorStyle}
+            editor={editor}
+            onHtmlChange={(html) => setForm({ ...form, details: html })}
+            rawHtml={form.details || ''}
+          />
+        </>
+      )}
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <FormControlLabel
