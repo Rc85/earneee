@@ -110,23 +110,21 @@ const AddUrl = ({ cancel, url, submit, affiliates, variantId }: Props) => {
         <option value='dropship'>Dropship</option>
       </TextField>
 
-      {form.type === 'affiliate' && (
-        <TextField
-          label='Affiliate'
-          select
-          SelectProps={{ native: true }}
-          onChange={handleAffiliateChange}
-          value={form.affiliateId || ''}
-        >
-          <option value=''></option>
+      <TextField
+        label='Affiliate'
+        select
+        SelectProps={{ native: true }}
+        onChange={handleAffiliateChange}
+        value={form.affiliateId || ''}
+      >
+        <option value=''></option>
 
-          {affiliates.map((affiliate) => (
-            <option key={affiliate.id} value={affiliate.id}>
-              {affiliate.name}
-            </option>
-          ))}
-        </TextField>
-      )}
+        {affiliates.map((affiliate) => (
+          <option key={affiliate.id} value={affiliate.id}>
+            {affiliate.name}
+          </option>
+        ))}
+      </TextField>
     </Modal>
   );
 };

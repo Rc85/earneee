@@ -26,7 +26,6 @@ const ProductVariants = () => {
   );
   const params = useParams();
   const { productId } = params;
-  console.log(productId);
   const { isLoading, data } = retrieveProductVariants({ productId });
   const { variants } = data || {};
   const sortVariants = useSortProductVariants();
