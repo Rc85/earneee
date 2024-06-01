@@ -67,13 +67,25 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
     WHERE pm.status = 'enabled'
     ORDER BY pm.ordinance
   ),
+  a AS (
+    SELECT
+      a.id,
+      a.name
+    FROM affiliates AS a
+  ),
   pu AS (
     SELECT
       pu.url,
       pu.variant_id,
       pu.price,
-      pu.currency
+      pu.currency,
+      a.affiliate
     FROM product_urls AS pu
+    LEFT JOIN LATERAL (
+      SELECT TO_JSONB(a.*) AS affiliate
+      FROM a
+      WHERE a.id = pu.affiliate_id
+    ) AS a ON true
     WHERE LOWER(pu.country) = LOWER($2)
     ORDER BY pu.price DESC
   ),
@@ -125,8 +137,7 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
     pv.product_id,
     pv.status,
     pr.product,
-    pu.price,
-    pu.currency,
+    COALESCE(pu.urls, '[]'::JSONB) AS urls,
     COALESCE(pm.media, '[]'::JSONB) AS media,
     COALESCE(s.specifications, '[]'::JSONB) AS specifications
   FROM product_variants AS pv
@@ -135,7 +146,11 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
     FROM pm
     WHERE pm.variant_id = pv.id
   ) AS pm ON true
-  LEFT JOIN pu ON pu.variant_id = pv.id
+  LEFT JOIN LATERAL (
+    SELECT JSONB_AGG(pu.*) AS urls
+    FROM pu
+    WHERE pu.variant_id = pv.id
+  ) AS pu ON true
   LEFT JOIN LATERAL (
     SELECT JSONB_AGG(JSONB_BUILD_OBJECT(
       'id', s.id,
@@ -332,11 +347,6 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
         pv.details,
         pv.product_id,
         pv.status,
-        pu.price,
-        pu.currency,
-        pu.country,
-        pu.affiliate,
-        pu.type,
         COALESCE(pm.media, '[]'::JSONB) AS media,
         COALESCE(po.options, '[]'::JSONB) AS options,
         COALESCE(ps.specifications, '[]'::JSONB) AS specifications,
@@ -432,13 +442,25 @@ export const retrieveMarketplaceVariants = async (req: Request, resp: Response, 
       WHERE pm.status = 'enabled'
       ORDER BY pm.ordinance
     ),
+    a AS (
+      SELECT
+        a.id,
+        a.name
+      FROM affiliates AS a
+    ),
     pu AS (
       SELECT
         pu.url,
         pu.variant_id,
         pu.price,
-        pu.currency
+        pu.currency,
+        a.affiliate
       FROM product_urls AS pu
+      LEFT JOIN LATERAL (
+        SELECT TO_JSONB(a.*) AS affiliate
+        FROM a
+        WHERE a.id = pu.affiliate_id
+      ) AS a ON true
       WHERE LOWER(pu.country) = LOWER($2)
       ORDER BY pu.price DESC
     ),

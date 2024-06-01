@@ -147,21 +147,17 @@ const ProductForm = ({ product }: Props) => {
         <option value='direct'>Direct Sale Product</option>
       </TextField>
 
-      {form.type !== 'affiliate' && (
-        <>
-          <TextField
-            label='Excerpt'
-            onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
-            value={form.excerpt || ''}
-          />
-          <RichTextEditor
-            sx={editorStyle}
-            editor={editor}
-            onHtmlChange={(html) => setForm({ ...form, details: html })}
-            rawHtml={form.details || ''}
-          />{' '}
-        </>
-      )}
+      <TextField
+        label='Excerpt'
+        onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
+        value={form.excerpt || ''}
+      />
+      <RichTextEditor
+        sx={editorStyle}
+        editor={editor}
+        onHtmlChange={(html) => setForm({ ...form, details: html })}
+        rawHtml={form.details || ''}
+      />
 
       {selectedCategories.length > 0 && (
         <Box sx={{ mb: 2 }}>

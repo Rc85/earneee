@@ -309,13 +309,21 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
                 <Grid2 container spacing={1}>
                   {variants?.map((variant) => {
                     const mediaUrl = variant.media?.[0]?.url || variant.product?.media?.[0]?.url;
+                    const urls = variant.urls || [];
+
+                    urls.sort((a, b) => (a.price < b.price ? -1 : 1));
+
+                    const lowestPrice = urls[0]?.price || 0;
+                    const highestPrice = urls.length > 1 ? urls[urls.length - 1]?.price : 0;
+                    const currency = urls[0]?.currency || 'cad';
+                    const affiliateName = urls[0]?.affiliate?.name;
 
                     return (
                       <Grid2 key={variant.id} xs={12} sm={6} md={4} xl={3}>
                         <Paper
                           variant='outlined'
                           className='product-card'
-                          onClick={() => router.push(`/product/${variant.product?.id}?variant=${variant.id}`)}
+                          onClick={() => handleProductClick(variant)}
                           sx={{ width: 0, minWidth: '100%', cursor: 'pointer' }}
                         >
                           <Box
@@ -324,6 +332,7 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
                               height: '200px',
                               borderTopRightRadius: '3px',
                               borderTopLeftRadius: '3px',
+                              backgroundPosition: 'center',
                               backgroundImage: mediaUrl ? `url('${mediaUrl}')` : undefined,
                               backgroundRepeat: 'no-repeat',
                               backgroundSize: 'contain',
@@ -333,15 +342,13 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
                               alignItems: 'center'
                             }}
                           >
-                            {!variant.media?.[0]?.url && (
-                              <Icon path={mdiImageOff} size={5} color={grey[500]} />
-                            )}
+                            {!mediaUrl && <Icon path={mdiImageOff} size={5} color={grey[500]} />}
                           </Box>
 
                           <Box sx={{ p: 1 }}>
-                            <Typography sx={{ fontWeight: 'bold' }}>{variant.product?.name}</Typography>
-
-                            <Typography color='GrayText'>{variant.name}</Typography>
+                            <Typography sx={{ fontWeight: 'bold' }}>
+                              {variant.product?.name} - {variant.name}
+                            </Typography>
                           </Box>
 
                           {Boolean(variant.excerpt || variant.product?.excerpt) && (
@@ -360,17 +367,25 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
                             </Box>
                           )}
 
-                          {variant.price != null && (
-                            <>
-                              <Divider />
+                          <Divider />
 
-                              <Box sx={{ p: 1 }}>
-                                <Typography sx={{ textAlign: 'right' }}>
-                                  ${variant.price.toFixed(2)} {variant.currency?.toUpperCase()}
-                                </Typography>
-                              </Box>
-                            </>
-                          )}
+                          <Box
+                            sx={{
+                              p: 1,
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'flex-end'
+                            }}
+                          >
+                            <Typography variant='h6' sx={{ mb: 0 }}>
+                              ${lowestPrice.toFixed(2)}
+                              {highestPrice ? ` - ${highestPrice.toFixed(2)}` : ''} {currency.toUpperCase()}
+                            </Typography>
+
+                            {Boolean(affiliateName) && (
+                              <Typography variant='body2'>Sold on {affiliateName}</Typography>
+                            )}
+                          </Box>
                         </Paper>
                       </Grid2>
                     );
@@ -378,47 +393,76 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
                 </Grid2>
               ) : (
                 <List disablePadding>
-                  {variants?.map((variant) => (
-                    <ListItem key={variant.id} disableGutters divider>
-                      <ListItemButton
-                        sx={{ alignItems: 'flex-start' }}
-                        onClick={() => handleProductClick(variant)}
-                      >
-                        <ListItemIcon sx={{ mr: 1 }}>
-                          <Avatar
-                            src={variant.media?.[0]?.url || '/broken.jpg'}
-                            variant='rounded'
-                            alt={variant.name}
-                            sx={{ width: 100, height: 100, backgroundColor: grey[300] }}
-                          >
-                            <Icon path={mdiImageOff} size={1} color={grey[500]} />
-                          </Avatar>
-                        </ListItemIcon>
+                  {variants?.map((variant) => {
+                    const mediaUrl = variant.media?.[0]?.url || variant.product?.media?.[0]?.url;
+                    const urls = variant.urls || [];
 
-                        <Box>
-                          <ListItemText primary={variant.product?.name} secondary={variant.name} />
+                    urls.sort((a, b) => (a.price < b.price ? -1 : 1));
 
-                          <Typography
-                            sx={{
-                              display: '-webkit-box',
-                              WebkitBoxOrient: 'vertical',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              WebkitLineClamp: 3
-                            }}
-                          >
-                            {variant.excerpt || variant.product?.excerpt}
+                    const lowestPrice = urls[0]?.price || 0;
+                    const highestPrice = urls.length > 1 ? urls[urls.length - 1]?.price : 0;
+                    const currency = urls[0]?.currency || 'cad';
+                    const affiliateName = urls[0]?.affiliate?.name;
+
+                    return (
+                      <ListItem key={variant.id} disableGutters divider>
+                        <ListItemButton
+                          sx={{ alignItems: 'flex-start' }}
+                          onClick={() => handleProductClick(variant)}
+                        >
+                          <ListItemIcon sx={{ mr: 1 }}>
+                            <Avatar
+                              src={mediaUrl || '/broken.jpg'}
+                              variant='rounded'
+                              alt={variant.name}
+                              sx={{
+                                width: 100,
+                                height: 100,
+                                backgroundColor: !mediaUrl ? grey[300] : undefined
+                              }}
+                              imgProps={{ sx: { objectFit: 'contain' } }}
+                            >
+                              <Icon path={mdiImageOff} size={1} color={grey[500]} />
+                            </Avatar>
+                          </ListItemIcon>
+
+                          <Box>
+                            <ListItemText primary={variant.product?.name} secondary={variant.name} />
+
+                            <Typography
+                              sx={{
+                                display: '-webkit-box',
+                                WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                WebkitLineClamp: 3
+                              }}
+                            >
+                              {variant.excerpt || variant.product?.excerpt}
+                            </Typography>
+                          </Box>
+                        </ListItemButton>
+
+                        <Box
+                          sx={{
+                            flexShrink: 0,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'flex-end'
+                          }}
+                        >
+                          <Typography variant='h6' sx={{ mb: 0 }}>
+                            ${lowestPrice.toFixed(2)}
+                            {highestPrice ? ` - ${highestPrice.toFixed(2)}` : ''} {currency.toUpperCase()}
                           </Typography>
-                        </Box>
-                      </ListItemButton>
 
-                      {variant.price != null && (
-                        <Typography variant='h6' sx={{ flexShrink: 0 }}>
-                          ${variant.price.toFixed(2)} {variant.currency?.toUpperCase()}
-                        </Typography>
-                      )}
-                    </ListItem>
-                  ))}
+                          {variant.product?.type === 'affiliate' && (
+                            <Typography variant='body2'>Sold on {affiliateName}</Typography>
+                          )}
+                        </Box>
+                      </ListItem>
+                    );
+                  })}
                 </List>
               )}
 

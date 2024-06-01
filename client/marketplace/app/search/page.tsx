@@ -3,16 +3,7 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import Section from '../../../_shared/components/Section/Section';
 import { retrieveCategories, searchProducts } from '../../../_shared/api';
-import {
-  Avatar,
-  Box,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Typography
-} from '@mui/material';
+import { Avatar, Box, List, ListItem, ListItemButton, ListItemIcon, Typography } from '@mui/material';
 import { ProductVariantsInterface } from '../../../../_shared/types';
 
 const Search = () => {
@@ -60,6 +51,8 @@ const Search = () => {
             const variantMedia = variant.media || [];
             const productMedia = variant.product?.media || [];
             const media = [...variantMedia, ...productMedia];
+            const affiliateName = urls[0]?.affiliate?.name;
+            const excerpt = variant.excerpt || variant.product?.excerpt || '';
 
             return (
               <ListItem
@@ -81,23 +74,34 @@ const Search = () => {
                   </ListItemIcon>
 
                   <Box>
-                    <ListItemText
-                      primary={`${variant.product?.name} - ${variant.name}`}
-                      secondary={variant.product?.brand?.name}
-                    />
-
-                    <Typography>
-                      Lorem ipsum dolor, sit amet consectetur adipisicing elit. Aperiam, dolorem corporis
-                      reiciendis eveniet sint, incidunt at eaque perferendis sunt velit nostrum, recusandae
-                      fuga magni a mollitia dolor repellendus deleniti magnam.
+                    <Typography variant='h6' sx={{ mb: 0 }}>
+                      {variant.product?.name} - {variant.name}
                     </Typography>
+
+                    <Typography variant='body2' color='GrayText'>
+                      {variant.product?.brand?.name}
+                    </Typography>
+
+                    {Boolean(excerpt) && <Typography>{excerpt}</Typography>}
                   </Box>
                 </ListItemButton>
 
-                <Typography variant='h6' sx={{ flexShrink: 0, ml: 1 }}>
-                  ${lowestPrice.toFixed(2)}
-                  {highestPrice ? ` - ${highestPrice.toFixed(2)}` : ''} {currency.toUpperCase()}
-                </Typography>
+                <Box
+                  sx={{
+                    flexShrink: 0,
+                    ml: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center'
+                  }}
+                >
+                  <Typography variant='h6' sx={{ mb: 0 }}>
+                    ${lowestPrice.toFixed(2)}
+                    {highestPrice ? ` - ${highestPrice.toFixed(2)}` : ''} {currency.toUpperCase()}
+                  </Typography>
+
+                  {Boolean(affiliateName) && <Typography variant='body2'>Sold on {affiliateName}</Typography>}
+                </Box>
               </ListItem>
             );
           })}

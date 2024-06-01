@@ -53,13 +53,25 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
       FROM product_media AS pm
       ORDER BY pm.ordinance
     ),
+    a AS (
+      SELECT
+        a.id,
+        a.name
+      FROM affiliates AS a
+    ),
     pu AS (
       SELECT
         pu.url,
         pu.price,
         pu.currency,
-        pu.variant_id
-      FROM product_urls AS pu   
+        pu.variant_id,
+        a.affiliate
+      FROM product_urls AS pu
+      LEFT JOIN LATERAL (
+        SELECT TO_JSONB(a.*) AS affiliate
+        FROM a
+        WHERE a.id = pu.affiliate_id
+      ) AS a ON true
     ),
     p AS (
       SELECT
@@ -67,6 +79,7 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
         p.name,
         p.excerpt,
         p.category_id,
+        p.type,
         b.brand,
         COALESCE(pm.media, '[]'::JSONB) AS media
       FROM products AS p

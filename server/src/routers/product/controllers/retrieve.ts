@@ -47,13 +47,25 @@ export const retrieveProductShowcase = async (req: Request, resp: Response, next
       FROM product_media AS pm
       ORDER BY pm.created_at
     ),
+    a AS (
+      SELECT
+        a.id,
+        a.name
+      FROM affiliates AS a
+    ),
     pu AS (
       SELECT
         pu.url,
         pu.price,
         pu.currency,
-        pu.variant_id
+        pu.variant_id,
+        a.affiliate
       FROM product_urls AS pu
+      LEFT JOIN LATERAL (
+        SELECT TO_JSONB(a.*) AS affiliate
+        FROM a
+        WHERE a.id = pu.affiliate_id
+      ) AS a ON true
       WHERE LOWER(pu.country) = LOWER($1)
       ORDER BY pu.created_at
     ),

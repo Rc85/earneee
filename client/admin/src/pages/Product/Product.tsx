@@ -62,39 +62,35 @@ const Product = () => {
             </ListItemButton>
           </ListItem>
 
-          {product?.type !== 'affiliate' && (
-            <>
-              <ListItem disablePadding disableGutters>
-                <ListItemButton onClick={() => navigate(`/product/${productId}/about`)}>
-                  <ListItemIcon>
-                    <Icon path={mdiInformation} size={1} />
-                  </ListItemIcon>
+          <ListItem disablePadding disableGutters>
+            <ListItemButton onClick={() => navigate(`/product/${productId}/about`)}>
+              <ListItemIcon>
+                <Icon path={mdiInformation} size={1} />
+              </ListItemIcon>
 
-                  <ListItemText primary='About' />
-                </ListItemButton>
-              </ListItem>
+              <ListItemText primary='About' />
+            </ListItemButton>
+          </ListItem>
 
-              <ListItem disablePadding disableGutters>
-                <ListItemButton onClick={() => navigate(`/product/${productId}/details`)}>
-                  <ListItemIcon>
-                    <Icon path={mdiImageText} size={1} />
-                  </ListItemIcon>
+          <ListItem disablePadding disableGutters>
+            <ListItemButton onClick={() => navigate(`/product/${productId}/details`)}>
+              <ListItemIcon>
+                <Icon path={mdiImageText} size={1} />
+              </ListItemIcon>
 
-                  <ListItemText primary='Main Details' />
-                </ListItemButton>
-              </ListItem>
+              <ListItemText primary='Main Details' />
+            </ListItemButton>
+          </ListItem>
 
-              <ListItem disablePadding disableGutters>
-                <ListItemButton onClick={() => navigate(`/product/${productId}/specifications`)}>
-                  <ListItemIcon>
-                    <Icon path={mdiDetails} size={1} />
-                  </ListItemIcon>
+          <ListItem disablePadding disableGutters>
+            <ListItemButton onClick={() => navigate(`/product/${productId}/specifications`)}>
+              <ListItemIcon>
+                <Icon path={mdiDetails} size={1} />
+              </ListItemIcon>
 
-                  <ListItemText primary='Specifications' />
-                </ListItemButton>
-              </ListItem>
-            </>
-          )}
+              <ListItemText primary='Specifications' />
+            </ListItemButton>
+          </ListItem>
 
           <ListItem disablePadding disableGutters>
             <ListItemButton onClick={() => navigate(`/product/${productId}/media`)}>

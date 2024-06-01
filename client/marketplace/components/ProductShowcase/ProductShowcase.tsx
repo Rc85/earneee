@@ -55,6 +55,7 @@ const ProductShowcase = ({ type }: Props) => {
           const lowestPrice = urls[0]?.price || 0;
           const highestPrice = urls.length > 1 ? urls[urls.length - 1]?.price : 0;
           const currency = urls[0]?.currency || 'cad';
+          const affiliateName = urls[0]?.affiliate?.name;
 
           return (
             <Grid2 key={product.id} xs={12} sm={4}>
@@ -83,7 +84,7 @@ const ProductShowcase = ({ type }: Props) => {
 
                   <Box sx={{ p: 2, flexGrow: 1 }}>
                     <Typography variant='h6' sx={{ mb: 0 }}>
-                      {product.name}
+                      {product.name} {variant?.name ? `- ${variant?.name}` : ''}
                     </Typography>
 
                     {Boolean(excerpt) && (
@@ -107,11 +108,17 @@ const ProductShowcase = ({ type }: Props) => {
 
                   <Divider />
 
-                  <Box sx={{ p: 2, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                  <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                     <Typography variant='h6' sx={{ mb: 0 }}>
                       ${lowestPrice.toFixed(2)}
                       {highestPrice ? ` - ${highestPrice.toFixed(2)}` : ''} {currency.toUpperCase()}
                     </Typography>
+
+                    {Boolean(affiliateName) && (
+                      <Typography variant='body2' sx={{ textAlign: 'center' }}>
+                        Sold on {affiliateName}
+                      </Typography>
+                    )}
                   </Box>
                 </Box>
               </Paper>

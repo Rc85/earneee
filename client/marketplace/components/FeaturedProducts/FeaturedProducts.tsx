@@ -145,6 +145,7 @@ const FeaturedProducts = () => {
                 const currency = urls[0]?.currency || 'cad';
                 const media = variant.media?.[0] || variant.product?.media?.[0];
                 const mediaUrl = media?.url;
+                const affiliateName = urls[0]?.affiliate?.name;
 
                 return (
                   <Box
@@ -198,10 +199,18 @@ const FeaturedProducts = () => {
                         </Typography>
                       </Box>
 
-                      <Typography sx={{ ml: 1, flexShrink: 0 }} color='white' variant='h4'>
-                        ${lowestPrice.toFixed(2)}
-                        {highestPrice ? ` - ${highestPrice.toFixed(2)}` : ''} {currency.toUpperCase()}
-                      </Typography>
+                      <Box sx={{ ml: 1, flexShrink: 0 }}>
+                        <Typography sx={{ mb: 0, textAlign: 'center' }} color='white' variant='h4'>
+                          ${lowestPrice.toFixed(2)}
+                          {highestPrice ? ` - ${highestPrice.toFixed(2)}` : ''} {currency.toUpperCase()}
+                        </Typography>
+
+                        {Boolean(affiliateName) && (
+                          <Typography variant='body2' color='white' sx={{ textAlign: 'center' }}>
+                            Sold on {affiliateName}
+                          </Typography>
+                        )}
+                      </Box>
                     </Box>
                   </Box>
                 );
