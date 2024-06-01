@@ -13,6 +13,7 @@ import {
   ListItemText,
   Typography
 } from '@mui/material';
+import { ProductVariantsInterface } from '../../../../_shared/types';
 
 const Search = () => {
   const searchParams = useSearchParams();
@@ -23,6 +24,22 @@ const Search = () => {
   const { data } = searchProducts({ value: searchValue, category });
   const { variants } = data || {};
   const router = useRouter();
+
+  const handleProductClick = (variant: ProductVariantsInterface) => {
+    if (variant.product?.type === 'affiliate') {
+      const urls = variant.urls?.[0];
+
+      if (urls) {
+        const { url } = urls;
+
+        if (url) {
+          window.open(url, '_blank');
+        }
+      }
+    } else {
+      router.push(`/product/${variant.product?.id}?variant=${variant.id}`);
+    }
+  };
 
   return (
     <Section
@@ -52,10 +69,7 @@ const Search = () => {
                 divider
                 sx={{ alignItems: 'flex-start' }}
               >
-                <ListItemButton
-                  sx={{ alignItems: 'flex-start' }}
-                  onClick={() => router.push(`/product/${variant.product?.id}?variant=${variant.id}`)}
-                >
+                <ListItemButton sx={{ alignItems: 'flex-start' }} onClick={() => handleProductClick(variant)}>
                   <ListItemIcon>
                     <Avatar
                       src={media?.[0]?.url || '/broken.jpg'}

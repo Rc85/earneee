@@ -9,6 +9,7 @@ import { Loading } from '../../../_shared/components';
 import { useAppSelector } from '../../../_shared/redux/store';
 import Icon from '@mdi/react';
 import { useRouter } from 'next/navigation';
+import { ProductVariantsInterface } from '../../../../_shared/types';
 
 let carouselInterval: NodeJS.Timer | undefined | void = undefined;
 
@@ -78,8 +79,20 @@ const FeaturedProducts = () => {
     setImageIndex(imageIndex + 1);
   };
 
-  const handleProductClick = (url: string) => {
-    router.push(url);
+  const handleProductClick = (variant: ProductVariantsInterface) => {
+    if (variant.product?.type === 'affiliate') {
+      const urls = variant.urls?.[0];
+
+      if (urls) {
+        const { url } = urls;
+
+        if (url) {
+          window.open(url, '_blank');
+        }
+      }
+    } else {
+      router.push(`/product/${variant.product?.id}?variant=${variant.id}`);
+    }
   };
 
   const handleOnMouseOver = () => {
@@ -138,9 +151,7 @@ const FeaturedProducts = () => {
                     key={variant.id}
                     onMouseOver={handleOnMouseOver}
                     onMouseLeave={handleOnMouseLeave}
-                    onClick={() =>
-                      handleProductClick(`/product/${variant.product?.id}?variant=${variant.id}`)
-                    }
+                    onClick={() => handleProductClick(variant)}
                     sx={{
                       cursor: 'pointer',
                       display: 'flex',

@@ -25,7 +25,7 @@ const Offer = ({ offer }: Props) => {
         )}
       </Modal>
 
-      <Link href={offer.url}>
+      <Link href={offer.url} target='_blank'>
         <img src={offer.logoUrl} style={{ maxWidth: '100%' }} />
       </Link>
 

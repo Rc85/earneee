@@ -55,6 +55,7 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
     ),
     pu AS (
       SELECT
+        pu.url,
         pu.price,
         pu.currency,
         pu.variant_id

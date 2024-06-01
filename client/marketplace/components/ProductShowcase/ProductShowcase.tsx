@@ -6,6 +6,7 @@ import { retrieveProductShowcase } from '../../../_shared/api';
 import { useAppSelector } from '../../../_shared/redux/store';
 import { useRouter } from 'next/navigation';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
+import { ProductsInterface } from '../../../../_shared/types';
 
 interface Props {
   type: 'new' | 'popular';
@@ -17,8 +18,20 @@ const ProductShowcase = ({ type }: Props) => {
   const { products } = data || {};
   const router = useRouter();
 
-  const handleProductClick = (url: string) => {
-    router.push(url);
+  const handleProductClick = (product: ProductsInterface) => {
+    if (product.type === 'affiliate') {
+      const urls = product.variants?.[0].urls?.[0];
+
+      if (urls) {
+        const { url } = urls;
+
+        if (url) {
+          window.open(url, '_blank');
+        }
+      }
+    } else {
+      router.push(`/product/${product.id}?variant=${product.variants?.[0]?.id}`);
+    }
   };
 
   return products && products.length > 0 ? (
@@ -55,7 +68,7 @@ const ProductShowcase = ({ type }: Props) => {
                 }}
                 className='product-card'
               >
-                <Box onClick={() => handleProductClick(`/product/${product.id}?variant=${variant?.id}`)}>
+                <Box onClick={() => handleProductClick(product)}>
                   <Box
                     sx={{
                       borderTopRightRadius: 4,

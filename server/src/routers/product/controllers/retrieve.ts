@@ -49,6 +49,7 @@ export const retrieveProductShowcase = async (req: Request, resp: Response, next
     ),
     pu AS (
       SELECT
+        pu.url,
         pu.price,
         pu.currency,
         pu.variant_id

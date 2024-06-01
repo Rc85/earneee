@@ -19,17 +19,19 @@ const Index = async () => {
   return (
     <>
       <Box sx={{ display: 'flex' }}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, overflowX: 'hidden' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, overflowX: 'hidden', mr: 2 }}>
           <FeaturedProducts />
 
           <ProductShowcase type='new' />
         </Box>
 
-        <Box sx={{ width: '25%', minWidth: '200px', maxWidth: '300px', ml: 2 }}>
-          {offers?.map((offer) => {
-            return <Offer key={offer.id} offer={offer} />;
-          })}
-        </Box>
+        {Boolean(offers && offers.length > 0) && (
+          <Box sx={{ width: '30%', minWidth: '250px', maxWidth: '350px' }}>
+            {offers?.map((offer) => {
+              return <Offer key={offer.id} offer={offer} />;
+            })}
+          </Box>
+        )}
       </Box>
 
       {emailSubscriptionStatus?.online && <Subscribe />}

@@ -93,6 +93,7 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
       pr.id,
       pr.name,
       pr.excerpt,
+      pr.type,
       pr.category_id,
       pr.created_at,
       COALESCE(pm.media, '[]'::JSONB) AS media,
@@ -336,13 +337,16 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
         pu.country,
         pu.affiliate,
         pu.type,
-        pu.url,
         COALESCE(pm.media, '[]'::JSONB) AS media,
         COALESCE(po.options, '[]'::JSONB) AS options,
-        COALESCE(ps.specifications, '[]'::JSONB) AS specifications
+        COALESCE(ps.specifications, '[]'::JSONB) AS specifications,
+        COALESCE(pu.urls, '[]'::JSONB) AS urls
       FROM product_variants AS pv
-      LEFT JOIN pu
-      ON pu.variant_id = pv.id
+      LEFT JOIN LATERAL (
+        SELECT JSONB_AGG(pu.*) AS urls
+        FROM pu
+        WHERE pu.variant_id = pv.id
+      ) AS pu ON true
       LEFT JOIN LATERAL (
         SELECT JSONB_AGG(pm.*) AS media
         FROM pm
@@ -369,6 +373,7 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
       p.about,
       p.excerpt,
       p.status,
+      p.type,
       ac.ancestors,
       COALESCE(pv.variants, '[]'::JSONB) AS variants,
       COALESCE(pm.media, '[]'::JSONB) AS media,
@@ -429,6 +434,7 @@ export const retrieveMarketplaceVariants = async (req: Request, resp: Response, 
     ),
     pu AS (
       SELECT
+        pu.url,
         pu.variant_id,
         pu.price,
         pu.currency
@@ -441,6 +447,7 @@ export const retrieveMarketplaceVariants = async (req: Request, resp: Response, 
         pr.id,
         pr.name,
         pr.excerpt,
+        pr.type,
         pr.category_id,
         pr.created_at,
         COALESCE(pm.media, '[]'::JSONB) AS media

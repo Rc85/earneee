@@ -29,7 +29,7 @@ import {
   retrieveMarketplaceProducts
 } from '../../../../_shared/api';
 import Link from 'next/link';
-import { ProductSpecificationsInterface } from '../../../../../_shared/types';
+import { ProductSpecificationsInterface, ProductVariantsInterface } from '../../../../../_shared/types';
 import { PriceFilter } from '../../../components';
 import { mdiCloseBoxMultiple, mdiImageOff, mdiViewGrid, mdiViewList } from '@mdi/js';
 import Icon from '@mdi/react';
@@ -114,6 +114,22 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
 
   const handleClearAllClick = () => {
     setFilters({ minPrice: undefined, maxPrice: undefined, specifications: {} });
+  };
+
+  const handleProductClick = (variant: ProductVariantsInterface) => {
+    if (variant.product?.type === 'affiliate') {
+      const urls = variant.urls?.[0];
+
+      if (urls) {
+        const { url } = urls;
+
+        if (url) {
+          window.open(url, '_blank');
+        }
+      }
+    } else {
+      router.push(`/product/${variant.product?.id}?variant=${variant.id}`);
+    }
   };
 
   return (
@@ -366,7 +382,7 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
                     <ListItem key={variant.id} disableGutters divider>
                       <ListItemButton
                         sx={{ alignItems: 'flex-start' }}
-                        onClick={() => router.push(`/product/${variant.product?.id}?variant=${variant.id}`)}
+                        onClick={() => handleProductClick(variant)}
                       >
                         <ListItemIcon sx={{ mr: 1 }}>
                           <Avatar
