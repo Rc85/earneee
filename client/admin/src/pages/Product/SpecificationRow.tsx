@@ -11,10 +11,10 @@ import { Icon } from '@mdi/react';
 import { mdiDragHorizontalVariant, mdiTrashCan } from '@mdi/js';
 import { useState } from 'react';
 import { Modal } from '../../../../_shared/components';
-import AddSpecification from './AddSpecification';
 import { useDeleteProductSpecification } from '../../../../_shared/api';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import EditSpecification from './EditSpecification';
 
 interface Props {
   specification: ProductSpecificationsInterface;
@@ -48,7 +48,7 @@ const SpecificationRow = ({ specification }: Props) => {
         cancelText='No'
       />
 
-      {status === 'Edit' && <AddSpecification cancel={() => setStatus('')} specification={specification} />}
+      {status === 'Edit' && <EditSpecification cancel={() => setStatus('')} specification={specification} />}
 
       <IconButton size='small' {...listeners}>
         <Icon path={mdiDragHorizontalVariant} size={1} />

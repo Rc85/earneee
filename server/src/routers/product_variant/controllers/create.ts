@@ -4,7 +4,20 @@ import { ProductUrlsInterface } from '../../../../../_shared/types';
 
 export const createVariant = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
-  const { id, name, description, featured, status, productId, urls, about, details, excerpt } = req.body;
+  const {
+    id,
+    name,
+    description,
+    featured,
+    status,
+    productId,
+    urls,
+    about,
+    details,
+    excerpt,
+    price,
+    currency
+  } = req.body;
 
   const variants = await database.retrieve('product_variants', {
     where: 'product_id = $1',
@@ -24,7 +37,9 @@ export const createVariant = async (req: Request, resp: Response, next: NextFunc
       'ordinance',
       'about',
       'details',
-      'excerpt'
+      'excerpt',
+      'price',
+      'currency'
     ],
     [
       id,
@@ -36,7 +51,9 @@ export const createVariant = async (req: Request, resp: Response, next: NextFunc
       variants.length,
       about,
       details,
-      excerpt || null
+      excerpt || null,
+      price || 0,
+      currency || 'cad'
     ],
     {
       conflict: {
@@ -49,6 +66,8 @@ export const createVariant = async (req: Request, resp: Response, next: NextFunc
           about = EXCLUDED.about,
           details = EXCLUDED.details,
           excerpt = EXCLUDED.excerpt,
+          price = EXCLUDED.price,
+          currency = EXCLUDED.currency,
           updated_at = NOW()`
       },
       client

@@ -1,50 +1,33 @@
-'use client';
-
 import '../index.css';
-import { Footer, ThemeRegistry, TopBar } from '../components';
-import { Box, Container, LinearProgress, Typography } from '@mui/material';
-import { Suspense, useEffect, useState } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { SnackbarProvider } from 'notistack';
-import { Provider } from 'react-redux';
-import { store } from '../../_shared/redux/store';
-import axios from 'axios';
-import { brandName } from '../../_shared/constants';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { StatusesInterface } from '../../../_shared/types';
-import { Loading } from '../../_shared/components';
+import { brandName } from '../../_shared/constants/brand-name';
+import type { Viewport } from 'next';
+import Main from './main';
 
-axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL;
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 0.1,
+  maximumScale: 1
+};
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
-  const [queryClient] = useState(
-    () => new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false } } })
-  );
-  const [status, setStatus] = useState('Loading');
-
-  useEffect(() => {
-    (async () => {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/v1/statuses`, {
-        next: { revalidate: 5 }
-      });
-      const data = await response.json();
-      const statuses: StatusesInterface[] = data.statuses;
-      const marketplaceStatus = statuses.find((status) => status.name === 'marketplace');
-
-      if (!marketplaceStatus?.online) {
-        setStatus('Offline');
-      } else {
-        setStatus('');
-      }
-    })();
-  }, []);
-
   return (
     <html lang='en'>
       <head>
         <title>{brandName}</title>
 
-        <script dangerouslySetInnerHTML={{ __html: `<!-- 8D38E63E-BD75-4651-AAE2-F2A241D269D2 -->` }} />
+        <meta
+          name='description'
+          content='Find trendy products as well as deals and discounts from all over the web'
+        />
+        <meta property='og:title' content='Earneee' />
+        <meta
+          property='og:description'
+          content='Find trendy products as well as deals and discounts from all over the web'
+        />
+        <meta
+          property='og:image'
+          content='https://earneee.sfo3.cdn.digitaloceanspaces.com/images/earneee_logo.png'
+        />
 
         <link
           rel='stylesheet'
@@ -57,54 +40,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
       </head>
 
       <body>
-        {status === 'Loading' ? (
-          <Loading />
-        ) : status === 'Offline' ? (
-          <Container
-            maxWidth='md'
-            sx={{
-              flexGrow: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center'
-            }}
-          >
-            <Typography variant='h3' sx={{ fontWeight: 900, mb: 5, textAlign: 'center' }}>
-              Offline
-            </Typography>
-
-            <Typography>
-              {brandName} is running some maintenance and will be back online as soon as possible.
-            </Typography>
-          </Container>
-        ) : (
-          <Provider store={store}>
-            <QueryClientProvider client={queryClient}>
-              <SnackbarProvider>
-                <ThemeRegistry>
-                  <TopBar />
-
-                  <Container maxWidth='xl' sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
-                    <Suspense
-                      fallback={
-                        <Box sx={{ flexGrow: 1 }}>
-                          <LinearProgress />
-                        </Box>
-                      }
-                    >
-                      {children}
-                    </Suspense>
-                  </Container>
-
-                  <Footer />
-                </ThemeRegistry>
-              </SnackbarProvider>
-
-              <ReactQueryDevtools initialIsOpen={false} />
-            </QueryClientProvider>
-          </Provider>
-        )}
+        <Main>{children}</Main>
       </body>
     </html>
   );

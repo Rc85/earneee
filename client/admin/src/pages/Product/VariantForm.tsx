@@ -7,12 +7,12 @@ import { Icon } from '@mdi/react';
 import { mdiArrowUpDropCircle, mdiPlusBox, mdiRefresh } from '@mdi/js';
 import { useNavigate, useParams } from 'react-router-dom';
 import { LoadingButton } from '@mui/lab';
-import { retrieveAffiliates, useCreateProductVariant } from '../../../../_shared/api';
+import { retrieveAffiliates, retrieveProducts, useCreateProductVariant } from '../../../../_shared/api';
 import AddUrl from './AddUrl';
 import UrlRow from './UrlRow';
 import { useEditor } from '@tiptap/react';
 import { editorExtensions } from '../../../../_shared/constants';
-import { RichTextEditor } from '../../../../_shared/components';
+import { Loading, RichTextEditor } from '../../../../_shared/components';
 
 interface Props {
   variant?: ProductVariantsInterface;
@@ -23,9 +23,12 @@ const editorStyle = { mb: 1.5 };
 const VariantForm = ({ variant }: Props) => {
   const params = useParams();
   const { productId } = params;
+  const productData = retrieveProducts({ productId });
+  const { products } = productData?.data || {};
+  const product = products?.[0];
   const navigate = useNavigate();
   const [status, setStatus] = useState('');
-  const initialVariant = {
+  const initialVariant: ProductVariantsInterface = {
     id: generateKey(1),
     name: '',
     ordinance: 0,
@@ -34,7 +37,8 @@ const VariantForm = ({ variant }: Props) => {
     about: null,
     details: null,
     featured: false,
-    productId,
+    productId: productId!,
+    currency: 'cad',
     status: 'available',
     createdAt: new Date().toISOString(),
     updatedAt: null,
@@ -125,7 +129,9 @@ const VariantForm = ({ variant }: Props) => {
     setForm({ ...form, urls });
   };
 
-  return (
+  return productData.isLoading ? (
+    <Loading />
+  ) : (
     <Box component='form' onSubmit={handleSubmit}>
       {status === 'Add URL' && (
         <AddUrl
@@ -142,6 +148,29 @@ const VariantForm = ({ variant }: Props) => {
         value={form.name}
         autoFocus
       />
+
+      {product?.type !== 'affiliate' && (
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.25 }}>
+          <TextField
+            label='Price'
+            onChange={(e) => setForm({ ...form, price: e.target.value as unknown as number })}
+            value={form.price}
+            sx={{ mb: '0 !important', mr: 1 }}
+          />
+
+          <TextField
+            label='Currency'
+            select
+            SelectProps={{ native: true }}
+            onChange={(e) => setForm({ ...form, currency: e.target.value })}
+            value={form.currency}
+            sx={{ mb: '0 !important' }}
+          >
+            <option value='cad'>CAD</option>
+            <option value='usd'>USD</option>
+          </TextField>
+        </Box>
+      )}
 
       <TextField
         label='Excerpt'

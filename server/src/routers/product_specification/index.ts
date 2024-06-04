@@ -34,4 +34,12 @@ router.put(
   response
 );
 
+router.patch(
+  '/v1/auth/admin/product/specification',
+  dbConnect,
+  middleware(controllers.validateUpdateProductSpecification),
+  middleware(controllers.updateProductSpecification),
+  response
+);
+
 export default router;

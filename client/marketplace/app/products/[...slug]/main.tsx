@@ -452,8 +452,11 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
                           }}
                         >
                           <Typography variant='h6' sx={{ mb: 0 }}>
-                            ${lowestPrice.toFixed(2)}
-                            {highestPrice ? ` - ${highestPrice.toFixed(2)}` : ''} {currency.toUpperCase()}
+                            {variant.product?.type === 'affiliate'
+                              ? `${lowestPrice.toFixed(2)}${
+                                  highestPrice ? ` - ${highestPrice.toFixed(2)}` : ''
+                                } ${currency.toUpperCase()}`
+                              : `${(variant.price || 0).toFixed(2)} ${variant.currency?.toUpperCase()}`}
                           </Typography>
 
                           {variant.product?.type === 'affiliate' && (

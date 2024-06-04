@@ -2,7 +2,7 @@ import { Box } from '@mui/material';
 import { FeaturedProducts, ProductShowcase, Offer, Subscribe } from '../components';
 import { OffersInterface, StatusesInterface } from '../../../_shared/types';
 
-const Index = async () => {
+const Page = async () => {
   const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/v1/offer?status=active`, {
     next: { revalidate: 30, tags: ['offers'] },
     credentials: 'include'
@@ -39,4 +39,4 @@ const Index = async () => {
   );
 };
 
-export default Index;
+export default Page;

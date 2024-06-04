@@ -11,11 +11,15 @@ export const validateCreateProduct = async (req: Request, resp: Response, next: 
   req.body.about = purify.sanitize(req.body.about);
   req.body.details = purify.sanitize(req.body.details);
 
-  const { name, excerpt, categoryId, brandId, description, about, details } = req.body;
+  const { name, excerpt, categoryId, brandId, description, about, details, type } = req.body;
   const { client } = resp.locals;
 
   if (!name || validations.blankCheck.test(name)) {
     return next(new HttpException(400, `Name required`));
+  } else if (!type || validations.blankCheck.test(type)) {
+    return next(new HttpException(400, `Type required`));
+  } else if (!['affiliate', 'dropship', 'direct'].includes(type)) {
+    return next(new HttpException(400, `Invalidate type`));
   } else if (typeof name !== 'string') {
     return next(new HttpException(400, `Invalid name`));
   } else if (excerpt && typeof excerpt !== 'string') {

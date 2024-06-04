@@ -1,4 +1,3 @@
 export { editorExtensions } from './editor-extensions';
 export { theme } from './theme';
-
-export const brandName = 'Earneee';
+export { brandName } from './brand-name';

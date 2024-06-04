@@ -41,6 +41,8 @@ export const product = {
         pv.about,
         pv.details,
         pv.status,
+        pv.price,
+        pv.currency,
         COALESCE(pu.urls, '[]'::JSONB) AS urls
       FROM product_variants AS pv
       LEFT JOIN LATERAL (
@@ -200,6 +202,8 @@ export const product = {
         pv.about,
         pv.details,
         pv.status,
+        pv.price,
+        pv.currency,
         p.product,
         COALESCE(m.media, '[]'::JSONB) AS media,
         COALESCE(pu.urls, '[]'::JSONB) AS urls

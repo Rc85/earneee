@@ -206,74 +206,49 @@ const Product = ({ params: { id } }: Props) => {
                 );
               })}
 
-              {selectedVariant?.status === 'available' && selectedVariant.price != null && (
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <img
-                        src={`${
-                          process.env.NEXT_PUBLIC_STORAGE_URL
-                        }/images/countries/${selectedVariant.country?.toLowerCase()}.png`}
-                      />
-
-                      <Typography sx={{ fontWeight: 500, ml: 1 }}>
-                        ${selectedVariant.price.toFixed(2)} {selectedVariant.currency?.toUpperCase()}
+              {selectedVariant?.status === 'available' && (
+                <>
+                  {options.map((option) => (
+                    <Box key={option.id}>
+                      <Typography variant='h6'>
+                        {option.name} {option.required && <Typography color='red'>Required</Typography>}
                       </Typography>
+
+                      {option.selections?.map((selection) => (
+                        <FormControlLabel
+                          key={selection.id}
+                          label={
+                            <ListItemText
+                              primary={selection.name}
+                              secondary={`+$${selection.price?.toFixed(
+                                2
+                              )} ${selectedVariant.currency?.toUpperCase()}`}
+                            />
+                          }
+                          control={<Checkbox color='info' />}
+                          onChange={(e) => {
+                            /* TODO */
+                          }}
+                        />
+                      ))}
                     </Box>
+                  ))}
 
-                    {selectedVariant.type === 'dropship'
-                      ? options.map((option) => (
-                          <Box key={option.id}>
-                            <Typography variant='h6'>
-                              {option.name} {option.required && <Typography color='red'>Required</Typography>}
-                            </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Typography variant='h6' sx={{ ml: 1 }}>
+                      ${(selectedVariant.price || 0).toFixed(2)} {selectedVariant.currency?.toUpperCase()}
+                    </Typography>
 
-                            {option.selections?.map((selection) => (
-                              <Box key={selection.id}>
-                                {selectedVariant.type === 'affiliate' ? (
-                                  <ListItemText
-                                    primary={selection.name}
-                                    secondary={`+$${selectedVariant.price?.toFixed(
-                                      2
-                                    )} ${selectedVariant.currency?.toUpperCase()}`}
-                                  />
-                                ) : (
-                                  <FormControlLabel
-                                    label={
-                                      <ListItemText
-                                        primary={selection.name}
-                                        secondary={`+$${selection.price?.toFixed(
-                                          2
-                                        )} ${selectedVariant.currency?.toUpperCase()}`}
-                                      />
-                                    }
-                                    control={<Checkbox color='info' />}
-                                  />
-                                )}
-                              </Box>
-                            ))}
-                          </Box>
-                        ))
-                      : selectedVariant.affiliate && (
-                          <Typography>
-                            Sold on{' '}
-                            {Boolean(selectedVariant.affiliate.url) ? (
-                              <Link href={selectedVariant.affiliate.url!} target='_blank'>
-                                {selectedVariant.affiliate.name}
-                              </Link>
-                            ) : (
-                              selectedVariant.affiliate.name
-                            )}
-                          </Typography>
-                        )}
-                  </Box>
-
-                  {selectedVariant.url && (
-                    <Button variant='contained' onClick={() => window.open(selectedVariant.url!, '_blank')}>
+                    <Button
+                      variant='contained'
+                      onClick={() => {
+                        /* TODO */
+                      }}
+                    >
                       Buy Now
                     </Button>
-                  )}
-                </Box>
+                  </Box>
+                </>
               )}
 
               <Box sx={{ mt: 3 }}>

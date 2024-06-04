@@ -1,7 +1,7 @@
 import { Alert, Chip, TextField } from '@mui/material';
 import { Modal } from '../../../../_shared/components';
 import { ProductSpecificationsInterface } from '../../../../../_shared/types';
-import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from 'react';
+import { FormEvent, KeyboardEvent, useRef, useState } from 'react';
 import { generateKey } from '../../../../../_shared/utils';
 import { useSnackbar } from 'notistack';
 import { useParams } from 'react-router-dom';
@@ -9,10 +9,9 @@ import { useCreateProductSpecification } from '../../../../_shared/api';
 
 interface Props {
   cancel: () => void;
-  specification?: ProductSpecificationsInterface;
 }
 
-const AddSpecification = ({ cancel, specification }: Props) => {
+const AddSpecification = ({ cancel }: Props) => {
   const params = useParams();
   const { productId, variantId } = params;
   const [status, setStatus] = useState('');
@@ -23,27 +22,12 @@ const AddSpecification = ({ cancel, specification }: Props) => {
   const [value, setValue] = useState('');
   const [shiftDown, setShiftDown] = useState(false);
 
-  useEffect(() => {
-    if (specification) {
-      setName(specification.name);
-      setSpecifications([specification]);
-    }
-  }, [specification]);
-
   const handleSuccess = () => {
-    if (specification) {
-      cancel();
+    nameInputRef.current?.focus();
 
-      enqueueSnackbar('Specification updated', { variant: 'success' });
-    } else {
-      setName('');
-      setValue('');
-
-      nameInputRef.current?.focus();
-
-      setSpecifications([]);
-    }
-
+    setName('');
+    setValue('');
+    setSpecifications([]);
     setStatus('');
   };
 
@@ -110,7 +94,7 @@ const AddSpecification = ({ cancel, specification }: Props) => {
   return (
     <Modal
       open
-      title={specification ? 'Edit Specifiation' : 'Add Specification'}
+      title='Add Specification'
       submit={handleSubmit}
       cancel={cancel}
       disableBackdropClick

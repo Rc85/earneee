@@ -3,11 +3,11 @@ import { database } from '../../../database';
 
 export const createProduct = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
-  const { id, name, excerpt, categoryId, brandId, description, status, about, details } = req.body;
+  const { id, name, excerpt, categoryId, brandId, description, status, about, details, type } = req.body;
 
   await database.create(
     'products',
-    ['id', 'name', 'excerpt', 'category_id', 'brand_id', 'description', 'status', 'about', 'details'],
+    ['id', 'name', 'excerpt', 'category_id', 'brand_id', 'description', 'status', 'about', 'details', 'type'],
     [
       id,
       name,
@@ -17,7 +17,8 @@ export const createProduct = async (req: Request, resp: Response, next: NextFunc
       description || null,
       status,
       about || null,
-      details || null
+      details || null,
+      type
     ],
     {
       conflict: {
@@ -31,6 +32,7 @@ export const createProduct = async (req: Request, resp: Response, next: NextFunc
           status = EXCLUDED.status,
           about = EXCLUDED.about,
           details = EXCLUDED.details,
+          type = EXCLUDED.type,
           updated_at = NOW()`
       },
       client

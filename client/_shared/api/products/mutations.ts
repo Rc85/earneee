@@ -296,6 +296,39 @@ export const useCreateProductSpecification = (
   });
 };
 
+export const useUpdateProductSpecification = (
+  onSuccess?: (data: any) => void,
+  onError?: (err: any) => void
+) => {
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (options: ProductSpecificationsInterface) =>
+      axios({
+        method: 'patch',
+        url: '/v1/auth/admin/product/specification',
+        withCredentials: true,
+        data: {
+          specification: options
+        }
+      }),
+
+    onSuccess: (data) => {
+      dispatch(setIsLoading(false));
+
+      queryClient.invalidateQueries({ queryKey: ['specifications'] });
+
+      onSuccess?.(data);
+    },
+    onError: (err) => {
+      dispatch(setIsLoading(false));
+
+      onError?.(err);
+    }
+  });
+};
+
 export const useDeleteProductSpecification = (
   onSuccess?: (data: any) => void,
   onError?: (err: any) => void

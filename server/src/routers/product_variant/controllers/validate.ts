@@ -10,7 +10,7 @@ export const validateCreateVariant = async (req: Request, _: Response, next: Nex
   req.body.about = purify.sanitize(req.body.about);
   req.body.details = purify.sanitize(req.body.details);
 
-  const { name, description, featured, status, urls, about, details, excerpt } = req.body;
+  const { name, description, featured, status, urls, about, details, excerpt, price, currency } = req.body;
 
   if (!name || validations.blankCheck.test(name)) {
     return next(new HttpException(400, `Name required`));
@@ -28,6 +28,10 @@ export const validateCreateVariant = async (req: Request, _: Response, next: Nex
     return next(new HttpException(400, `Invalid status`));
   } else if (excerpt && typeof excerpt !== 'string') {
     return next(new HttpException(400, `Invalid excerpt`));
+  } else if (price && typeof price !== 'number' && isNaN(parseFloat(price))) {
+    return next(new HttpException(400, `Invalid price`));
+  } else if (currency && !['cad', 'usd'].includes(currency)) {
+    return next(new HttpException(400, `Invalid currency`));
   }
 
   if (urls) {
