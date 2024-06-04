@@ -202,10 +202,10 @@ const FeaturedProducts = () => {
                       <Box sx={{ ml: 1, flexShrink: 0 }}>
                         <Typography sx={{ mb: 0, textAlign: 'center' }} color='white' variant='h4'>
                           {variant.product?.type === 'affiliate'
-                            ? `${lowestPrice.toFixed(2)}${
-                                highestPrice ? ` - ${highestPrice.toFixed(2)}` : ''
+                            ? `$${lowestPrice.toFixed(2)}${
+                                highestPrice ? ` - $${highestPrice.toFixed(2)}` : ''
                               } ${currency.toUpperCase()}`
-                            : `${(variant.price || 0).toFixed(2)} ${variant.currency?.toUpperCase()}`}
+                            : `$${(variant.price || 0).toFixed(2)} ${variant.currency?.toUpperCase()}`}
                         </Typography>
 
                         {Boolean(affiliateName) && (

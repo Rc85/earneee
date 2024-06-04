@@ -111,10 +111,10 @@ const ProductShowcase = ({ type }: Props) => {
                   <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                     <Typography variant='h6' sx={{ mb: 0 }}>
                       {product?.type === 'affiliate'
-                        ? `${lowestPrice.toFixed(2)}${
-                            highestPrice ? ` - ${highestPrice.toFixed(2)}` : ''
+                        ? `$${lowestPrice.toFixed(2)}${
+                            highestPrice ? ` - $${highestPrice.toFixed(2)}` : ''
                           } ${currency.toUpperCase()}`
-                        : `${(variant?.price || 0).toFixed(2)} ${variant?.currency?.toUpperCase()}`}
+                        : `$${(variant?.price || 0).toFixed(2)} ${variant?.currency?.toUpperCase()}`}
                     </Typography>
 
                     {Boolean(affiliateName) && (
