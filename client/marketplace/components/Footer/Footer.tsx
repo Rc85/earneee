@@ -3,7 +3,7 @@
 import { Box, Container, Divider, Typography } from '@mui/material';
 import { brandName } from '../../../_shared/constants';
 import Icon from '@mdi/react';
-import { mdiFacebook, mdiInstagram, mdiTwitter } from '@mdi/js';
+import { mdiInstagram } from '@mdi/js';
 import { retrieveStatuses } from '../../../_shared/api';
 import Link from 'next/link';
 
@@ -96,17 +96,17 @@ const Footer = () => {
                 Follow Us
               </Typography>
 
-              <Box sx={{ display: 'flex' }}>
-                <Link href='https://facebook.com' style={{ marginRight: '20px' }}>
-                  <Icon path={mdiFacebook} size={1} color='#1877F2' />
-                </Link>
-
-                <Link href='https://twitter.com' style={{ marginRight: '20px' }}>
-                  <Icon path={mdiTwitter} size={1} color='#1DA1F2' />
-                </Link>
-
-                <Link href='https://instagram.com'>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Link
+                  href='https://www.instagram.com/official.earneee/'
+                  target='_blank'
+                  style={{ marginRight: '20px' }}
+                >
                   <Icon path={mdiInstagram} size={1} />
+                </Link>
+
+                <Link href='https://x.com/OfficialEarneee' target='_blank'>
+                  <img src='https://earneee.sfo3.cdn.digitaloceanspaces.com/images/x.jpg' />
                 </Link>
               </Box>
             </Box>
