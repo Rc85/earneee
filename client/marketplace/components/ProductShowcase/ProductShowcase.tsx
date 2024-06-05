@@ -26,7 +26,7 @@ const ProductShowcase = ({ type }: Props) => {
         const { url } = urls;
 
         if (url) {
-          window.open(url, '_blank');
+          window.open(url, '_blank', 'noopener, noreferrer');
         }
       }
     } else {
