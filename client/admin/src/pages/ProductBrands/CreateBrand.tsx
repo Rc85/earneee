@@ -69,6 +69,21 @@ const CreateBrand = () => {
     createProductBrand.mutate(form);
   };
 
+  const disabled = () => {
+    let noUrl = false;
+
+    if (form.urls) {
+      for (const url of form.urls) {
+        if (!url.url) {
+          noUrl = true;
+          break;
+        }
+      }
+    }
+
+    return !form.name || !form.urls || !form.urls.length || noUrl || deepEqual(form, initialState);
+  };
+
   return isLoading ? (
     <Loading />
   ) : (
@@ -90,7 +105,7 @@ const CreateBrand = () => {
         loadingPosition='start'
         loadingIndicator={<CircularProgress size={20} />}
         fullWidth
-        disabled={deepEqual(form, initialState)}
+        disabled={disabled()}
       >
         Submit
       </LoadingButton>

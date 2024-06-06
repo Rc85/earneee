@@ -38,6 +38,21 @@ const CreateBrand = ({ submit, cancel, brand }: Props) => {
     submit(form);
   };
 
+  const disabled = () => {
+    let noUrl = false;
+
+    if (form.urls) {
+      for (const url of form.urls) {
+        if (!url.url) {
+          noUrl = true;
+          break;
+        }
+      }
+    }
+
+    return !form.name || !form.urls || !form.urls.length || noUrl || deepEqual(form, initialState);
+  };
+
   return (
     <Modal
       open
@@ -45,7 +60,7 @@ const CreateBrand = ({ submit, cancel, brand }: Props) => {
       submit={handleSubmit}
       cancel={cancel}
       disableBackdropClick
-      disableSubmit={!form.name || deepEqual(form, initialState)}
+      disableSubmit={disabled()}
     >
       <BrandForm brand={form} setForm={setForm} />
     </Modal>
