@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { database } from '../../../database';
+import { database } from '../../../middlewares';
 import { s3 } from '../../../services';
 
 export const deleteBrand = async (req: Request, resp: Response, next: NextFunction) => {

@@ -1,19 +1,20 @@
 import { InputAdornment, TextField } from '@mui/material';
-import { AffiliatesInterface, ProductUrlsInterface } from '../../../../../_shared/types';
+import { ProductUrlsInterface } from '../../../../../_shared/types';
 import { Modal } from '../../../../_shared/components';
 import { useState } from 'react';
 import { generateKey } from '../../../../../_shared/utils';
 import { countries } from '../../../../../_shared';
+import { retrieveAffiliates } from '../../../../_shared/api';
 
 interface Props {
   cancel: () => void;
   submit: (url: ProductUrlsInterface) => void;
   url?: ProductUrlsInterface;
-  affiliates: AffiliatesInterface[];
-  variantId: string;
 }
 
-const AddUrl = ({ cancel, url, submit, affiliates, variantId }: Props) => {
+const AddUrl = ({ cancel, url, submit }: Props) => {
+  const { data } = retrieveAffiliates();
+  const { affiliates } = data || {};
   const [form, setForm] = useState<ProductUrlsInterface>(
     url || {
       id: generateKey(1),
@@ -23,7 +24,8 @@ const AddUrl = ({ cancel, url, submit, affiliates, variantId }: Props) => {
       country: 'CA',
       type: 'affiliate',
       affiliateId: null,
-      variantId,
+      productId: '',
+      variantId: null,
       createdAt: new Date().toISOString(),
       updatedAt: null
     }
@@ -36,7 +38,7 @@ const AddUrl = ({ cancel, url, submit, affiliates, variantId }: Props) => {
   };
 
   const handleAffiliateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const affiliate = affiliates.find((affiliate) => affiliate.id === e.target.value);
+    const affiliate = affiliates?.find((affiliate) => affiliate.id === e.target.value);
 
     if (affiliate) {
       setForm({ ...form, affiliate, affiliateId: affiliate.id });
@@ -108,6 +110,7 @@ const AddUrl = ({ cancel, url, submit, affiliates, variantId }: Props) => {
       >
         <option value='affiliate'>Affiliate</option>
         <option value='dropship'>Dropship</option>
+        <option value='direct'>Direct Sale</option>
       </TextField>
 
       <TextField
@@ -119,7 +122,7 @@ const AddUrl = ({ cancel, url, submit, affiliates, variantId }: Props) => {
       >
         <option value=''></option>
 
-        {affiliates.map((affiliate) => (
+        {affiliates?.map((affiliate) => (
           <option key={affiliate.id} value={affiliate.id}>
             {affiliate.name}
           </option>

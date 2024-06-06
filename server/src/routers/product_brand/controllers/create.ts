@@ -1,16 +1,16 @@
 import { ObjectCannedACL } from '@aws-sdk/client-s3';
 import { NextFunction, Request, Response } from 'express';
 import sharp from 'sharp';
-import { database } from '../../../database';
+import { database } from '../../../middlewares';
 import { s3 } from '../../../services';
-import { ProductBrandUrlsInterface, ProductBrandsInterface } from '../../../../../_shared/types';
+import { ProductBrandsInterface } from '../../../../../_shared/types';
 import { generateKey } from '../../../../../_shared/utils';
 
 export const createBrand = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
-  const { id, name, owner, urls, logoUrl, logoPath, status } = req.body;
+  const { id, name, owner, url, logoUrl, logoPath, status } = req.body;
 
-  let url = logoUrl;
+  let logo = logoUrl;
   let path = logoPath;
 
   if (logoUrl && /^data:image\/(png|jpeg);base64.*/.test(logoUrl)) {
@@ -30,7 +30,7 @@ export const createBrand = async (req: Request, resp: Response, next: NextFuncti
     const data = await s3.putObject(params);
     const eTag = data.ETag ? data.ETag.replace(/"/g, '') : '';
 
-    url = `https://${process.env.S3_BUCKET_NAME}.${process.env.S3_ENDPOINT}/${key}?ETag=${eTag}`;
+    logo = `https://${process.env.S3_BUCKET_NAME}.${process.env.S3_ENDPOINT}/${key}?ETag=${eTag}`;
     path = key;
   } else if (!logoUrl && logoPath) {
     await s3.deleteObject({
@@ -41,8 +41,8 @@ export const createBrand = async (req: Request, resp: Response, next: NextFuncti
 
   const brand: ProductBrandsInterface[] = await database.create(
     'product_brands',
-    ['id', 'name', 'owner', 'logo_path', 'logo_url', 'status'],
-    [id || generateKey(1), name, owner, path, url, status],
+    ['id', 'name', 'owner', 'logo_path', 'logo_url', 'url', 'status'],
+    [id || generateKey(1), name, owner, path, logo, url, status],
     {
       conflict: {
         columns: 'id',
@@ -51,30 +51,13 @@ export const createBrand = async (req: Request, resp: Response, next: NextFuncti
           owner = EXCLUDED.owner,
           logo_path = EXCLUDED.logo_path,
           logo_url = EXCLUDED.logo_url,
+          url = EXCLUDED.url,
           status = EXCLUDED.status,
           updated_at = NOW()`
       },
       client
     }
   );
-
-  if (brand.length && urls) {
-    const urlIds = urls.map((url: ProductBrandUrlsInterface) => url.id);
-
-    await database.delete('product_brand_urls', { where: 'NOT id = ANY($1)', params: [urlIds], client });
-
-    for (const url of urls) {
-      await database.create(
-        'product_brand_urls',
-        ['id', 'url', 'country', 'brand_id'],
-        [url.id, url.url, url.country, brand[0].id],
-        {
-          conflict: { columns: 'brand_id, country', do: `UPDATE SET url = EXCLUDED.url, updated_at = NOW()` },
-          client
-        }
-      );
-    }
-  }
 
   if (brand.length && brand[0].updatedAt) {
     resp.locals.response = { data: { statusText: 'Brand updated' } };

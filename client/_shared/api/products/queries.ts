@@ -9,9 +9,14 @@ import {
   ProductsInterface
 } from '../../../../_shared/types';
 
-export const retrieveProducts = (options?: { productId?: string; offset?: number }) => {
+export const retrieveProducts = (options?: {
+  id?: string;
+  parentId?: string;
+  productId?: string;
+  offset?: number;
+}) => {
   return useQuery<{ products: ProductsInterface[]; count: number }>({
-    queryKey: ['products', options?.productId, options?.offset],
+    queryKey: ['products', options?.id, options?.parentId, options?.productId, options?.offset],
     queryFn: async () => {
       const { data } = await axios({
         method: 'get',
@@ -110,13 +115,12 @@ export const retrieveProductOptions = (options?: { productId?: string; variantId
 
 export const retrieveProductSpecifications = (options?: {
   productId?: string;
-  variantId?: string;
   categoryId?: number;
   enabled: boolean;
 }) => {
   return useQuery<{ specifications: ProductSpecificationsInterface[] }>({
     enabled: options?.enabled,
-    queryKey: ['specifications', options?.variantId, options?.categoryId],
+    queryKey: ['specifications', options?.productId, options?.categoryId],
     queryFn: async () => {
       const { data } = await axios({
         method: 'get',

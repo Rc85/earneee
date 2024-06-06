@@ -14,13 +14,13 @@ const CreateBrand = ({ submit, cancel, brand }: Props) => {
   const initial = {
     id: '',
     name: '',
+    url: null,
     logoUrl: null,
     logoPath: null,
     owner: null,
     status: 'active',
     createdAt: '',
-    updatedAt: null,
-    urls: []
+    updatedAt: null
   };
   const [initialState, setInitialState] = useState<ProductBrandsInterface>({ ...initial });
   const [form, setForm] = useState<ProductBrandsInterface>({ ...initial });
@@ -39,18 +39,7 @@ const CreateBrand = ({ submit, cancel, brand }: Props) => {
   };
 
   const disabled = () => {
-    let noUrl = false;
-
-    if (form.urls) {
-      for (const url of form.urls) {
-        if (!url.url) {
-          noUrl = true;
-          break;
-        }
-      }
-    }
-
-    return !form.name || !form.urls || !form.urls.length || noUrl || deepEqual(form, initialState);
+    return !form.name || deepEqual(form, initialState);
   };
 
   return (

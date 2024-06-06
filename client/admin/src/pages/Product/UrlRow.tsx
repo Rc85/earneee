@@ -1,18 +1,17 @@
 import { mdiTrashCan } from '@mdi/js';
 import Icon from '@mdi/react';
 import { ListItem, ListItemButton, ListItemText, IconButton } from '@mui/material';
-import { AffiliatesInterface, ProductUrlsInterface } from '../../../../../_shared/types';
+import { ProductUrlsInterface } from '../../../../../_shared/types';
 import { useState } from 'react';
 import AddUrl from './AddUrl';
 
 interface Props {
   url: ProductUrlsInterface;
   onDelete: () => void;
-  affiliates: AffiliatesInterface[];
   submit: (url: ProductUrlsInterface) => void;
 }
 
-const UrlRow = ({ url, onDelete, affiliates, submit }: Props) => {
+const UrlRow = ({ url, onDelete, submit }: Props) => {
   const [status, setStatus] = useState('');
 
   const handleSubmit = (url: ProductUrlsInterface) => {
@@ -23,15 +22,7 @@ const UrlRow = ({ url, onDelete, affiliates, submit }: Props) => {
 
   return (
     <ListItem disableGutters disablePadding divider>
-      {status === 'Edit' && (
-        <AddUrl
-          cancel={() => setStatus('')}
-          submit={handleSubmit}
-          url={url}
-          variantId={url.variantId}
-          affiliates={affiliates}
-        />
-      )}
+      {status === 'Edit' && <AddUrl cancel={() => setStatus('')} submit={handleSubmit} url={url} />}
 
       <ListItemButton onClick={() => setStatus('Edit')}>
         <ListItemText

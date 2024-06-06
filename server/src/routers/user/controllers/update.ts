@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
-import { database } from '../../../database';
+import { database } from '../../../middlewares';
 import dayjs from 'dayjs';
+import { UserBansInterface } from '../../../../../_shared/types';
 
 export const updateUser = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
@@ -11,7 +12,7 @@ export const updateUser = async (req: Request, resp: Response, next: NextFunctio
       client
     });
   } else if (unban) {
-    const ban = await database.retrieve('user_bans', {
+    const ban = await database.retrieve<UserBansInterface[]>(`SELECT * FROM user_bans`, {
       where: 'user_id = $1 AND banned_until > NOW()',
       orderBy: 'banned_until DESC',
       limit: '1',

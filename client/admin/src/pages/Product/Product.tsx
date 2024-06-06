@@ -30,12 +30,13 @@ import About from './About';
 import Media from './Media';
 import Specifications from './Specifications';
 import Details from './Details';
+import Options from './Options';
 
 const Product = () => {
   const navigate = useNavigate();
   const params = useParams();
-  const { productId } = params;
-  const { isLoading, data } = retrieveProducts({ productId });
+  const { id, productId } = params;
+  const { isLoading, data } = retrieveProducts({ parentId: productId ? id : undefined, id, productId });
   const { products } = data || {};
   const product = products?.[0];
 
@@ -53,7 +54,9 @@ const Product = () => {
       >
         <List disablePadding>
           <ListItem disablePadding disableGutters>
-            <ListItemButton onClick={() => navigate(`/product/${product?.id}`)}>
+            <ListItemButton
+              onClick={() => navigate(`/product/${id}${productId ? `/variant/${productId}` : ''}`)}
+            >
               <ListItemIcon>
                 <Icon path={mdiPencil} size={1} />
               </ListItemIcon>
@@ -63,7 +66,9 @@ const Product = () => {
           </ListItem>
 
           <ListItem disablePadding disableGutters>
-            <ListItemButton onClick={() => navigate(`/product/${productId}/about`)}>
+            <ListItemButton
+              onClick={() => navigate(`/product/${id}${productId ? `/variant/${productId}` : ''}/about`)}
+            >
               <ListItemIcon>
                 <Icon path={mdiInformation} size={1} />
               </ListItemIcon>
@@ -73,7 +78,9 @@ const Product = () => {
           </ListItem>
 
           <ListItem disablePadding disableGutters>
-            <ListItemButton onClick={() => navigate(`/product/${productId}/details`)}>
+            <ListItemButton
+              onClick={() => navigate(`/product/${id}${productId ? `/variant/${productId}` : ''}/details`)}
+            >
               <ListItemIcon>
                 <Icon path={mdiImageText} size={1} />
               </ListItemIcon>
@@ -83,7 +90,11 @@ const Product = () => {
           </ListItem>
 
           <ListItem disablePadding disableGutters>
-            <ListItemButton onClick={() => navigate(`/product/${productId}/specifications`)}>
+            <ListItemButton
+              onClick={() =>
+                navigate(`/product/${id}${productId ? `/variant/${productId}` : ''}/specifications`)
+              }
+            >
               <ListItemIcon>
                 <Icon path={mdiDetails} size={1} />
               </ListItemIcon>
@@ -93,7 +104,9 @@ const Product = () => {
           </ListItem>
 
           <ListItem disablePadding disableGutters>
-            <ListItemButton onClick={() => navigate(`/product/${productId}/media`)}>
+            <ListItemButton
+              onClick={() => navigate(`/product/${id}${productId ? `/variant/${productId}` : ''}/media`)}
+            >
               <ListItemIcon>
                 <Icon path={mdiImage} size={1} />
               </ListItemIcon>
@@ -102,25 +115,29 @@ const Product = () => {
             </ListItemButton>
           </ListItem>
 
-          <ListItem disablePadding disableGutters>
-            <ListItemButton onClick={() => navigate(`/product/${product?.id}/variants`)}>
-              <ListItemIcon>
-                <Icon path={mdiViewGridPlus} size={1} />
-              </ListItemIcon>
+          {!productId && (
+            <ListItem disablePadding disableGutters>
+              <ListItemButton onClick={() => navigate(`/product/${id}/variants`)}>
+                <ListItemIcon>
+                  <Icon path={mdiViewGridPlus} size={1} />
+                </ListItemIcon>
 
-              <ListItemText primary='Variants' />
-            </ListItemButton>
-          </ListItem>
+                <ListItemText primary='Variants' />
+              </ListItemButton>
+            </ListItem>
+          )}
 
-          <ListItem disablePadding disableGutters>
-            <ListItemButton onClick={() => navigate(`/product/${product?.id}/variants/add`)}>
-              <ListItemIcon>
-                <Icon path={mdiPlusBox} size={1} />
-              </ListItemIcon>
+          {!productId && (
+            <ListItem disablePadding disableGutters>
+              <ListItemButton onClick={() => navigate(`/product/${id}/variants/add`)}>
+                <ListItemIcon>
+                  <Icon path={mdiPlusBox} size={1} />
+                </ListItemIcon>
 
-              <ListItemText primary='Add Variant' />
-            </ListItemButton>
-          </ListItem>
+                <ListItemText primary='Add Variant' />
+              </ListItemButton>
+            </ListItem>
+          )}
         </List>
       </Box>
 
@@ -128,7 +145,13 @@ const Product = () => {
         <Breadcrumbs>
           <Link onClick={() => navigate('/products')}>Products</Link>
 
-          <Typography>{product?.name}</Typography>
+          {product?.product ? (
+            <Link onClick={() => navigate(`/product/${product.product?.id}`)}>{product.product?.name}</Link>
+          ) : (
+            <Typography>{product?.name}</Typography>
+          )}
+
+          {product?.product && <Typography>{product.name}</Typography>}
         </Breadcrumbs>
 
         <Outlet context={{ product }} />
@@ -144,5 +167,6 @@ Product.About = About;
 Product.Media = Media;
 Product.Specifications = Specifications;
 Product.Details = Details;
+Product.Options = Options;
 
 export default Product;

@@ -6,7 +6,6 @@ import ResetPassword from './ResetPassword/ResetPassword';
 import Account from './Account/Account';
 import Products from './Products/Products';
 import Product from './Product/Product';
-import ProductVariant from './ProductVariant/ProductVariant';
 import Affiliates from './Affiliates/Affiliates';
 import Offers from './Offers/Offers';
 import ProductBrands from './ProductBrands/ProductBrands';
@@ -24,7 +23,6 @@ export {
   Product,
   ProductBrands,
   Products,
-  ProductVariant,
   ResetPassword,
   Statuses,
   Users

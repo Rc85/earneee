@@ -14,6 +14,6 @@ router.post(
   response
 );
 
-router.delete('/v1/auth/admin/product/brand', dbConnect, middleware(controllers.deleteBrand), response);
+router.delete('/v1/auth/admin/brand', dbConnect, middleware(controllers.deleteBrand), response);
 
 export default router;

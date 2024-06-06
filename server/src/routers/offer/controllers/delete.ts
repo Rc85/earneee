@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { database } from '../../../database';
+import { database } from '../../../middlewares';
 import { OffersInterface } from '../../../../../_shared/types';
 import { s3 } from '../../../services';
 

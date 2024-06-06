@@ -1,14 +1,16 @@
 import { NextFunction, Request, Response } from 'express';
-import { database } from '../../../database';
+import { database } from '../../../middlewares';
 import { generateKey } from '../../../../../_shared/utils';
 import sharp from 'sharp';
 import { ObjectCannedACL } from '@aws-sdk/client-s3';
 import { s3 } from '../../../services';
+import { ProductUrlsInterface } from '../../../../../_shared/types';
 
 export const createProduct = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
   const { product, brand } = req.body;
-  const { id, name, excerpt, categoryId, description, status, about, details, type } = product;
+  const { id, name, excerpt, categoryId, description, status, about, details, urls, parentId, featured } =
+    product;
 
   let { brandId } = product;
 
@@ -47,11 +49,23 @@ export const createProduct = async (req: Request, resp: Response, next: NextFunc
     brandId = createdBrand[0].id;
   }
 
-  await database.create(
+  const createdProduct = await database.create(
     'products',
-    ['id', 'name', 'excerpt', 'category_id', 'brand_id', 'description', 'status', 'about', 'details', 'type'],
     [
-      id,
+      'id',
+      'name',
+      'excerpt',
+      'category_id',
+      'brand_id',
+      'description',
+      'status',
+      'about',
+      'details',
+      'parent_id',
+      'featured'
+    ],
+    [
+      id || generateKey(1),
       name,
       excerpt || null,
       categoryId,
@@ -60,7 +74,8 @@ export const createProduct = async (req: Request, resp: Response, next: NextFunc
       status,
       about || null,
       details || null,
-      type
+      parentId || null,
+      Boolean(featured)
     ],
     {
       conflict: {
@@ -74,12 +89,53 @@ export const createProduct = async (req: Request, resp: Response, next: NextFunc
           status = EXCLUDED.status,
           about = EXCLUDED.about,
           details = EXCLUDED.details,
-          type = EXCLUDED.type,
+          parent_id = EXCLUDED.parent_id,
+          featured = EXCLUDED.featured,
           updated_at = NOW()`
       },
       client
     }
   );
+
+  const urlIds = urls ? urls.map((url: ProductUrlsInterface) => url.id) : [];
+
+  await database.delete('product_urls', {
+    where: 'NOT (id = ANY($1)) AND product_id = $2',
+    params: [urlIds, createdProduct[0].id],
+    client
+  });
+
+  if (urls) {
+    for (const url of urls) {
+      await database.create(
+        'product_urls',
+        ['id', 'url', 'country', 'product_id', 'price', 'currency', 'affiliate_id', 'type'],
+        [
+          url.id,
+          url.url,
+          url.country,
+          createdProduct[0].id,
+          url.price || 0,
+          url.currency || 'cad',
+          url.affiliateId || null,
+          url.type || 'affiliate'
+        ],
+        {
+          conflict: {
+            columns: 'id',
+            do: `UPDATE SET
+              url = EXCLUDED.url,
+              price = EXCLUDED.price,
+              currency = EXCLUDED.currency,
+              affiliate_id = EXCLUDED.affiliate_id,
+              type = EXCLUDED.type,
+              updated_at = NOW()`
+          },
+          client
+        }
+      );
+    }
+  }
 
   return next();
 };

@@ -37,13 +37,13 @@ const VariantMedia = () => {
   const [type, setType] = useState('image');
   const { enqueueSnackbar } = useSnackbar();
   const params = useParams();
-  const { variantId, productId } = params;
+  const { id, productId } = params;
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
   const fileInputRef = useRef<any>(null);
-  const { isLoading, data } = retrieveProductMedia({ variantId, productId });
+  const { isLoading, data } = retrieveProductMedia({ productId: productId || id });
   const { media } = data || {};
   const dispatch = useDispatch();
 
@@ -74,8 +74,6 @@ const VariantMedia = () => {
   const handleAddMedia = (url: string, type: string, videoId: string) => {
     setStatus('Loading');
 
-    console.log(videoId);
-
     if (media) {
       const id = generateKey(1);
 
@@ -95,8 +93,7 @@ const VariantMedia = () => {
             width,
             ordinance,
             type,
-            productId: productId!,
-            variantId: variantId || null,
+            productId: productId || id!,
             status: 'enabled',
             createdAt: '',
             updatedAt: ''
@@ -113,8 +110,7 @@ const VariantMedia = () => {
           width: 0,
           ordinance: media.length,
           type,
-          productId: productId!,
-          variantId: variantId || null,
+          productId: productId || id!,
           status: 'enabled',
           createdAt: '',
           updatedAt: ''
@@ -156,7 +152,7 @@ const VariantMedia = () => {
 
             dispatch(setIsLoading(true));
 
-            uploadProductMedia.mutate({ variantId: variantId!, image: result });
+            uploadProductMedia.mutate({ productId: productId || id, image: result });
           };
 
           fileReader.readAsDataURL(file);
@@ -164,7 +160,7 @@ const VariantMedia = () => {
           const formData = new FormData();
 
           formData.set('media', file);
-          formData.set('variantId', variantId!);
+          formData.set('productId', productId || id!);
 
           dispatch(setIsLoading(true));
 

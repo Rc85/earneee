@@ -1,21 +1,13 @@
 import { NextFunction, Request, Response } from 'express';
-import { database } from '../../../database';
+import { database } from '../../../middlewares';
 
 export const retrieveProductMedia = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
-  const { variantId, productId } = req.query;
+  const { productId } = req.query;
   const params = [productId];
   const where = [`product_id = $1`];
 
-  if (variantId) {
-    params.push(variantId);
-
-    where.push(`variant_id = $${params.length}`);
-  } else {
-    where.push(`variant_id IS NULL`);
-  }
-
-  const media = await database.retrieve('product_media', {
+  const media = await database.retrieve('SELECT * FROM product_media', {
     where: where.join(' AND '),
     params,
     orderBy: 'ordinance',

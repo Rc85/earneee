@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { database } from '../../../database';
+import { database } from '../../../middlewares';
 import bcrypt from 'bcrypt';
 
 export const changePassword = async (req: Request, resp: Response, next: NextFunction) => {

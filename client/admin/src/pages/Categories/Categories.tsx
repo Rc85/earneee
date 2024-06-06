@@ -16,11 +16,6 @@ const Categories = () => {
     parentId: parentId ? parseInt(parentId) : undefined
   });
   const { categories } = data || {};
-  /* const sensors = useSensors(
-    useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
-  );
-  const sortCategories = useSortCategories(); */
 
   const handleCreateClick = () => {
     setStatus('Create');
@@ -29,28 +24,6 @@ const Categories = () => {
   const handleCancelClick = () => {
     setStatus('');
   };
-
-  /* const handleDragEnd = async (e: DragEndEvent) => {
-    const { active, over } = e;
-
-    if (active.id !== over?.id && categories) {
-      const oldIndex = categories.findIndex((category) => category.id === active.id);
-      const newIndex = categories.findIndex((category) => category.id === over?.id);
-
-      const sortedCategories = arrayMove(categories, oldIndex, newIndex);
-
-      for (const i in sortedCategories) {
-        const index = parseInt(i);
-        const category = sortedCategories[index];
-
-        category.ordinance = index + 1;
-      }
-
-      console.log(sortedCategories);
-
-      sortCategories.mutate({ categories: sortedCategories });
-    }
-  }; */
 
   return isLoading ? (
     <Loading />
@@ -68,15 +41,11 @@ const Categories = () => {
     >
       {status === 'Create' && <CreateCategory cancel={handleCancelClick} />}
 
-      {/* <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={categories || []} strategy={verticalListSortingStrategy}> */}
       <List disablePadding>
         {categories?.map((category) => (
           <CategoryRow key={category.id} category={category} />
         ))}
       </List>
-      {/* </SortableContext>
-      </DndContext> */}
     </Section>
   );
 };

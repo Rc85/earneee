@@ -70,7 +70,7 @@ const OfferRow = ({ offer }: Props) => {
       </IconButton>
 
       <ListItemButton onClick={() => navigate('/offers/create', { state: { offerId: offer.id } })}>
-        <ListItemText primary={offer.name} />
+        <ListItemText primary={offer.url} secondary={offer.name} />
       </ListItemButton>
 
       <Switch color='success' checked={offer.status === 'active'} onChange={handleToggle} />

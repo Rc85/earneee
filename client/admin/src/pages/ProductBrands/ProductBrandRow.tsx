@@ -59,7 +59,7 @@ const ProductBrandRow = ({ brand }: Props) => {
           <Avatar src={brand.logoUrl || '/broken.jpg'} alt={brand.name} />
         </ListItemIcon>
 
-        <ListItemText primary={brand.name} />
+        <ListItemText primary={brand.name} secondary={brand.url} />
       </ListItemButton>
 
       <Switch color='success' checked={brand.status === 'active'} sx={{ mr: 1 }} onChange={handleToggle} />

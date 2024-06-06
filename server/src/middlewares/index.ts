@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { HttpException } from '../utils';
-import { db } from '../database';
+import { db } from './database';
 
 export const middleware = (controller: any) => {
   return async (req: Request, resp: Response, next: NextFunction) => {
@@ -84,3 +84,4 @@ export { guestSession, marketplaceSession, adminSession } from './sessions';
 export { recaptcha } from './recaptcha';
 export { validateCreateUser } from '../routers/user/controllers/validate';
 export { authenticateMiddleware } from './authenticate';
+export { database } from './database';

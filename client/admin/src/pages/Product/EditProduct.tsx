@@ -5,8 +5,8 @@ import { retrieveProducts } from '../../../../_shared/api';
 
 const EditProduct = () => {
   const params = useParams();
-  const { productId } = params;
-  const { data } = retrieveProducts({ productId });
+  const { id, productId } = params;
+  const { data } = retrieveProducts({ id: productId || id, parentId: productId ? id : undefined });
   const { products } = data || {};
   const product = products?.[0];
 

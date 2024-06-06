@@ -1,0 +1,191 @@
+import { NextFunction, Request, Response } from 'express';
+import { database } from '../../../../src/middlewares/database';
+
+export const searchProducts = async (req: Request, resp: Response, next: NextFunction) => {
+  const { client } = resp.locals;
+  const { value, category } = req.query;
+  const offset = req.query.offset?.toString() || '0';
+  const params: any = [];
+
+  if (value) {
+    const splitBySpaces = value.toString().split(' ');
+    const splitByUnderscores = splitBySpaces.map((value) => value.split('_')).flat();
+    const splitByDashes = splitByUnderscores.map((value) => value.split('-')).flat();
+    const splitByPeriods = splitByDashes.map((value) => value.split('.')).flat();
+
+    params.push(splitByPeriods.join(' '));
+  }
+
+  if (category) {
+    params.push(category.toString());
+  }
+
+  const variants = await database.query(
+    `WITH RECURSIVE
+    pc AS (
+      SELECT
+        id,
+        name,
+        parent_id
+      FROM categories
+      ${category ? 'WHERE id = $2' : 'WHERE parent_id IS NULL'}
+      UNION ALL
+      SELECT
+        c.id,
+        c.name,
+        c.parent_id
+      FROM categories AS c
+      JOIN pc ON pc.id = c.parent_id
+    ),
+    b AS (
+      SELECT
+        b.id,
+        b.name,
+        b.logo_url
+      FROM product_brands AS b
+    ),
+    pm AS (
+      SELECT
+        pm.id,
+        pm.url,
+        pm.variant_id,
+        pm.product_id
+      FROM product_media AS pm
+      ORDER BY pm.ordinance
+    ),
+    a AS (
+      SELECT
+        a.id,
+        a.name
+      FROM affiliates AS a
+    ),
+    pu AS (
+      SELECT
+        pu.url,
+        pu.price,
+        pu.currency,
+        pu.variant_id,
+        a.affiliate
+      FROM product_urls AS pu
+      LEFT JOIN LATERAL (
+        SELECT TO_JSONB(a.*) AS affiliate
+        FROM a
+        WHERE a.id = pu.affiliate_id
+      ) AS a ON true
+    ),
+    p AS (
+      SELECT
+        p.id,
+        p.name,
+        p.excerpt,
+        p.category_id,
+        p.type,
+        b.brand,
+        COALESCE(pm.media, '[]'::JSONB) AS media
+      FROM products AS p
+      LEFT JOIN LATERAL (
+        SELECT TO_JSONB(b.*) AS brand
+        FROM b
+        WHERE b.id = p.brand_id
+      ) AS b ON true
+      LEFT JOIN LATERAL (
+        SELECT JSONB_AGG(pm.*) AS media
+        FROM pm
+        WHERE pm.product_id = p.id
+      ) AS pm ON true
+    )
+    
+    SELECT
+      pv.id,
+      pv.name,
+      pv.price,
+      pv.currency,
+      pv.description,
+      p.product,
+      WORD_SIMILARITY(p.product->>'name', $1) AS product_similarity,
+      WORD_SIMILARITY(pv.name, $1) AS variant_similarity,
+      COALESCE(pm.media, '[]'::JSONB) AS media,
+      COALESCE(pu.urls, '[]'::JSONB) AS urls
+    FROM product_variants AS pv
+    LEFT JOIN LATERAL (
+      SELECT TO_JSONB(p) AS product
+      FROM p
+      WHERE p.id = pv.product_id
+    ) AS p ON true
+    LEFT JOIN LATERAL (
+      SELECT JSONB_AGG(pm.*) AS media
+      FROM pm
+      WHERE pm.variant_id = pv.id
+    ) AS pm ON true
+    LEFT JOIN LATERAL (
+      SELECT JSONB_AGG(pu.*) AS urls
+      FROM pu
+      WHERE pu.variant_id = pv.id
+    ) AS pu ON true
+    WHERE (WORD_SIMILARITY(p.product->>'name', $1) > 0.5
+    OR WORD_SIMILARITY(pv.name, $1) > 0.5
+    OR p.product->>'name' ILIKE '%' || $1 || '%'
+    OR pv.name ILIKE '%' || $1 || '%'
+    OR p.product->'brand'->>'name' ILIKE '%' || $1 || '%')
+    ${category ? `AND (p.product->>'category_id')::INT IN (SELECT id FROM pc)` : ''}
+    ORDER BY WORD_SIMILARITY(p.product->>'name', $1) DESC, WORD_SIMILARITY(pv.name, $1) DESC
+    OFFSET ${offset}
+    LIMIT 20`,
+    params,
+    client
+  );
+
+  const count = await database.query(
+    `WITH
+    b AS (
+      SELECT
+        b.id,
+        b.name,
+        b.logo_url
+      FROM product_brands AS b
+    ),
+    p AS (
+      SELECT
+        p.id,
+        p.name,
+        p.excerpt,
+        p.category_id,
+        b.brand
+      FROM products AS p
+      LEFT JOIN LATERAL (
+        SELECT TO_JSONB(b.*) AS brand
+        FROM b
+        WHERE b.id = p.brand_id
+      ) AS b ON true
+      ${category ? `WHERE p.category_id = $2` : ''}
+    )
+    
+    SELECT
+      pv.id,
+      pv.name,
+      pv.price,
+      pv.currency,
+      pv.description,
+      pv.excerpt,
+      p.product
+    FROM product_variants AS pv
+    LEFT JOIN LATERAL (
+      SELECT TO_JSONB(p) AS product
+      FROM p
+      WHERE p.id = pv.product_id
+    ) AS p ON true
+    WHERE (WORD_SIMILARITY(p.product->>'name', $1) > 0.5
+    OR WORD_SIMILARITY(pv.name, $1) > 0.5
+    OR p.product->>'name' ILIKE '%' || $1 || '%'
+    OR pv.name ILIKE '%' || $1 || '%'
+    OR p.product->'brand'->>'name' ILIKE '%' || $1 || '%')
+    ${category ? `AND (p.product->>'category_id')::INT IN (SELECT id FROM pc)` : ''}
+    ORDER BY WORD_SIMILARITY(p.product->>'name', $1) DESC, WORD_SIMILARITY(pv.name, $1) DESC`,
+    params,
+    client
+  );
+
+  resp.locals.response = { data: { variants, count: count.length } };
+
+  return next();
+};

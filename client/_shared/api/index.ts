@@ -61,3 +61,4 @@ export * from './users/queries';
 export * from './products/mutations';
 export * from './statuses/queries';
 export * from './statuses/mutations';
+export * from './products/product/mutations';

@@ -2,9 +2,7 @@ import { mdiTrashCan, mdiUpload } from '@mdi/js';
 import Icon from '@mdi/react';
 import { Box, IconButton, Button, TextField, useTheme } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import { countries } from '../../../../../_shared';
-import { ProductBrandUrlsInterface, ProductBrandsInterface } from '../../../../../_shared/types';
-import { generateKey } from '../../../../../_shared/utils';
+import { ProductBrandsInterface } from '../../../../../_shared/types';
 import { ChangeEvent, useRef } from 'react';
 import { retrieveUserProfiles } from '../../../../_shared/api';
 
@@ -20,32 +18,6 @@ const BrandForm = ({ brand, setForm }: Props) => {
   const user = retrieveUserProfiles();
   const { userProfiles } = user.data || {};
   const fileInputRef = useRef<any>();
-
-  const handleUrlChange = (value: string, key: keyof ProductBrandUrlsInterface, index: number) => {
-    const urls = brand.urls ? [...brand.urls] : [];
-
-    urls[index][key] = value;
-
-    setForm({ ...brand, urls });
-  };
-
-  const handleRemoveUrl = (index: number) => {
-    const urls = brand.urls ? [...brand.urls] : [];
-
-    if (index >= 0) {
-      urls.splice(index, 1);
-    }
-
-    setForm({ ...brand, urls });
-  };
-
-  const handleAddWebsiteLinkClick = () => {
-    const urls = brand.urls ? [...brand.urls] : [];
-
-    urls.push({ id: generateKey(1), url: '', country: 'CA', brandId: '', createdAt: '', updatedAt: '' });
-
-    setForm({ ...brand, urls });
-  };
 
   const handleRemoveLogo = () => {
     setForm({ ...brand, logoUrl: null });
@@ -136,6 +108,12 @@ const BrandForm = ({ brand, setForm }: Props) => {
           />
 
           <TextField
+            label='URL'
+            onChange={(e) => setForm({ ...brand, url: e.target.value })}
+            value={brand.url}
+          />
+
+          <TextField
             label='Owner'
             select
             SelectProps={{ native: true }}
@@ -151,44 +129,6 @@ const BrandForm = ({ brand, setForm }: Props) => {
           </TextField>
         </Box>
       </Box>
-
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }} onClick={handleAddWebsiteLinkClick}>
-        <Button>Add Website Link</Button>
-      </Box>
-
-      {brand.urls?.map((url, i) => (
-        <Box key={url.id} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-          <TextField
-            label='URL'
-            type='url'
-            required
-            autoFocus
-            sx={{ mr: 1, mb: '0px !important' }}
-            onChange={(e) => handleUrlChange(e.target.value, 'url', i)}
-            value={url.url}
-          />
-
-          <TextField
-            label='Country'
-            required
-            select
-            SelectProps={{ native: true }}
-            onChange={(e) => handleUrlChange(e.target.value, 'country', i)}
-            value={url.country}
-            sx={{ mb: '0px !important' }}
-          >
-            {countries.map((country) => (
-              <option key={country.code} value={country.code}>
-                {country.name}
-              </option>
-            ))}
-          </TextField>
-
-          <IconButton size='small' onClick={() => handleRemoveUrl(i)}>
-            <Icon path={mdiTrashCan} size={1} />
-          </IconButton>
-        </Box>
-      ))}
     </>
   );
 };

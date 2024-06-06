@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import sharp from 'sharp';
 import { s3 } from '../../../services';
 import { ObjectCannedACL } from '@aws-sdk/client-s3';
-import { database } from '../../../database';
+import { database } from '../../../middlewares';
 import { AffiliatesInterface } from '../../../../../_shared/types';
 
 export const addAffiliate = async (req: Request, resp: Response, next: NextFunction) => {

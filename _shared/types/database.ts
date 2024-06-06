@@ -15,7 +15,6 @@ export interface DatabaseQueryOptions {
 }
 
 export interface DatabaseRetrieveOptions {
-  columns?: string;
   where?: string;
   orderBy?: string;
   groupBy?: string;

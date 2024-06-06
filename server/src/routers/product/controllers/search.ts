@@ -1,11 +1,13 @@
 import { NextFunction, Request, Response } from 'express';
-import { database } from '../../../database';
+import { database } from '../../../middlewares';
+import { ProductsInterface } from '../../../../../_shared/types';
 
 export const searchProducts = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
   const { value, category } = req.query;
   const offset = req.query.offset?.toString() || '0';
   const params: any = [];
+  const where = [];
 
   if (value) {
     const splitBySpaces = value.toString().split(' ');
@@ -14,13 +16,19 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
     const splitByPeriods = splitByDashes.map((value) => value.split('.')).flat();
 
     params.push(splitByPeriods.join(' '));
+
+    where.push(`(WORD_SIMILARITY(p.name, $${params.length}) > 0.5
+    OR b.brand->>'name' ILIKE '%' || $${params.length} || '%')
+    ${category ? `AND (p.category_id)::INT IN (SELECT id FROM pc)` : ''}`);
   }
 
   if (category) {
     params.push(category.toString());
+
+    where.push(`p.category_id = $${params.length}`);
   }
 
-  const variants = await database.query(
+  const products = await database.retrieve<ProductsInterface[]>(
     `WITH RECURSIVE
     pc AS (
       SELECT
@@ -48,7 +56,6 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
       SELECT
         pm.id,
         pm.url,
-        pm.variant_id,
         pm.product_id
       FROM product_media AS pm
       ORDER BY pm.ordinance
@@ -64,7 +71,7 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
         pu.url,
         pu.price,
         pu.currency,
-        pu.variant_id,
+        pu.product_id,
         a.affiliate
       FROM product_urls AS pu
       LEFT JOIN LATERAL (
@@ -72,70 +79,39 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
         FROM a
         WHERE a.id = pu.affiliate_id
       ) AS a ON true
-    ),
-    p AS (
-      SELECT
-        p.id,
-        p.name,
-        p.excerpt,
-        p.category_id,
-        p.type,
-        b.brand,
-        COALESCE(pm.media, '[]'::JSONB) AS media
-      FROM products AS p
-      LEFT JOIN LATERAL (
-        SELECT TO_JSONB(b.*) AS brand
-        FROM b
-        WHERE b.id = p.brand_id
-      ) AS b ON true
-      LEFT JOIN LATERAL (
-        SELECT JSONB_AGG(pm.*) AS media
-        FROM pm
-        WHERE pm.product_id = p.id
-      ) AS pm ON true
     )
     
     SELECT
-      pv.id,
-      pv.name,
-      pv.price,
-      pv.currency,
-      pv.description,
-      p.product,
-      WORD_SIMILARITY(p.product->>'name', $1) AS product_similarity,
-      WORD_SIMILARITY(pv.name, $1) AS variant_similarity,
+      p.id,
+      p.name,
+      p.excerpt,
+      p.category_id,
+      p.type,
+      b.brand,
       COALESCE(pm.media, '[]'::JSONB) AS media,
       COALESCE(pu.urls, '[]'::JSONB) AS urls
-    FROM product_variants AS pv
-    LEFT JOIN LATERAL (
-      SELECT TO_JSONB(p) AS product
-      FROM p
-      WHERE p.id = pv.product_id
-    ) AS p ON true
+    FROM products AS p
     LEFT JOIN LATERAL (
       SELECT JSONB_AGG(pm.*) AS media
       FROM pm
-      WHERE pm.variant_id = pv.id
+      WHERE pm.product_id = p.id
     ) AS pm ON true
     LEFT JOIN LATERAL (
       SELECT JSONB_AGG(pu.*) AS urls
       FROM pu
-      WHERE pu.variant_id = pv.id
-    ) AS pu ON true
-    WHERE (WORD_SIMILARITY(p.product->>'name', $1) > 0.5
-    OR WORD_SIMILARITY(pv.name, $1) > 0.5
-    OR p.product->>'name' ILIKE '%' || $1 || '%'
-    OR pv.name ILIKE '%' || $1 || '%'
-    OR p.product->'brand'->>'name' ILIKE '%' || $1 || '%')
-    ${category ? `AND (p.product->>'category_id')::INT IN (SELECT id FROM pc)` : ''}
-    ORDER BY WORD_SIMILARITY(p.product->>'name', $1) DESC, WORD_SIMILARITY(pv.name, $1) DESC
-    OFFSET ${offset}
-    LIMIT 20`,
-    params,
-    client
+      WHERE pu.product_id = p.id
+    ) AS pu ON true`,
+    {
+      where: where.join(' AND '),
+      params,
+      orderBy: `WORD_SIMILARITY(p.name, $1) DESC`,
+      offset,
+      limit: '20',
+      client
+    }
   );
 
-  const count = await database.query(
+  const count = await database.retrieve<number>(
     `WITH
     b AS (
       SELECT
@@ -173,19 +149,15 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
       SELECT TO_JSONB(p) AS product
       FROM p
       WHERE p.id = pv.product_id
-    ) AS p ON true
-    WHERE (WORD_SIMILARITY(p.product->>'name', $1) > 0.5
-    OR WORD_SIMILARITY(pv.name, $1) > 0.5
-    OR p.product->>'name' ILIKE '%' || $1 || '%'
-    OR pv.name ILIKE '%' || $1 || '%'
-    OR p.product->'brand'->>'name' ILIKE '%' || $1 || '%')
-    ${category ? `AND (p.product->>'category_id')::INT IN (SELECT id FROM pc)` : ''}
-    ORDER BY WORD_SIMILARITY(p.product->>'name', $1) DESC, WORD_SIMILARITY(pv.name, $1) DESC`,
-    params,
-    client
+    ) AS p ON true`,
+    {
+      where: where.join(' AND '),
+      params,
+      client
+    }
   );
 
-  resp.locals.response = { data: { variants, count: count.length } };
+  resp.locals.response = { data: { products, count } };
 
   return next();
 };

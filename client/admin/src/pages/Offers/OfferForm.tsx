@@ -161,18 +161,17 @@ const OfferForm = ({ offer }: Props) => {
 
         <Box sx={{ flexGrow: 1 }}>
           <TextField
-            label='Name'
-            required
-            autoFocus
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-            value={form?.name || ''}
-          />
-
-          <TextField
             label='URL'
+            autoFocus
             required
             onChange={(e) => setForm({ ...form, url: e.target.value })}
             value={form?.url || ''}
+          />
+
+          <TextField
+            label='Name'
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            value={form?.name || ''}
           />
 
           <TextField

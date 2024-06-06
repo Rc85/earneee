@@ -3,7 +3,7 @@ import { Modal } from '../../../../_shared/components';
 import { OptionSelectionsInterface, ProductOptionsInterface } from '../../../../../_shared/types';
 import { generateKey } from '../../../../../_shared/utils';
 import { TextField } from '@mui/material';
-import OptionForm from '../ProductVariant/OptionForm';
+import OptionForm from './OptionForm';
 import { useSnackbar } from 'notistack';
 import { useCreateProductOption } from '../../../../_shared/api';
 import { useParams } from 'react-router-dom';

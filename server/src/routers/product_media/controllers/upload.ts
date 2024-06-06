@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import sharp from 'sharp';
 import { s3 } from '../../../services';
 import { generateKey } from '../../../../../_shared/utils';
-import { database } from '../../../database';
+import { database } from '../../../middlewares';
 
 export const uploadProductMedia = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;

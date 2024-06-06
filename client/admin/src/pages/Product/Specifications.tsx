@@ -30,10 +30,9 @@ const Specifications = () => {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
   const params = useParams();
-  const { variantId, productId } = params;
+  const { id, productId } = params;
   const { isLoading, data } = retrieveProductSpecifications({
-    productId,
-    variantId,
+    productId: productId || id,
     enabled: true
   });
   const { specifications } = data || {};

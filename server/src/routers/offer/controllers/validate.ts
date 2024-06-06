@@ -2,11 +2,11 @@ import { NextFunction, Request, Response } from 'express';
 import { HttpException, validations } from '../../../utils';
 import dayjs from 'dayjs';
 
-export const validateCreateOffer = async (req: Request, resp: Response, next: NextFunction) => {
+export const validateCreateOffer = async (req: Request, _: Response, next: NextFunction) => {
   const { name, url, logoUrl, startDate, endDate, details, status } = req.body;
 
-  if (!name || validations.blankCheck.test(name)) {
-    return next(new HttpException(400, `Name is required`));
+  if (name && typeof name !== 'string') {
+    return next(new HttpException(400, `Invalid name`));
   } else if (!url || validations.blankCheck.test(url)) {
     return next(new HttpException(400, `URL is required`));
   } else if (details && typeof details !== 'string') {

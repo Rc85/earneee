@@ -5,7 +5,6 @@ import { mdiPlusBox } from '@mdi/js';
 import { useNavigate } from 'react-router-dom';
 import CreateProduct from './CreateProduct';
 import ProductRow from './ProductRow';
-import SearchProducts from './SearchProducts';
 import { retrieveProducts } from '../../../../_shared/api';
 import { useState } from 'react';
 
@@ -33,13 +32,15 @@ const Products = () => {
       ]}
       sx={{ p: 2, flex: 1 }}
     >
-      {/* <SearchProducts onChange={retrieveProducts} /> */}
-
       {products && products.length > 0 ? (
         <>
           <List disablePadding>
             {products.map((product) => (
-              <ProductRow key={product.id} product={product} />
+              <ProductRow
+                key={product.id}
+                product={product}
+                onClick={() => navigate(`/product/${product.id}`)}
+              />
             ))}
           </List>
 

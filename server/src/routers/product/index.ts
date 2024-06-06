@@ -24,6 +24,14 @@ router.get(
   response
 );
 
-router.get('/v1/product/showcase', dbConnect, middleware(controllers.retrieveProductShowcase), response);
+router.put(
+  '/v1/auth/admin/product',
+  dbConnect,
+  middleware(controllers.validateSortProducts),
+  middleware(controllers.sortProducts),
+  response
+);
+
+//router.get('/v1/product/showcase', dbConnect, middleware(controllers.retrieveProductShowcase), response);
 
 export default router;

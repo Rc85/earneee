@@ -87,16 +87,18 @@ app.use(/^\/v1\/auth\/admin/, middlewares.adminSession);
 app.use(/^\/v1\/auth\/admin\/(?!login).*/, middlewares.authenticateMiddleware('admin'));
 
 app.use(routers.userRouter);
-app.use(routers.affiliateRouter);
 app.use(routers.categoryRouter);
-app.use(routers.offerRouter);
-app.use(routers.productRouter);
 app.use(routers.productBrandRouter);
-app.use(routers.productVariantRouter);
-app.use(routers.productOptionRouter);
+app.use(routers.productRouter);
+app.use(routers.affiliateRouter);
 app.use(routers.productSpecificationRouter);
 app.use(routers.productMediaRouter);
 app.use(routers.statusRouter);
+app.use(routers.offerRouter);
+/*
+app.use(routers.productVariantRouter);
+app.use(routers.productOptionRouter);
+ */
 
 app.use(middlewares.errorHandler);
 

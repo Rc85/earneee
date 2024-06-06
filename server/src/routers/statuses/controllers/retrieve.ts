@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
-import { database } from '../../../database';
+import { database } from '../../../middlewares';
+import { StatusesInterface } from '../../../../../_shared/types';
 
 export const retrieveStatuses = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
@@ -13,8 +14,7 @@ export const retrieveStatuses = async (req: Request, resp: Response, next: NextF
     where.push(`name = $${params.length}`);
   }
 
-  const statuses = await database.retrieve('statuses', {
-    columns: 'id, name, online',
+  const statuses = await database.retrieve<StatusesInterface[]>(`SELECT id, name, online FROM statuses`, {
     where: where.join(' AND '),
     params,
     orderBy: 'name',

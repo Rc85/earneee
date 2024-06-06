@@ -6,9 +6,7 @@ import {
   ProductBrandsInterface,
   ProductMediaInterface,
   ProductOptionsInterface,
-  ProductSpecificationsInterface,
-  ProductVariantsInterface,
-  ProductsInterface
+  ProductSpecificationsInterface
 } from '../../../../_shared/types';
 
 export const useCreateProductBrand = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
@@ -67,66 +65,7 @@ export const useDeleteProductBrand = (onSuccess?: (data: any) => void, onError?:
   });
 };
 
-export const useCreateProduct = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
-  const dispatch = useDispatch();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (options: {
-      product: ProductsInterface | ProductVariantsInterface;
-      brand?: ProductBrandsInterface;
-    }) =>
-      axios({
-        method: 'post',
-        url: '/v1/auth/admin/product',
-        withCredentials: true,
-        data: options
-      }),
-
-    onSuccess: (data) => {
-      dispatch(setIsLoading(false));
-
-      queryClient.invalidateQueries({ queryKey: ['products'] });
-
-      onSuccess?.(data);
-    },
-    onError: (err) => {
-      dispatch(setIsLoading(false));
-
-      onError?.(err);
-    }
-  });
-};
-
-export const useDeleteProduct = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
-  const dispatch = useDispatch();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (productId: string) =>
-      axios({
-        method: 'delete',
-        url: '/v1/auth/admin/product',
-        withCredentials: true,
-        params: { productId }
-      }),
-
-    onSuccess: (data) => {
-      dispatch(setIsLoading(false));
-
-      queryClient.invalidateQueries({ queryKey: ['products'] });
-
-      onSuccess?.(data);
-    },
-    onError: (err) => {
-      dispatch(setIsLoading(false));
-
-      onError?.(err);
-    }
-  });
-};
-
-export const useCreateProductVariant = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
+/* export const useCreateProductVariant = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
 
@@ -152,37 +91,9 @@ export const useCreateProductVariant = (onSuccess?: (data: any) => void, onError
       onError?.(err);
     }
   });
-};
+}; */
 
-export const useSortProductVariants = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
-  const dispatch = useDispatch();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (options: { variants: ProductVariantsInterface[] }) =>
-      axios({
-        method: 'put',
-        url: '/v1/auth/admin/product/variant',
-        withCredentials: true,
-        data: options
-      }),
-
-    onSuccess: (data) => {
-      dispatch(setIsLoading(false));
-
-      queryClient.invalidateQueries({ queryKey: ['variants'] });
-
-      onSuccess?.(data);
-    },
-    onError: (err) => {
-      dispatch(setIsLoading(false));
-
-      onError?.(err);
-    }
-  });
-};
-
-export const useDeleteProductVariant = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
+/* export const useDeleteProductVariant = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
 
@@ -208,7 +119,7 @@ export const useDeleteProductVariant = (onSuccess?: (data: any) => void, onError
       onError?.(err);
     }
   });
-};
+}; */
 
 export const useDeleteProductOption = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
   const dispatch = useDispatch();

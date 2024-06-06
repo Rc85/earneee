@@ -3,7 +3,6 @@ export interface ProductMediaInterface {
   url: string;
   path: string | null;
   productId: string | null;
-  variantId: string | null;
   width: number;
   height: number;
   type: string;

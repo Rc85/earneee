@@ -2,7 +2,7 @@ import { ObjectCannedACL } from '@aws-sdk/client-s3';
 import { NextFunction, Request, Response } from 'express';
 import sharp from 'sharp';
 import { OffersInterface } from '../../../../../_shared/types';
-import { database } from '../../../database';
+import { database } from '../../../middlewares';
 import { s3 } from '../../../services';
 
 export const createOffer = async (req: Request, resp: Response, next: NextFunction) => {

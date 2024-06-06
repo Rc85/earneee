@@ -84,7 +84,7 @@ const App = () => {
                     </Route>
 
                     <Route
-                      path='/product/:productId'
+                      path='/product/:id'
                       element={
                         <AuthenticatedRoute>
                           <Pages.Product />
@@ -92,7 +92,7 @@ const App = () => {
                       }
                     >
                       <Route
-                        path='/product/:productId'
+                        path='/product/:id'
                         element={
                           <AuthenticatedRoute>
                             <Pages.Product.Edit />
@@ -101,7 +101,7 @@ const App = () => {
                       />
 
                       <Route
-                        path='/product/:productId/media'
+                        path='/product/:id/media'
                         element={
                           <AuthenticatedRoute>
                             <Pages.Product.Media />
@@ -110,7 +110,7 @@ const App = () => {
                       />
 
                       <Route
-                        path='/product/:productId/specifications'
+                        path='/product/:id/specifications'
                         element={
                           <AuthenticatedRoute>
                             <Pages.Product.Specifications />
@@ -119,7 +119,7 @@ const App = () => {
                       />
 
                       <Route
-                        path='/product/:productId/about'
+                        path='/product/:id/about'
                         element={
                           <AuthenticatedRoute>
                             <Pages.Product.About />
@@ -128,7 +128,7 @@ const App = () => {
                       />
 
                       <Route
-                        path='/product/:productId/details'
+                        path='/product/:id/details'
                         element={
                           <AuthenticatedRoute>
                             <Pages.Product.Details />
@@ -137,7 +137,7 @@ const App = () => {
                       />
 
                       <Route
-                        path='/product/:productId/variants'
+                        path='/product/:id/variants'
                         element={
                           <AuthenticatedRoute>
                             <Pages.Product.Variants />
@@ -146,7 +146,7 @@ const App = () => {
                       />
 
                       <Route
-                        path='/product/:productId/variants/add'
+                        path='/product/:id/variants/add'
                         element={
                           <AuthenticatedRoute>
                             <Pages.Product.AddVariant />
@@ -156,63 +156,63 @@ const App = () => {
                     </Route>
 
                     <Route
-                      path='/product/:productId/variant/:variantId'
+                      path='/product/:id/variant/:productId'
                       element={
                         <AuthenticatedRoute>
-                          <Pages.ProductVariant />
+                          <Pages.Product />
                         </AuthenticatedRoute>
                       }
                     >
                       <Route
-                        path='/product/:productId/variant/:variantId'
+                        path='/product/:id/variant/:productId'
                         element={
                           <AuthenticatedRoute>
-                            <Pages.ProductVariant.Edit />
+                            <Pages.Product.Edit />
                           </AuthenticatedRoute>
                         }
                       />
 
                       <Route
-                        path='/product/:productId/variant/:variantId/media'
+                        path='/product/:id/variant/:productId/media'
                         element={
                           <AuthenticatedRoute>
-                            <Pages.ProductVariant.Media />
+                            <Pages.Product.Media />
                           </AuthenticatedRoute>
                         }
                       />
 
                       <Route
-                        path='/product/:productId/variant/:variantId/options'
+                        path='/product/:id/variant/:productId/options'
                         element={
                           <AuthenticatedRoute>
-                            <Pages.ProductVariant.Options />
+                            <Pages.Product.Options />
                           </AuthenticatedRoute>
                         }
                       />
 
                       <Route
-                        path='/product/:productId/variant/:variantId/specifications'
+                        path='/product/:id/variant/:productId/specifications'
                         element={
                           <AuthenticatedRoute>
-                            <Pages.ProductVariant.Specifications />
+                            <Pages.Product.Specifications />
                           </AuthenticatedRoute>
                         }
                       />
 
                       <Route
-                        path='/product/:productId/variant/:variantId/about'
+                        path='/product/:id/variant/:productId/about'
                         element={
                           <AuthenticatedRoute>
-                            <Pages.ProductVariant.About />
+                            <Pages.Product.About />
                           </AuthenticatedRoute>
                         }
                       />
 
                       <Route
-                        path='/product/:productId/variant/:variantId/details'
+                        path='/product/:id/variant/:productId/details'
                         element={
                           <AuthenticatedRoute>
-                            <Pages.ProductVariant.Details />
+                            <Pages.Product.Details />
                           </AuthenticatedRoute>
                         }
                       />

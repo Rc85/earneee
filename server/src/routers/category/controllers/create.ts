@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
-import { database } from '../../../database';
+import { database } from '../../../middlewares';
+import { CategoriesInterface } from '../../../../../_shared/types';
 
 export const createCategory = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
@@ -16,7 +17,11 @@ export const createCategory = async (req: Request, resp: Response, next: NextFun
     where.push(`parent_id IS NULL`);
   }
 
-  const categories = await database.retrieve('categories', { where: where.join(' AND '), params, client });
+  const categories = await database.retrieve<CategoriesInterface[]>(`SELECT * FROM categories`, {
+    where: where.join(' AND '),
+    params,
+    client
+  });
 
   const columns = ['name', 'parent_id', 'status', 'ordinance'];
   const values = [name, parentId, status, ordinance || categories.length];

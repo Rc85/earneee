@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { database } from '../../../database';
+import { database } from '../../../middlewares';
 
 export const updateProductMedia = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;

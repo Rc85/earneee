@@ -15,9 +15,9 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy
 } from '@dnd-kit/sortable';
-import VariantRow from './VariantRow';
-import { retrieveProductVariants, useSortProductVariants } from '../../../../_shared/api';
-import { useParams } from 'react-router-dom';
+import { retrieveProducts, useSortProducts } from '../../../../_shared/api';
+import { useNavigate, useParams } from 'react-router-dom';
+import ProductRow from '../Products/ProductRow';
 
 const ProductVariants = () => {
   const sensors = useSensors(
@@ -25,28 +25,29 @@ const ProductVariants = () => {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
   const params = useParams();
-  const { productId } = params;
-  const { isLoading, data } = retrieveProductVariants({ productId });
-  const { variants } = data || {};
-  const sortVariants = useSortProductVariants();
+  const { id } = params;
+  const { isLoading, data } = retrieveProducts({ parentId: id });
+  const { products } = data || {};
+  const sortProducts = useSortProducts();
+  const navigate = useNavigate();
 
   const handleDragEnd = (e: DragEndEvent) => {
     const { active, over } = e;
 
-    if (active.id !== over?.id && variants) {
-      const oldIndex = variants.findIndex((variant) => variant.id === active.id);
-      const newIndex = variants.findIndex((variant) => variant.id === over?.id);
+    if (active.id !== over?.id && products) {
+      const oldIndex = products.findIndex((product) => product.id === active.id);
+      const newIndex = products.findIndex((product) => product.id === over?.id);
 
-      const sortedVariants = arrayMove(variants, oldIndex, newIndex);
+      const sortedProducts = arrayMove(products, oldIndex, newIndex);
 
-      for (const i in sortedVariants) {
+      for (const i in sortedProducts) {
         const index = parseInt(i);
-        const variant = sortedVariants[index];
+        const product = sortedProducts[index];
 
-        variant.ordinance = index + 1;
+        product.ordinance = index + 1;
       }
 
-      sortVariants.mutate({ variants: sortedVariants });
+      sortProducts.mutate({ products: sortedProducts });
     }
   };
 
@@ -55,10 +56,15 @@ const ProductVariants = () => {
   ) : (
     <Section title='VARIANTS' titleVariant='h3'>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={variants || []} strategy={verticalListSortingStrategy}>
+        <SortableContext items={products || []} strategy={verticalListSortingStrategy}>
           <List disablePadding>
-            {variants?.map((variant) => (
-              <VariantRow key={variant.id} variant={variant} />
+            {products?.map((product) => (
+              <ProductRow
+                key={product.id}
+                product={product}
+                onClick={() => navigate(`/product/${product.parentId}/variant/${product.id}`)}
+                sortable
+              />
             ))}
           </List>
         </SortableContext>

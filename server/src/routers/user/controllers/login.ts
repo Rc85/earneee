@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
-import { database } from '../../../database';
+import { database } from '../../../middlewares';
+import { SessionsInterface } from '../../../../../_shared/types';
 
 export const login = async (req: Request, resp: Response, next: NextFunction) => {
   const { client, user } = resp.locals;
@@ -8,7 +9,7 @@ export const login = async (req: Request, resp: Response, next: NextFunction) =>
   if (user) {
     const ipAddress = req.headers['real-x-ip'] || '127.0.0.1';
 
-    const activeSession = await database.retrieve('sessions', {
+    const activeSession = await database.retrieve<SessionsInterface[]>('SELECT * FROM sessions', {
       where: 'user_id = $1 AND application = $2 AND status = $3',
       params: [user.id, application, 'active'],
       client

@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import bcrypt from 'bcrypt';
-import { database } from '../../../database';
+import { database } from '../../../middlewares';
 
 export const createUser = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;

@@ -1,10 +1,10 @@
 import { Section } from '../../../../_shared/components';
-import VariantForm from './VariantForm';
+import ProductForm from '../Products/ProductForm';
 
 const AddVariant = () => {
   return (
     <Section title='Add Variant' titleVariant='h3'>
-      <VariantForm />
+      <ProductForm variant />
     </Section>
   );
 };

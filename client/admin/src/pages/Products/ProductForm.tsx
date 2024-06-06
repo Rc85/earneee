@@ -1,39 +1,63 @@
-import { Box, Button, Chip, CircularProgress, IconButton, Paper, TextField, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Checkbox,
+  Chip,
+  CircularProgress,
+  FormControlLabel,
+  IconButton,
+  List,
+  Paper,
+  TextField,
+  Typography
+} from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { Icon } from '@mdi/react';
 import { mdiArrowUpDropCircle, mdiPencil, mdiPlusBox, mdiTrashCan } from '@mdi/js';
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { useSnackbar } from 'notistack';
-import { CategoriesInterface, ProductBrandsInterface, ProductsInterface } from '../../../../../_shared/types';
-import { useNavigate } from 'react-router-dom';
+import {
+  CategoriesInterface,
+  ProductBrandsInterface,
+  ProductUrlsInterface,
+  ProductsInterface
+} from '../../../../../_shared/types';
+import { useNavigate, useParams } from 'react-router-dom';
 import { retrieveCategories, retrieveProductBrands, useCreateProduct } from '../../../../_shared/api';
-import { generateKey } from '../../../../../_shared/utils';
 import { RichTextEditor } from '../../../../_shared/components';
 import { editorExtensions } from '../../../../_shared/constants';
 import { useEditor } from '@tiptap/react';
 import CreateBrand from './CreateBrand';
+import UrlRow from '../Product/UrlRow';
+import AddUrl from '../Product/AddUrl';
 
 interface Props {
   product?: ProductsInterface;
+  variant?: boolean;
 }
 
 const editorStyle = { mb: 1.5 };
 
-const ProductForm = ({ product }: Props) => {
+const ProductForm = ({ product, variant }: Props) => {
   const [status, setStatus] = useState('');
+  const params = useParams();
+  const { id, productId } = params;
   const [form, setForm] = useState<ProductsInterface>({
-    id: generateKey(1),
+    id: '',
     name: '',
-    type: 'affiliate',
     description: null,
+    parentId: productId || id!,
     about: null,
+    ordinance: null,
     details: null,
+    featured: false,
     categoryId: 0,
     brandId: '',
     excerpt: '',
     status: 'available',
     createdAt: '',
-    updatedAt: ''
+    updatedAt: '',
+    urls: []
   });
   const [brand, setBrand] = useState<ProductBrandsInterface>();
   const { enqueueSnackbar } = useSnackbar();
@@ -59,6 +83,8 @@ const ProductForm = ({ product }: Props) => {
   useEffect(() => {
     if (product) {
       setForm({ ...product });
+
+      console.log(product.category);
 
       if (product.category) {
         const exists = selectedCategories.find((category) => category.id === product.category?.id);
@@ -93,21 +119,11 @@ const ProductForm = ({ product }: Props) => {
   const handleSubmit = async (e?: FormEvent) => {
     e?.preventDefault();
 
-    const categoryId = selectedCategories[selectedCategories.length - 1]?.id;
+    setStatus('Loading');
 
-    if (!form.name) {
-      return enqueueSnackbar('Name required', { variant: 'error' });
-    } else if (!categoryId) {
-      return enqueueSnackbar('Category required', { variant: 'error' });
-    }
+    const product = { ...form, categoryId: selectedCategories[selectedCategories.length - 1]?.id };
 
-    if (selectedCategories.length) {
-      setStatus('Loading');
-
-      const product = { ...form, categoryId: selectedCategories[selectedCategories.length - 1].id };
-
-      createProduct.mutate({ product, brand });
-    }
+    createProduct.mutate({ product, brand });
   };
 
   const handleCategoryChange = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -143,11 +159,40 @@ const ProductForm = ({ product }: Props) => {
     setStatus('');
   };
 
+  const handleAddUrl = (url: ProductUrlsInterface) => {
+    const urls = form.urls || [];
+    const index = urls.findIndex((u) => u.id === url.id);
+
+    url.productId = form.id;
+
+    if (index >= 0) {
+      urls[index] = url;
+    } else {
+      urls.push(url);
+    }
+
+    setForm({ ...form, urls });
+
+    setStatus('');
+  };
+
+  const handleDeleteUrl = (index: number) => {
+    const urls = form.urls || [];
+
+    if (index >= 0) {
+      urls.splice(index, 1);
+    }
+
+    setForm({ ...form, urls });
+  };
+
   return (
     <>
       {status === 'Create Brand' && (
         <CreateBrand submit={handleCreateBrand} cancel={handleCancelCreateBrand} brand={brand} />
       )}
+
+      {status === 'Add URL' && <AddUrl cancel={() => setStatus('')} submit={handleAddUrl} />}
 
       <Box component='form' onSubmit={handleSubmit}>
         <TextField
@@ -156,17 +201,6 @@ const ProductForm = ({ product }: Props) => {
           onChange={(e) => setForm({ ...form, name: e.target.value })}
           value={form.name}
         />
-
-        <TextField
-          select
-          SelectProps={{ native: true }}
-          value={form.type}
-          onChange={(e) => setForm({ ...form, type: e.target.value })}
-        >
-          <option value='affiliate'>Affiliate Product</option>
-          <option value='dropship'>Dropship Product</option>
-          <option value='direct'>Direct Sale Product</option>
-        </TextField>
 
         <TextField
           label='Excerpt'
@@ -180,103 +214,135 @@ const ProductForm = ({ product }: Props) => {
           rawHtml={form.details || ''}
         />
 
-        {selectedCategories.length > 0 && (
-          <Box sx={{ mb: 2 }}>
-            <Typography variant='body2' color='GrayText'>
-              Selected category
-            </Typography>
+        {!variant && (
+          <>
+            {selectedCategories.length > 0 && (
+              <Box sx={{ mb: 2 }}>
+                <Typography variant='body2' color='GrayText'>
+                  Selected category
+                </Typography>
 
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              {selectedCategories.map((category, i) => (
-                <Box key={category.id} sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Chip
-                    label={category.name}
-                    color={i === selectedCategories.length - 1 ? 'success' : undefined}
-                    sx={{ mr: 1 }}
-                    deleteIcon={<Icon path={mdiTrashCan} size={1} />}
-                    onDelete={() => handleDeleteSelectedCategory(i)}
-                  />
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  {selectedCategories.map((category, i) => (
+                    <Box key={category.id} sx={{ display: 'flex', alignItems: 'center' }}>
+                      <Chip
+                        label={category.name}
+                        color={i === selectedCategories.length - 1 ? 'success' : undefined}
+                        sx={{ mr: 1 }}
+                        deleteIcon={<Icon path={mdiTrashCan} size={1} />}
+                        onDelete={() => handleDeleteSelectedCategory(i)}
+                      />
 
-                  {i !== selectedCategories.length - 1 ? <Typography sx={{ mr: 1 }}>/</Typography> : null}
+                      {i !== selectedCategories.length - 1 ? <Typography sx={{ mr: 1 }}>/</Typography> : null}
+                    </Box>
+                  ))}
                 </Box>
-              ))}
-            </Box>
-          </Box>
-        )}
-
-        {categories && categories.length > 0 && (
-          <TextField
-            select
-            label='Category'
-            SelectProps={{ native: true }}
-            onChange={handleCategoryChange}
-            value={form.categoryId || ''}
-          >
-            <option value=''></option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </TextField>
-        )}
-
-        {brand ? (
-          <Paper variant='outlined' sx={{ p: 2, mb: 1, display: 'flex', alignItems: 'flex-start' }}>
-            {brand.logoUrl && (
-              <Box
-                sx={{
-                  width: '100px',
-                  height: '100px',
-                  backgroundImage: `url(${brand.logoUrl})`,
-                  backgroundSize: 'contain',
-                  backgroundPosition: 'center top',
-                  backgroundRepeat: 'no-repeat'
-                }}
-              />
+              </Box>
             )}
 
-            <Box sx={{ ml: 1, flexGrow: 1 }}>
-              <Typography>{brand.name}</Typography>
-              <Typography>{brand.owner}</Typography>
+            {categories && categories.length > 0 && (
+              <TextField
+                select
+                label='Category'
+                SelectProps={{ native: true }}
+                onChange={handleCategoryChange}
+                value={form.categoryId || ''}
+              >
+                <option value=''></option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </TextField>
+            )}
 
-              {brand.urls?.map((url) => (
-                <Typography key={url.id}>{url.url}</Typography>
-              ))}
+            <Box sx={{ mb: 1 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <FormControlLabel
+                  label='Featured'
+                  control={<Checkbox color='info' />}
+                  checked={form.featured}
+                  onChange={() => setForm({ ...form, featured: !form.featured })}
+                />
+
+                <Button startIcon={<Icon path={mdiPlusBox} size={1} />} onClick={() => setStatus('Add URL')}>
+                  Add URL
+                </Button>
+              </Box>
+
+              {Boolean(form.urls && form.urls.length > 0) && (
+                <List disablePadding>
+                  {form.urls?.map((url, i) => (
+                    <UrlRow
+                      key={url.id}
+                      url={url}
+                      onDelete={() => handleDeleteUrl(i)}
+                      submit={handleAddUrl}
+                    />
+                  ))}
+                </List>
+              )}
             </Box>
 
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <IconButton size='small' onClick={() => setStatus('Create Brand')} sx={{ mr: 1 }}>
-                <Icon path={mdiPencil} size={1} />
-              </IconButton>
+            {brand ? (
+              <Paper variant='outlined' sx={{ p: 2, mb: 1, display: 'flex', alignItems: 'flex-start' }}>
+                {brand.logoUrl && (
+                  <Box
+                    sx={{
+                      width: '100px',
+                      height: '100px',
+                      backgroundImage: `url(${brand.logoUrl})`,
+                      backgroundSize: 'contain',
+                      backgroundPosition: 'center top',
+                      backgroundRepeat: 'no-repeat'
+                    }}
+                  />
+                )}
 
-              <IconButton size='small' color='error' onClick={() => setBrand(undefined)}>
-                <Icon path={mdiTrashCan} size={1} />
-              </IconButton>
-            </Box>
-          </Paper>
-        ) : (
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.25 }}>
-            <TextField
-              select
-              label='Brand'
-              SelectProps={{ native: true }}
-              onChange={(e) => setForm({ ...form, brandId: e.target.value })}
-              value={form.brandId || ''}
-              sx={{ mb: '0 !important', mr: 1 }}
-            >
-              <option value=''></option>
-              {brands?.map((brand) => (
-                <option key={brand.id} value={brand.id}>
-                  {brand.name}
-                </option>
-              ))}
-            </TextField>
+                <Box sx={{ ml: 1, flexGrow: 1 }}>
+                  <Typography>{brand.name}</Typography>
+                  <Typography>{brand.owner}</Typography>
+                  <Typography>{brand.url}</Typography>
+                </Box>
 
-            <Button startIcon={<Icon path={mdiPlusBox} size={1} />} onClick={() => setStatus('Create Brand')}>
-              Create
-            </Button>
-          </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <IconButton size='small' onClick={() => setStatus('Create Brand')} sx={{ mr: 1 }}>
+                    <Icon path={mdiPencil} size={1} />
+                  </IconButton>
+
+                  <IconButton size='small' color='error' onClick={() => setBrand(undefined)}>
+                    <Icon path={mdiTrashCan} size={1} />
+                  </IconButton>
+                </Box>
+              </Paper>
+            ) : (
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.25 }}>
+                <TextField
+                  select
+                  label='Brand'
+                  SelectProps={{ native: true }}
+                  onChange={(e) => setForm({ ...form, brandId: e.target.value })}
+                  value={form.brandId || ''}
+                  sx={{ mb: '0 !important', mr: 1 }}
+                >
+                  <option value=''></option>
+                  {brands?.map((brand) => (
+                    <option key={brand.id} value={brand.id}>
+                      {brand.name}
+                    </option>
+                  ))}
+                </TextField>
+
+                <Button
+                  startIcon={<Icon path={mdiPlusBox} size={1} />}
+                  onClick={() => setStatus('Create Brand')}
+                >
+                  Create
+                </Button>
+              </Box>
+            )}
+          </>
         )}
 
         <LoadingButton

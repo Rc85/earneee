@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import { HttpException, validations } from '../../../utils';
-import { database } from '../../../database';
+import { database } from '../../../middlewares';
 import bcrypt from 'bcrypt';
-import { UsersInterface } from '../../../../../_shared/types';
+import { UserBansInterface, UsersInterface } from '../../../../../_shared/types';
 import dayjs from 'dayjs';
 
 export const validateCreateUser = (req: Request, _: Response, next: NextFunction) => {
@@ -55,7 +55,7 @@ export const validateLogin = async (req: Request, resp: Response, next: NextFunc
     return next(new HttpException(400, `Login origin not recognized`));
   }
 
-  const ban = await database.retrieve('user_bans', {
+  const ban = await database.retrieve<UserBansInterface[]>('SELECT * FROM user_bans', {
     where: 'user_id = $1 AND banned_until > NOW()',
     params: [user[0].id],
     client
@@ -84,7 +84,11 @@ export const validateChangePassword = async (req: Request, resp: Response, next:
     return next(new HttpException(400, `Passwords do not match`));
   }
 
-  const user = await database.retrieve('users', { where: 'id = $1', params: [req.session.user?.id], client });
+  const user = await database.retrieve<UsersInterface[]>('SELECT password FROM users', {
+    where: 'id = $1',
+    params: [req.session.user?.id],
+    client
+  });
 
   if (!user.length) {
     return next(new HttpException(400, `Incorrect password`));

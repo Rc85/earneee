@@ -19,7 +19,7 @@ import { Modal } from '../../../../_shared/components';
 import { LoadingButton } from '@mui/lab';
 import { deepEqual, generateKey } from '../../../../../_shared/utils';
 import { useSnackbar } from 'notistack';
-import OptionForm from '../ProductVariant/OptionForm';
+import OptionForm from './OptionForm';
 import { useCreateProductOption, useDeleteProductOption } from '../../../../_shared/api';
 
 interface Props {

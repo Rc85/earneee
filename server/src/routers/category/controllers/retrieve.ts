@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { database } from '../../../database';
+import { database } from '../../../middlewares';
 
 export const retrieveCategories = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
@@ -24,7 +24,7 @@ export const retrieveCategories = async (req: Request, resp: Response, next: Nex
     where.push(`(JSONB_ARRAY_LENGTH(c1.subcategories) > 0 OR p.product > 0)`);
   }
 
-  const categories = await database.query(
+  const categories = await database.retrieve(
     `WITH
     c2 AS (
       SELECT
@@ -78,11 +78,8 @@ export const retrieveCategories = async (req: Request, resp: Response, next: Nex
       SELECT COUNT(p.*) AS product
       FROM products AS p
       WHERE p.category_id = c.id
-    ) AS p ON true
-    ${where.length > 0 ? `WHERE ${where.join(' AND ')}` : ''}
-    ORDER BY c.name`,
-    params,
-    client
+    ) AS p ON true`,
+    { where: where.join(' AND '), orderBy: 'c.name', params, client }
   );
 
   resp.locals.response = { data: { categories } };

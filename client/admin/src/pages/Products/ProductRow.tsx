@@ -9,22 +9,25 @@ import {
 } from '@mui/material';
 import { ProductsInterface } from '../../../../../_shared/types';
 import { Icon } from '@mdi/react';
-import { mdiChevronRight, mdiTrashCan } from '@mdi/js';
+import { mdiChevronRight, mdiDragHorizontalVariant, mdiTrashCan } from '@mdi/js';
 import { useState } from 'react';
 import { Modal } from '../../../../_shared/components';
-import { useNavigate } from 'react-router-dom';
 import { useCreateProduct, useDeleteProduct } from '../../../../_shared/api';
 import { useSnackbar } from 'notistack';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface Props {
   product: ProductsInterface;
+  onClick: () => void;
+  sortable?: boolean;
 }
 
-const ProductRow = ({ product }: Props) => {
+const ProductRow = ({ product, onClick, sortable }: Props) => {
   const theme = useTheme();
   const [status, setStatus] = useState('');
-  const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: product.id });
 
   const handleSuccess = (response: any) => {
     if (response.data.statusText) {
@@ -65,12 +68,10 @@ const ProductRow = ({ product }: Props) => {
     setStatus('');
   };
 
-  const handleClick = () => {
-    navigate(`/product/${product.id}`);
-  };
+  const style = { transform: CSS.Transform.toString(transform), transition };
 
   return (
-    <ListItem disableGutters disablePadding divider>
+    <ListItem disableGutters disablePadding divider {...attributes} style={style}>
       <Modal
         open={status === 'Confirm Delete'}
         title='Are you sure you want to delete this product?'
@@ -81,8 +82,14 @@ const ProductRow = ({ product }: Props) => {
         cancelText='No'
       />
 
-      <ListItemButton onClick={handleClick}>
-        <ListItemText primary={product.name} />
+      {sortable && (
+        <IconButton size='small' ref={setNodeRef} {...listeners}>
+          <Icon path={mdiDragHorizontalVariant} size={1} />
+        </IconButton>
+      )}
+
+      <ListItemButton onClick={onClick}>
+        <ListItemText primary={`${product.brand?.name ? `${product.brand?.name} ` : ''}${product.name}`} />
       </ListItemButton>
 
       <Switch
