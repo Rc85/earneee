@@ -26,6 +26,7 @@ interface Props {
   loading?: boolean;
   component?: ElementType<any>;
   maxWidth?: false | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  disableSubmit?: boolean;
 }
 
 const Modal = ({
@@ -40,7 +41,8 @@ const Modal = ({
   disableBackdropClick,
   loading,
   component,
-  maxWidth
+  maxWidth,
+  disableSubmit
 }: Props) => {
   const handleOnClose = (_e: FormEvent, reason: 'backdropClick' | 'escapeKeyDown') => {
     if (!reason || (reason === 'backdropClick' && !disableBackdropClick)) {
@@ -82,6 +84,7 @@ const Modal = ({
               fullWidth
               startIcon={<Icon path={mdiArrowUpDropCircle} size={1} />}
               sx={{ mb: 1 }}
+              disabled={disableSubmit}
             >
               {submitText}
             </LoadingButton>

@@ -13,7 +13,7 @@ export const createOffer = async (req: Request, resp: Response, next: NextFuncti
   let bannerUrl = logoUrl;
   let path = logoPath;
 
-  if (logoUrl && /^data:image\/png;base64.*/.test(logoUrl)) {
+  if (logoUrl && /^data:image\/(png|jpeg);base64.*/.test(logoUrl)) {
     const base64 = logoUrl.split(',')[1];
     const buffer = Buffer.from(base64, 'base64');
     const body = await sharp(buffer).withMetadata().resize(500).toBuffer();

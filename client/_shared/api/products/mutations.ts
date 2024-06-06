@@ -72,7 +72,10 @@ export const useCreateProduct = (onSuccess?: (data: any) => void, onError?: (err
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (options: ProductsInterface | ProductVariantsInterface) =>
+    mutationFn: (options: {
+      product: ProductsInterface | ProductVariantsInterface;
+      brand?: ProductBrandsInterface;
+    }) =>
       axios({
         method: 'post',
         url: '/v1/auth/admin/product',

@@ -7,12 +7,52 @@ import { database } from '../../../database';
 export const validateCreateProduct = async (req: Request, resp: Response, next: NextFunction) => {
   const window = new JSDOM('').window;
   const purify = DOMPurify(window);
-
-  req.body.about = purify.sanitize(req.body.about);
-  req.body.details = purify.sanitize(req.body.details);
-
-  const { name, excerpt, categoryId, brandId, description, about, details, type } = req.body;
+  const { product, brand } = req.body;
   const { client } = resp.locals;
+
+  if (!product) {
+    return next(new HttpException(400, `Product required`));
+  }
+
+  if (brand) {
+    const { name, owner, urls, logoUrl, status } = brand;
+
+    if (!name || validations.blankCheck.test(name)) {
+      return next(new HttpException(400, `Brand name required`));
+    } else if (typeof name !== 'string') {
+      return next(new HttpException(400, `Invalid brand name`));
+    } else if (!urls || !(urls instanceof Array) || urls.length === 0) {
+      return next(new HttpException(400, `At least one brand link is required`));
+    } else if (logoUrl && typeof logoUrl !== 'string') {
+      return next(new HttpException(400, `Invalid brand logo`));
+    } else if (owner) {
+      const user = await database.retrieve('users', {
+        columns: 'email',
+        where: 'id = $1',
+        params: [owner],
+        client
+      });
+
+      if (user.length === 0) {
+        return next(new HttpException(400, `The brand owner does not exist`));
+      }
+    }
+
+    const exists = await database.retrieve('product_brands', {
+      where: 'name = $1 AND owner = $2',
+      params: [name, owner],
+      client
+    });
+
+    if (exists.length) {
+      return next(new HttpException(400, `A same brand and owner already exists`));
+    }
+  }
+
+  product.about = purify.sanitize(product.about);
+  product.details = purify.sanitize(product.details);
+
+  const { name, excerpt, categoryId, brandId, description, about, details, type } = product;
 
   if (!name || validations.blankCheck.test(name)) {
     return next(new HttpException(400, `Name required`));

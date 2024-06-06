@@ -4,7 +4,7 @@ import sharp from 'sharp';
 import { database } from '../../../database';
 import { s3 } from '../../../services';
 import { ProductBrandUrlsInterface, ProductBrandsInterface } from '../../../../../_shared/types';
-import { HttpException } from '../../../utils';
+import { generateKey } from '../../../../../_shared/utils';
 
 export const createBrand = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
@@ -13,7 +13,7 @@ export const createBrand = async (req: Request, resp: Response, next: NextFuncti
   let url = logoUrl;
   let path = logoPath;
 
-  if (logoUrl && /^data:image\/png;base64.*/.test(logoUrl)) {
+  if (logoUrl && /^data:image\/(png|jpeg);base64.*/.test(logoUrl)) {
     const base64 = logoUrl.split(',')[1];
     const buffer = Buffer.from(base64, 'base64');
     const body = await sharp(buffer).withMetadata().resize(500).toBuffer();
@@ -42,7 +42,7 @@ export const createBrand = async (req: Request, resp: Response, next: NextFuncti
   const brand: ProductBrandsInterface[] = await database.create(
     'product_brands',
     ['id', 'name', 'owner', 'logo_path', 'logo_url', 'status'],
-    [id, name, owner, path, url, status],
+    [id || generateKey(1), name, owner, path, url, status],
     {
       conflict: {
         columns: 'id',
@@ -58,7 +58,7 @@ export const createBrand = async (req: Request, resp: Response, next: NextFuncti
     }
   );
 
-  if (urls) {
+  if (brand.length && urls) {
     const urlIds = urls.map((url: ProductBrandUrlsInterface) => url.id);
 
     await database.delete('product_brand_urls', { where: 'NOT id = ANY($1)', params: [urlIds], client });
@@ -67,7 +67,7 @@ export const createBrand = async (req: Request, resp: Response, next: NextFuncti
       await database.create(
         'product_brand_urls',
         ['id', 'url', 'country', 'brand_id'],
-        [url.id, url.url, url.country, id],
+        [url.id, url.url, url.country, brand[0].id],
         {
           conflict: { columns: 'brand_id, country', do: `UPDATE SET url = EXCLUDED.url, updated_at = NOW()` },
           client

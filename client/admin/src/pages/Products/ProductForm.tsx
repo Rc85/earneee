@@ -1,16 +1,17 @@
-import { Box, Chip, CircularProgress, TextField, Typography } from '@mui/material';
+import { Box, Button, Chip, CircularProgress, IconButton, Paper, TextField, Typography } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { Icon } from '@mdi/react';
-import { mdiArrowUpDropCircle, mdiTrashCan } from '@mdi/js';
+import { mdiArrowUpDropCircle, mdiPencil, mdiPlusBox, mdiTrashCan } from '@mdi/js';
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { useSnackbar } from 'notistack';
-import { CategoriesInterface, ProductsInterface } from '../../../../../_shared/types';
+import { CategoriesInterface, ProductBrandsInterface, ProductsInterface } from '../../../../../_shared/types';
 import { useNavigate } from 'react-router-dom';
 import { retrieveCategories, retrieveProductBrands, useCreateProduct } from '../../../../_shared/api';
 import { generateKey } from '../../../../../_shared/utils';
 import { RichTextEditor } from '../../../../_shared/components';
 import { editorExtensions } from '../../../../_shared/constants';
 import { useEditor } from '@tiptap/react';
+import CreateBrand from './CreateBrand';
 
 interface Props {
   product?: ProductsInterface;
@@ -34,6 +35,7 @@ const ProductForm = ({ product }: Props) => {
     createdAt: '',
     updatedAt: ''
   });
+  const [brand, setBrand] = useState<ProductBrandsInterface>();
   const { enqueueSnackbar } = useSnackbar();
   const [selectedCategories, setSelectedCategories] = useState<CategoriesInterface[]>([]);
   const navigate = useNavigate();
@@ -102,7 +104,9 @@ const ProductForm = ({ product }: Props) => {
     if (selectedCategories.length) {
       setStatus('Loading');
 
-      createProduct.mutate({ ...form, categoryId: selectedCategories[selectedCategories.length - 1].id });
+      const product = { ...form, categoryId: selectedCategories[selectedCategories.length - 1].id };
+
+      createProduct.mutate({ product, brand });
     }
   };
 
@@ -127,107 +131,168 @@ const ProductForm = ({ product }: Props) => {
     setSelectedCategories(selected);
   };
 
+  const handleCreateBrand = (brand: ProductBrandsInterface) => {
+    setBrand(brand);
+
+    setStatus('');
+  };
+
+  const handleCancelCreateBrand = () => {
+    setBrand(undefined);
+
+    setStatus('');
+  };
+
   return (
-    <Box component='form' onSubmit={handleSubmit}>
-      <TextField
-        label='Name'
-        required
-        onChange={(e) => setForm({ ...form, name: e.target.value })}
-        value={form.name}
-      />
-
-      <TextField
-        select
-        SelectProps={{ native: true }}
-        value={form.type}
-        onChange={(e) => setForm({ ...form, type: e.target.value })}
-      >
-        <option value='affiliate'>Affiliate Product</option>
-        <option value='dropship'>Dropship Product</option>
-        <option value='direct'>Direct Sale Product</option>
-      </TextField>
-
-      <TextField
-        label='Excerpt'
-        onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
-        value={form.excerpt || ''}
-      />
-      <RichTextEditor
-        sx={editorStyle}
-        editor={editor}
-        onHtmlChange={(html) => setForm({ ...form, details: html })}
-        rawHtml={form.details || ''}
-      />
-
-      {selectedCategories.length > 0 && (
-        <Box sx={{ mb: 2 }}>
-          <Typography variant='body2' color='GrayText'>
-            Selected category
-          </Typography>
-
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            {selectedCategories.map((category, i) => (
-              <Box key={category.id} sx={{ display: 'flex', alignItems: 'center' }}>
-                <Chip
-                  label={category.name}
-                  color={i === selectedCategories.length - 1 ? 'success' : undefined}
-                  sx={{ mr: 1 }}
-                  deleteIcon={<Icon path={mdiTrashCan} size={1} />}
-                  onDelete={() => handleDeleteSelectedCategory(i)}
-                />
-
-                {i !== selectedCategories.length - 1 ? <Typography sx={{ mr: 1 }}>/</Typography> : null}
-              </Box>
-            ))}
-          </Box>
-        </Box>
+    <>
+      {status === 'Create Brand' && (
+        <CreateBrand submit={handleCreateBrand} cancel={handleCancelCreateBrand} brand={brand} />
       )}
 
-      {categories && categories.length > 0 && (
+      <Box component='form' onSubmit={handleSubmit}>
+        <TextField
+          label='Name'
+          required
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
+          value={form.name}
+        />
+
         <TextField
           select
-          label='Category'
           SelectProps={{ native: true }}
-          onChange={handleCategoryChange}
-          value={form.categoryId || ''}
+          value={form.type}
+          onChange={(e) => setForm({ ...form, type: e.target.value })}
         >
-          <option value=''></option>
-          {categories.map((category) => (
-            <option key={category.id} value={category.id}>
-              {category.name}
-            </option>
-          ))}
+          <option value='affiliate'>Affiliate Product</option>
+          <option value='dropship'>Dropship Product</option>
+          <option value='direct'>Direct Sale Product</option>
         </TextField>
-      )}
 
-      <TextField
-        select
-        label='Brand'
-        SelectProps={{ native: true }}
-        onChange={(e) => setForm({ ...form, brandId: e.target.value })}
-        value={form.brandId || ''}
-      >
-        <option value=''></option>
-        {brands?.map((brand) => (
-          <option key={brand.id} value={brand.id}>
-            {brand.name}
-          </option>
-        ))}
-      </TextField>
+        <TextField
+          label='Excerpt'
+          onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
+          value={form.excerpt || ''}
+        />
+        <RichTextEditor
+          sx={editorStyle}
+          editor={editor}
+          onHtmlChange={(html) => setForm({ ...form, details: html })}
+          rawHtml={form.details || ''}
+        />
 
-      <LoadingButton
-        type='submit'
-        onClick={handleSubmit}
-        variant='contained'
-        fullWidth
-        loading={status === 'Loading'}
-        loadingIndicator={<CircularProgress size={20} />}
-        loadingPosition='start'
-        startIcon={<Icon path={mdiArrowUpDropCircle} size={1} />}
-      >
-        Submit
-      </LoadingButton>
-    </Box>
+        {selectedCategories.length > 0 && (
+          <Box sx={{ mb: 2 }}>
+            <Typography variant='body2' color='GrayText'>
+              Selected category
+            </Typography>
+
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              {selectedCategories.map((category, i) => (
+                <Box key={category.id} sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Chip
+                    label={category.name}
+                    color={i === selectedCategories.length - 1 ? 'success' : undefined}
+                    sx={{ mr: 1 }}
+                    deleteIcon={<Icon path={mdiTrashCan} size={1} />}
+                    onDelete={() => handleDeleteSelectedCategory(i)}
+                  />
+
+                  {i !== selectedCategories.length - 1 ? <Typography sx={{ mr: 1 }}>/</Typography> : null}
+                </Box>
+              ))}
+            </Box>
+          </Box>
+        )}
+
+        {categories && categories.length > 0 && (
+          <TextField
+            select
+            label='Category'
+            SelectProps={{ native: true }}
+            onChange={handleCategoryChange}
+            value={form.categoryId || ''}
+          >
+            <option value=''></option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </TextField>
+        )}
+
+        {brand ? (
+          <Paper variant='outlined' sx={{ p: 2, mb: 1, display: 'flex', alignItems: 'flex-start' }}>
+            {brand.logoUrl && (
+              <Box
+                sx={{
+                  width: '100px',
+                  height: '100px',
+                  backgroundImage: `url(${brand.logoUrl})`,
+                  backgroundSize: 'contain',
+                  backgroundPosition: 'center top',
+                  backgroundRepeat: 'no-repeat'
+                }}
+              />
+            )}
+
+            <Box sx={{ ml: 1, flexGrow: 1 }}>
+              <Typography>{brand.name}</Typography>
+              <Typography>{brand.owner}</Typography>
+
+              {brand.urls?.map((url) => (
+                <Typography key={url.id}>{url.url}</Typography>
+              ))}
+            </Box>
+
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <IconButton size='small' onClick={() => setStatus('Create Brand')} sx={{ mr: 1 }}>
+                <Icon path={mdiPencil} size={1} />
+              </IconButton>
+
+              <IconButton size='small' color='error' onClick={() => setBrand(undefined)}>
+                <Icon path={mdiTrashCan} size={1} />
+              </IconButton>
+            </Box>
+          </Paper>
+        ) : (
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.25 }}>
+            <TextField
+              select
+              label='Brand'
+              SelectProps={{ native: true }}
+              onChange={(e) => setForm({ ...form, brandId: e.target.value })}
+              value={form.brandId || ''}
+              sx={{ mb: '0 !important', mr: 1 }}
+            >
+              <option value=''></option>
+              {brands?.map((brand) => (
+                <option key={brand.id} value={brand.id}>
+                  {brand.name}
+                </option>
+              ))}
+            </TextField>
+
+            <Button startIcon={<Icon path={mdiPlusBox} size={1} />} onClick={() => setStatus('Create Brand')}>
+              Create
+            </Button>
+          </Box>
+        )}
+
+        <LoadingButton
+          type='submit'
+          onClick={handleSubmit}
+          variant='contained'
+          fullWidth
+          loading={status === 'Loading'}
+          loadingIndicator={<CircularProgress size={20} />}
+          loadingPosition='start'
+          startIcon={<Icon path={mdiArrowUpDropCircle} size={1} />}
+        >
+          Submit
+        </LoadingButton>
+      </Box>
+    </>
   );
 };
 

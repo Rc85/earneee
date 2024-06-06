@@ -48,7 +48,7 @@ const ProductRow = ({ product }: Props) => {
   const handleToggle = () => {
     const status = product.status === 'available' ? 'unavailable' : 'available';
 
-    updateProduct.mutate({ ...product, status });
+    updateProduct.mutate({ product: { ...product, status } });
   };
 
   const handleDeleteClick = () => {

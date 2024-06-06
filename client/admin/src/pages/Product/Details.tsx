@@ -50,6 +50,7 @@ const Details = () => {
     about: null,
     details: null,
     categoryId: 0,
+    type: 'affiliate',
     brandId: '',
     excerpt: '',
     status: 'available',
@@ -115,7 +116,7 @@ const Details = () => {
     setStatus('Loading');
 
     if (productId && !variantId) {
-      createProduct.mutate(form);
+      createProduct.mutate({ product: form });
     } else {
       createVariant.mutate(form);
     }

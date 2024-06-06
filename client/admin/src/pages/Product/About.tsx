@@ -31,18 +31,16 @@ const About = () => {
   const initialProduct: ProductsInterface = {
     id: generateKey(1),
     name: '',
-    price: null,
-    currency: null,
     description: null,
     about: null,
     details: null,
     categoryId: 0,
+    type: 'affiliate',
     brandId: '',
     excerpt: '',
     status: 'available',
     createdAt: '',
-    updatedAt: '',
-    urls: []
+    updatedAt: ''
   };
   const initialVariant: ProductVariantsInterface = {
     id: generateKey(1),
@@ -118,7 +116,7 @@ const About = () => {
     setStatus('Loading');
 
     if (productId && !variantId) {
-      createProduct.mutate(form);
+      createProduct.mutate({ product: form });
     } else {
       createVariant.mutate(form);
     }
