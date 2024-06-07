@@ -495,7 +495,23 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
   const { productId, country } = req.query;
 
   const product = await database.retrieve<ProductUrlsInterface[]>(
-    `WITH
+    `WITH RECURSIVE
+    ac AS (
+      SELECT
+        c.id,
+        c.name,
+        1::int AS depth,
+        (ARRAY[]::JSONB[] || JSONB_BUILD_OBJECT('id', c.id, 'name', c.name)) AS ancestors
+      FROM categories AS c
+      UNION ALL
+      SELECT
+        c.id,
+        c.name,
+        ac.depth + 1 AS depth,
+        ac.ancestors || JSONB_BUILD_OBJECT('id', c.id, 'name', c.name)
+      FROM categories AS c, ac
+      WHERE c.parent_id = ac.id
+    ),
     ps AS (
       SELECT
         s.id,
@@ -602,10 +618,15 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
       p.about,
       pb.brand,
       pu.url,
+      ac.ancestors,
       COALESCE(pr.variants, '[]'::JSONB) AS variants,
       COALESCE(ps.specifications, '[]'::JSONB) AS specifications,
       COALESCE(pm.media, '[]'::JSONB) AS media
     FROM products AS p
+    LEFT JOIN LATERAL (
+      SELECT ac.ancestors, ac.depth FROM ac
+      WHERE ac.id = p.category_id
+    ) AS ac ON true
     LEFT JOIN LATERAL(
       SELECT JSONB_AGG(pm.*) AS media
       FROM pm
