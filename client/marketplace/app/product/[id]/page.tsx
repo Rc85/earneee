@@ -79,11 +79,15 @@ const Product = ({ params: { id } }: Props) => {
             </Link>
           );
         })}
-
-        <Typography>{product?.name}</Typography>
       </Breadcrumbs>
 
-      <Section title={product?.name} subtitle={excerpt} titleVariant='h3' maxWidth='xl' disableGutters>
+      <Section
+        title={`${product?.brand?.name} ${product?.name}`}
+        subtitle={excerpt}
+        titleVariant='h3'
+        maxWidth='xl'
+        disableGutters
+      >
         {isLoading ? (
           <Loading />
         ) : (

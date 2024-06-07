@@ -626,6 +626,7 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
     LEFT JOIN LATERAL (
       SELECT ac.ancestors, ac.depth FROM ac
       WHERE ac.id = p.category_id
+      ORDER BY ac.depth DESC
     ) AS ac ON true
     LEFT JOIN LATERAL(
       SELECT JSONB_AGG(pm.*) AS media
