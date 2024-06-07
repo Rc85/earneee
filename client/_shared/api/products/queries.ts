@@ -106,7 +106,7 @@ export const retrieveProducts = (options?: {
     queryFn: async () => {
       const { data } = await axios({
         method: 'get',
-        url: '/v1/product',
+        url: '/v1/auth/admin/product',
         params: options,
         withCredentials: true
       });

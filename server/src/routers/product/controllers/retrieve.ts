@@ -36,71 +36,41 @@ export const retrieveProducts = async (req: Request, resp: Response, next: NextF
   const products = await database.retrieve<ProductsInterface[]>(
     `WITH
     c AS (
-      SELECT
-        id,
-        name,
-        parent_id
-      FROM categories AS c
+      SELECT * FROM categories AS c
+    ),
+    pd AS (
+      SELECT * FROM product_discounts AS pd
+      WHERE  pd.starts_at <= NOW()
     ),
     a AS (
-      SELECT
-        a.id,
-        a.name
-      FROM affiliates AS a
+      SELECT * FROM affiliates AS a
     ),
     pu AS (
       SELECT
-        pu.id,
-        pu.url,
-        pu.country,
-        pu.price,
-        pu.currency,
-        pu.product_id,
-        pu.type,
-        pu.affiliate_id,
-        a.affiliate
+        pu.*,
+        a.affiliate,
+        COALESCE(pd.discounts, '[]') AS discounts
       FROM product_urls AS pu
       LEFT JOIN LATERAL (
         SELECT TO_JSONB(a.*) AS affiliate
         FROM a
         WHERE a.id = pu.affiliate_id
       ) AS a ON true
+      LEFT JOIN LATERAL (
+        SELECT JSONB_AGG(pd.*) AS discounts
+        FROM pd
+        WHERE pd.product_url_id = pu.id
+      ) AS pd ON true
     ),
     pb AS (
-      SELECT
-        pb.id,
-        pb.name,
-        pb.url
-      FROM product_brands AS pb
+      SELECT * FROM product_brands AS pb
     ),
     pr AS (
-      SELECT
-        p.id,
-        p.name,
-        p.description,
-        p.category_id,
-        p.excerpt,
-        p.about,
-        p.details,
-        p.status,
-        p.brand_id,
-        p.parent_id,
-        p.featured
-      FROM products AS p
+      SELECT *FROM products AS p
     )
     
     SELECT
-      p.id,
-      p.name,
-      p.description,
-      p.category_id,
-      p.excerpt,
-      p.about,
-      p.details,
-      p.status,
-      p.brand_id,
-      p.parent_id,
-      p.featured,
+      p.*,
       pr.product,
       pb.brand,
       c.category,
@@ -204,6 +174,19 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
       c.parent_id
     FROM categories AS c
     JOIN p ON p.id = c.parent_id
+  ),
+  pd AS (
+    SELECT
+      pd.id,
+      pd.amount,
+      pd.amount_type,
+      pd.product_url_id,
+      pd.limited_time_only,
+      pd.status
+    FROM product_discounts AS pd
+    WHERE pd.status = 'active'
+    AND pd.starts_at <= NOW()
+    AND (pd.ends_at IS NULL OR pd.ends_at > NOW())
   ),
   pm AS (
     SELECT
@@ -406,6 +389,19 @@ export const retrieveProductShowcase = async (req: Request, resp: Response, next
 
   const products = await database.retrieve<ProductsInterface[]>(
     `WITH
+    pd AS (
+      SELECT
+        pd.id,
+        pd.amount,
+        pd.amount_type,
+        pd.product_url_id,
+        pd.limited_time_only,
+        pd.status
+      FROM product_discounts AS pd
+      WHERE pd.status = 'active'
+      AND pd.starts_at <= NOW()
+      AND (pd.ends_at IS NULL OR pd.ends_at > NOW())
+    ),
     pm AS (
       SELECT
         pm.id,
@@ -464,12 +460,12 @@ export const retrieveProductShowcase = async (req: Request, resp: Response, next
       SELECT JSONB_AGG(pm.*) AS media
       FROM pm
       WHERE pm.product_id = p.id
-    ) AS pm ON TRUE
+    ) AS pm ON true
     LEFT JOIN LATERAL (
       SELECT JSONB_AGG(pu.*) AS urls
       FROM pu
       WHERE pu.product_id = p.id
-    ) AS pu ON TRUE`,
+    ) AS pu ON true`,
     {
       where: where.join(' AND '),
       params: [country],

@@ -3,9 +3,10 @@ export interface ProductDiscountsInterface {
   amount: number;
   amountType: string;
   status: string;
-  productId: string;
+  productUrlId: string;
   startsAt: string | null;
   endsAt: string | null;
+  limitedTimeOnly: boolean;
   createdAt: string;
   updatedAt: string | null;
 }

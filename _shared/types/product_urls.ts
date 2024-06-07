@@ -1,4 +1,5 @@
 import { AffiliatesInterface } from './affiliates';
+import { ProductDiscountsInterface } from './product_discounts';
 
 export interface ProductUrlsInterface {
   id: string;
@@ -13,4 +14,5 @@ export interface ProductUrlsInterface {
   createdAt: string;
   updatedAt: string | null;
   affiliate?: AffiliatesInterface;
+  discounts?: ProductDiscountsInterface[];
 }

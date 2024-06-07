@@ -4,7 +4,7 @@ import * as controllers from './controllers';
 
 const router = Router();
 
-router.get('/v1/product', dbConnect, middleware(controllers.retrieveProducts), response);
+router.get('/v1/auth/admin/product', dbConnect, middleware(controllers.retrieveProducts), response);
 
 router.post(
   '/v1/auth/admin/product',

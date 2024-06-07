@@ -1,49 +1,29 @@
-import { Box, TextField } from '@mui/material';
+import { Box, Checkbox, FormControlLabel, InputAdornment, TextField } from '@mui/material';
 import { ProductDiscountsInterface } from '../../../../../_shared/types';
 import { Modal } from '../../../../_shared/components';
 import { FormEvent, useEffect, useState } from 'react';
-import { useSnackbar } from 'notistack';
-import { useCreateProductDiscount } from '../../../../_shared/api';
-import { useParams } from 'react-router-dom';
 import dayjs from 'dayjs';
+import { generateKey } from '../../../../../_shared/utils';
 
 interface Props {
   cancel: () => void;
+  submit: (discount: ProductDiscountsInterface) => void;
   discount?: ProductDiscountsInterface;
 }
 
-const CreateDiscounts = ({ cancel, discount }: Props) => {
-  const [status, setStatus] = useState('');
-  const params = useParams();
-  const { id, productId } = params;
+const CreateDiscount = ({ submit, cancel, discount }: Props) => {
   const [form, setForm] = useState<ProductDiscountsInterface>({
-    id: '',
+    id: generateKey(1),
     amount: 0,
     amountType: 'fixed',
-    productId: productId || id!,
-    startsAt: null,
-    endsAt: '',
+    productUrlId: '',
+    startsAt: dayjs().format('YYYY-MM-DD'),
+    endsAt: null,
     createdAt: '',
     updatedAt: '',
+    limitedTimeOnly: false,
     status: 'active'
   });
-  const { enqueueSnackbar } = useSnackbar();
-
-  const handleSuccess = () => {
-    enqueueSnackbar(discount ? 'Discount updated' : 'Discount created', { variant: 'success' });
-
-    cancel();
-  };
-
-  const handleError = (err: any) => {
-    if (err.response.data.statusText) {
-      enqueueSnackbar(err.response.data.statusText, { variant: 'error' });
-    }
-
-    setStatus('');
-  };
-
-  const createDiscount = useCreateProductDiscount(handleSuccess, handleError);
 
   useEffect(() => {
     if (discount) {
@@ -54,9 +34,7 @@ const CreateDiscounts = ({ cancel, discount }: Props) => {
   const handleSubmit = (e?: FormEvent) => {
     e?.preventDefault();
 
-    setStatus('Loading');
-
-    createDiscount.mutate(form);
+    submit(form);
   };
 
   return (
@@ -67,7 +45,6 @@ const CreateDiscounts = ({ cancel, discount }: Props) => {
       submit={handleSubmit}
       disableBackdropClick
       component='form'
-      loading={status === 'Loading'}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.25 }}>
         <TextField
@@ -78,8 +55,10 @@ const CreateDiscounts = ({ cancel, discount }: Props) => {
           onChange={(e) => setForm({ ...form, amount: e.target.value as unknown as number })}
           value={form.amount}
           InputProps={{
-            startAdornment: form.amountType === 'fixed' ? '$' : undefined,
-            endAdornment: form.amountType === 'percentage' ? '%' : undefined
+            startAdornment:
+              form.amountType === 'fixed' ? <InputAdornment position='start'>$</InputAdornment> : undefined,
+            endAdornment:
+              form.amountType === 'percentage' ? <InputAdornment position='end'>%</InputAdornment> : undefined
           }}
           sx={{ width: '75%', mr: 1, mb: '0 !important' }}
         />
@@ -98,6 +77,14 @@ const CreateDiscounts = ({ cancel, discount }: Props) => {
         </TextField>
       </Box>
 
+      <FormControlLabel
+        label='Limited Time Only'
+        checked={form.limitedTimeOnly}
+        onChange={() => setForm({ ...form, limitedTimeOnly: !form.limitedTimeOnly })}
+        control={<Checkbox color='info' />}
+        sx={{ mb: 1.25 }}
+      />
+
       <TextField
         type='date'
         label='Starts At'
@@ -106,15 +93,17 @@ const CreateDiscounts = ({ cancel, discount }: Props) => {
         InputLabelProps={{ shrink: true }}
       />
 
-      <TextField
-        type='date'
-        label='Ends At'
-        value={dayjs(form.endsAt).format('YYYY-MM-DD')}
-        onChange={(e) => setForm({ ...form, endsAt: e.target.value })}
-        InputLabelProps={{ shrink: true }}
-      />
+      {!form.limitedTimeOnly && (
+        <TextField
+          type='date'
+          label='Ends At'
+          value={dayjs(form.endsAt).format('YYYY-MM-DD')}
+          onChange={(e) => setForm({ ...form, endsAt: e.target.value })}
+          InputLabelProps={{ shrink: true }}
+        />
+      )}
     </Modal>
   );
 };
 
-export default CreateDiscounts;
+export default CreateDiscount;

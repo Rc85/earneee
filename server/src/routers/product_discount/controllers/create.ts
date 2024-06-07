@@ -5,11 +5,11 @@ import { generateKey } from '../../../../../_shared/utils';
 export const createProductDiscount = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
   const { discount } = req.body;
-  const { id, amount, amountType, productId, status, startsAt, endsAt } = discount;
+  const { id, amount, amountType, productId, status, startsAt, endsAt, limitedTimeOnly } = discount;
 
   await database.create(
     'product_discounts',
-    ['id', 'amount', 'amount_type', 'product_id', 'status', 'starts_at', 'ends_at'],
+    ['id', 'amount', 'amount_type', 'product_id', 'status', 'starts_at', 'ends_at', 'limited_time_only'],
     [
       id || generateKey(1),
       amount || 0,
@@ -17,7 +17,8 @@ export const createProductDiscount = async (req: Request, resp: Response, next: 
       productId,
       status || 'active',
       startsAt || null,
-      endsAt || null
+      endsAt || null,
+      Boolean(limitedTimeOnly)
     ],
     {
       conflict: {
@@ -30,6 +31,7 @@ export const createProductDiscount = async (req: Request, resp: Response, next: 
           status = EXCLUDED.status,
           starts_at = EXCLUDED.starts_at,
           ends_at = EXCLUDED.ends_at,
+          limited_time_only = EXCLUDED.limited_time_only,
           updated_at = now()`
       },
       client

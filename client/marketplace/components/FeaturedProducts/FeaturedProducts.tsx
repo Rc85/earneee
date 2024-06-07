@@ -146,6 +146,39 @@ const FeaturedProducts = () => {
                 const media = product?.media?.[0];
                 const mediaUrl = media?.url;
                 const affiliateName = urls[0]?.affiliate?.name;
+                const discountTexts = [];
+                const totalFixedDiscount = (
+                  product.discounts?.filter((discount) => discount.amountType === 'fixed') || []
+                )
+                  .map((discount) => discount.amount)
+                  .reduce((acc, amount) => acc + amount, 0);
+                const totalPercentageDiscount = (
+                  product.discounts?.filter((discount) => discount.amountType === 'percentage') || []
+                )
+                  .map((discount) => discount.amount)
+                  .reduce((acc, amount) => acc + amount, 0);
+
+                const discountedLowestPrice =
+                  lowestPrice -
+                  totalFixedDiscount -
+                  (lowestPrice - totalFixedDiscount) * (totalPercentageDiscount / 100);
+
+                const discountedHighestPrice =
+                  highestPrice -
+                  totalFixedDiscount -
+                  (highestPrice - totalFixedDiscount) * (totalPercentageDiscount / 100);
+
+                if (product.discounts) {
+                  for (const discount of product.discounts) {
+                    if (discount.amountType === 'percentage') {
+                      discountTexts.push(`${discount.amount}% off`);
+                    }
+
+                    if (discount.amountType === 'fixed') {
+                      discountTexts.push(`$${discount.amount} off`);
+                    }
+                  }
+                }
 
                 return (
                   <Box
@@ -201,10 +234,25 @@ const FeaturedProducts = () => {
 
                       <Box sx={{ ml: 1, flexShrink: 0 }}>
                         <Typography sx={{ mb: 0, textAlign: 'center' }} color='white' variant='h4'>
-                          {`$${lowestPrice.toFixed(2)}${
-                            highestPrice ? ` - $${highestPrice.toFixed(2)}` : ''
-                          } ${currency.toUpperCase()}`}
+                          ${discountedLowestPrice.toFixed(2)}
+                          {discountedHighestPrice ? ` - $${discountedHighestPrice.toFixed(2)}` : ''}{' '}
+                          {currency.toUpperCase()}
                         </Typography>
+
+                        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                          {discountTexts.length > 0 && (
+                            <Typography variant='body2' color='red' sx={{ textAlign: 'center' }}>
+                              {discountTexts.join(', ')}
+                            </Typography>
+                          )}
+
+                          {lowestPrice !== discountedLowestPrice && (
+                            <Typography variant='body2' sx={{ textAlign: 'center', ml: 1 }} color='GrayText'>
+                              Was ${lowestPrice.toFixed(2)}
+                              {highestPrice ? ` - ${highestPrice.toFixed(2)}` : ''}
+                            </Typography>
+                          )}
+                        </Box>
 
                         {Boolean(affiliateName) && (
                           <Typography variant='body2' color='white' sx={{ textAlign: 'center' }}>

@@ -20,10 +20,10 @@ exports.up = (pgm) => {
         notNull: true,
         default: 'fixed'
       },
-      product_id: {
+      product_url_id: {
         type: 'varchar',
         notNull: true,
-        references: 'products (id)',
+        references: 'product_urls (id)',
         onUpdate: 'cascade',
         onDelete: 'cascade'
       },
@@ -37,6 +37,11 @@ exports.up = (pgm) => {
       },
       ends_at: {
         type: 'timestamptz'
+      },
+      limited_time_only: {
+        type: 'boolean',
+        default: false,
+        notNull: true
       },
       created_at: {
         type: 'timestamptz',

@@ -13,6 +13,7 @@ interface Props {
 
 const UrlRow = ({ url, onDelete, submit }: Props) => {
   const [status, setStatus] = useState('');
+  const discounts = url.discounts?.filter((discount) => discount.status !== 'deleted') || [];
 
   const handleSubmit = (url: ProductUrlsInterface) => {
     submit(url);
@@ -29,6 +30,8 @@ const UrlRow = ({ url, onDelete, submit }: Props) => {
           primary={url.url}
           secondary={`${url.country} \u2022 $${url.price} ${url.currency.toUpperCase()}${
             url.affiliate ? ` \u2022 ${url.affiliate.name}` : ''
+          }${
+            discounts.length ? ` \u2022 ${discounts.length} discount${discounts.length > 1 ? 's' : ''}` : ''
           }`}
           primaryTypographyProps={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
         />

@@ -134,6 +134,53 @@ export const createProduct = async (req: Request, resp: Response, next: NextFunc
           client
         }
       );
+
+      if (url.discounts) {
+        for (const discount of url.discounts) {
+          if (discount.status === 'deleted') {
+            await database.delete('product_discounts', { where: 'id = $1', params: [discount.id], client });
+          } else {
+            await database.create(
+              'product_discounts',
+              [
+                'id',
+                'amount',
+                'amount_type',
+                'product_url_id',
+                'starts_at',
+                'ends_at',
+                'status',
+                'limited_time_only'
+              ],
+              [
+                discount.id,
+                discount.amount,
+                discount.amountType,
+                url.id,
+                discount.startsAt,
+                discount.endsAt,
+                discount.status,
+                discount.limitedTimeOnly
+              ],
+              {
+                conflict: {
+                  columns: 'id',
+                  do: `UPDATE SET
+                    amount = EXCLUDED.amount,
+                    amount_type = EXCLUDED.amount_type,
+                    product_url_id = EXCLUDED.product_url_id,
+                    starts_at = EXCLUDED.starts_at,
+                    ends_at = EXCLUDED.ends_at,
+                    status = EXCLUDED.status,
+                    limited_time_only = EXCLUDED.limited_time_only,
+                    updated_at = NOW()`
+                },
+                client
+              }
+            );
+          }
+        }
+      }
     }
   }
 

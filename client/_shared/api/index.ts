@@ -69,5 +69,3 @@ export * from './products/brands/queries';
 export * from './products/media/queries';
 export * from './products/specifications/queries';
 export * from './products/options/queries';
-export * from './products/discounts/mutations';
-export * from './products/discounts/queries';

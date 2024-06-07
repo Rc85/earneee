@@ -110,15 +110,6 @@ const App = () => {
                       />
 
                       <Route
-                        path='/product/:id/discounts'
-                        element={
-                          <AuthenticatedRoute>
-                            <Pages.Product.Discounts />
-                          </AuthenticatedRoute>
-                        }
-                      />
-
-                      <Route
                         path='/product/:id/specifications'
                         element={
                           <AuthenticatedRoute>

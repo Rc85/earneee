@@ -19,7 +19,6 @@ import {
   mdiInformation,
   mdiPencil,
   mdiPlusBox,
-  mdiTag,
   mdiViewGridPlus
 } from '@mdi/js';
 import EditProduct from './EditProduct';
@@ -32,7 +31,6 @@ import Media from './Media';
 import Specifications from './Specifications';
 import Details from './Details';
 import Options from './Options';
-import Discounts from './Discounts';
 
 const Product = () => {
   const navigate = useNavigate();
@@ -107,18 +105,6 @@ const Product = () => {
 
           <ListItem disablePadding disableGutters>
             <ListItemButton
-              onClick={() => navigate(`/product/${id}${productId ? `/variant/${productId}` : ''}/discounts`)}
-            >
-              <ListItemIcon>
-                <Icon path={mdiTag} size={1} />
-              </ListItemIcon>
-
-              <ListItemText primary='Discounts' />
-            </ListItemButton>
-          </ListItem>
-
-          <ListItem disablePadding disableGutters>
-            <ListItemButton
               onClick={() => navigate(`/product/${id}${productId ? `/variant/${productId}` : ''}/media`)}
             >
               <ListItemIcon>
@@ -182,6 +168,5 @@ Product.Media = Media;
 Product.Specifications = Specifications;
 Product.Details = Details;
 Product.Options = Options;
-Product.Discounts = Discounts;
 
 export default Product;

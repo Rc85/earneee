@@ -45,6 +45,17 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
       FROM categories AS c
       JOIN pc ON pc.id = c.parent_id
     ),
+    pd AS (
+      SELECT
+        pd.id,
+        pd.amount,
+        pd.amount_type,
+        pd.product_id
+      FROM product_discounts AS pd
+      WHERE pd.status = 'active'
+      AND pd.starts_at <= NOW()
+      AND (pd.ends_at IS NULL OR pd.ends_at > NOW())
+    ),
     pb AS (
       SELECT
         b.id,
@@ -80,7 +91,7 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
         FROM a
         WHERE a.id = pu.affiliate_id
       ) AS a ON true
-      WHERE LOWER(pu.country) = LOWER($1)
+      WHERE pu.country = $1
     )
     
     SELECT
@@ -89,6 +100,7 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
       p.excerpt,
       p.category_id,
       pb.brand,
+      pd.discount,
       COALESCE(pm.media, '[]'::JSONB) AS media,
       COALESCE(pu.urls, '[]'::JSONB) AS urls
     FROM products AS p
@@ -106,11 +118,16 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
       SELECT TO_JSONB(pb.*) AS brand
       FROM pb
       WHERE pb.id = p.brand_id
-    ) AS pb ON true`,
+    ) AS pb ON true
+    LEFT JOIN LATERAL (
+      SELECT TO_JSONB(pd.*) AS discount
+      FROM pd
+      WHERE pd.product_id = p.id
+    ) AS pd ON true`,
     {
       where: where.join(' AND '),
       params,
-      orderBy: `WORD_SIMILARITY(p.name, $1) DESC`,
+      orderBy: `WORD_SIMILARITY(p.name, $2) DESC`,
       offset,
       limit: '20',
       client
@@ -125,6 +142,16 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
         b.name,
         b.logo_url
       FROM product_brands AS b
+    ),
+    pu AS (
+      SELECT
+        pu.url,
+        pu.price,
+        pu.currency,
+        pu.product_id,
+        pu.type
+      FROM product_urls AS pu
+      WHERE pu.country = $1
     )
     
     SELECT
