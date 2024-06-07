@@ -35,6 +35,21 @@ const Product = ({ params: { id } }: Props) => {
   const details = selectedVariant?.details || product?.details;
   const description = selectedVariant?.description || product?.description;
   const specifications: { name: string; value: string[] }[] = [];
+  const price = product?.url?.price || 0;
+  const currency = product?.url?.currency || 'CAD';
+  const discount = product?.url?.discount;
+
+  let discountAmount = 0;
+
+  if (discount) {
+    if (discount.amountType === 'fixed') {
+      discountAmount = discount.amount;
+    } else if (discount.amountType === 'percentage') {
+      discountAmount = price * (discount.amount / 100);
+    }
+  }
+
+  const finalPrice = price - discountAmount;
 
   useEffect(() => {
     if (product?.variants?.[0]) {
@@ -201,51 +216,76 @@ const Product = ({ params: { id } }: Props) => {
               {selectedVariant?.status === 'available' && (
                 <>
                   {/* options.map((option) => (
-                    <Box key={option.id}>
-                      <Typography variant='h6'>
-                        {option.name} {option.required && <Typography color='red'>Required</Typography>}
-                      </Typography>
+                      <Box key={option.id}>
+                        <Typography variant='h6'>
+                          {option.name} {option.required && <Typography color='red'>Required</Typography>}
+                        </Typography>
 
-                      {option.selections?.map((selection) => (
-                        <FormControlLabel
-                          key={selection.id}
-                          label={
-                            <ListItemText
-                              primary={selection.name}
-                              secondary={`+$${selection.price?.toFixed(
-                                2
-                              )} ${selectedVariant.currency?.toUpperCase()}`}
-                            />
-                          }
-                          control={<Checkbox color='info' />}
-                          onChange={(e) => {
-                            
-                          }}
-                        />
-                      ))}
-                    </Box>
-                  )) */}
-
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <Typography variant='h6' sx={{ ml: 1 }}>
-                      ${(selectedVariant.urls?.[0]?.price || 0).toFixed(2)}{' '}
-                      {selectedVariant.urls?.[0]?.currency?.toUpperCase()}
-                    </Typography>
-
-                    <Button
-                      variant='contained'
-                      onClick={() => {
-                        /* TODO */
-                      }}
-                    >
-                      Buy Now
-                    </Button>
-                  </Box>
+                        {option.selections?.map((selection) => (
+                          <FormControlLabel
+                            key={selection.id}
+                            label={
+                              <ListItemText
+                                primary={selection.name}
+                                secondary={`+$${selection.price?.toFixed(
+                                  2
+                                )} ${selectedVariant.currency?.toUpperCase()}`}
+                              />
+                            }
+                            control={<Checkbox color='info' />}
+                            onChange={(e) => {
+                              
+                            }}
+                          />
+                        ))}
+                      </Box>
+                    )) */}
                 </>
               )}
 
-              <Box sx={{ mt: 3 }}>
-                {Boolean(selectedVariant?.excerpt) && <Typography>{selectedVariant?.excerpt}</Typography>}
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box>
+                  <Typography variant='h6' sx={{ mb: 0 }}>
+                    ${finalPrice.toFixed(2)} {currency.toUpperCase()}
+                  </Typography>
+
+                  <Box sx={{ display: 'flex' }}>
+                    {discount && (
+                      <Typography variant='body2' color='red'>
+                        {discount.amountType === 'fixed'
+                          ? `$${discount.amount.toFixed(2)} off`
+                          : `${discount.amount}% off`}
+                      </Typography>
+                    )}
+
+                    {price !== finalPrice && (
+                      <Typography variant='body2' sx={{ ml: 1 }} color='GrayText'>
+                        Was ${price.toFixed(2)}
+                      </Typography>
+                    )}
+                  </Box>
+
+                  {product?.url?.affiliate && (
+                    <Typography variant='body2'>Sold on {product.url.affiliate.name}</Typography>
+                  )}
+                </Box>
+
+                <Button
+                  variant='contained'
+                  onClick={() => {
+                    /* TODO */
+                  }}
+                >
+                  Buy Now
+                </Button>
+              </Box>
+
+              <Divider sx={{ my: 2 }} />
+
+              <Box>
+                {Boolean(selectedVariant?.excerpt) && (
+                  <Typography sx={{ mb: 2 }}>{selectedVariant?.excerpt}</Typography>
+                )}
 
                 {Boolean(selectedVariant?.about || product?.about) && (
                   <>

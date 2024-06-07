@@ -19,19 +19,7 @@ const Search = () => {
   const router = useRouter();
 
   const handleProductClick = (product: ProductsInterface) => {
-    const urls = product.urls?.[0];
-
-    if (urls?.type === 'affiliate') {
-      if (urls) {
-        const { url } = urls;
-
-        if (url) {
-          window.open(url, '_blank', 'noopener, noreferrer');
-        }
-      }
-    } else {
-      router.push(`/product/${product.id}`);
-    }
+    router.push(`/product/${product.id}`);
   };
 
   return (

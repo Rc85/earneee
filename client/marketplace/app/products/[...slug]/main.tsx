@@ -117,19 +117,7 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
   };
 
   const handleProductClick = (product: ProductsInterface) => {
-    const urls = product.urls?.[0];
-
-    if (urls?.type === 'affiliate') {
-      if (urls) {
-        const { url } = urls;
-
-        if (url) {
-          window.open(url, '_blank', 'noopener, noreferrer');
-        }
-      }
-    } else {
-      router.push(`/product/${product.id}`);
-    }
+    router.push(`/product/${product.id}`);
   };
 
   return (
@@ -434,14 +422,21 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
                 <List disablePadding>
                   {products?.map((product) => {
                     const mediaUrl = product.media?.[0]?.url;
-                    const urls = product.urls || [];
+                    const price = product.url?.price || 0;
+                    const currency = product.url?.currency || 'CAD';
+                    const discount = product.url?.discount;
 
-                    urls.sort((a, b) => (a.price < b.price ? -1 : 1));
+                    let discountAmount = 0;
 
-                    const lowestPrice = urls[0]?.price || 0;
-                    const highestPrice = urls.length > 1 ? urls[urls.length - 1]?.price : 0;
-                    const currency = urls[0]?.currency || 'cad';
-                    const affiliateName = urls[0]?.affiliate?.name;
+                    if (discount) {
+                      if (discount.amountType === 'fixed') {
+                        discountAmount = discount.amount;
+                      } else if (discount.amountType === 'percentage') {
+                        discountAmount = price * (discount.amount / 100);
+                      }
+                    }
+
+                    const finalPrice = price - discountAmount;
 
                     return (
                       <ListItem key={product.id} disableGutters divider>
@@ -493,12 +488,31 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
                           }}
                         >
                           <Typography variant='h6' sx={{ mb: 0 }}>
-                            ${lowestPrice.toFixed(2)}
-                            {highestPrice ? ` - $${highestPrice.toFixed(2)}` : ''} {currency.toUpperCase()}
+                            ${finalPrice.toFixed(2)} {currency.toUpperCase()}
                           </Typography>
 
-                          {Boolean(affiliateName) && (
-                            <Typography variant='body2'>Sold on {affiliateName}</Typography>
+                          <Box sx={{ display: 'flex' }}>
+                            {discount && (
+                              <Typography variant='body2' color='red' sx={{ textAlign: 'center' }}>
+                                {discount.amountType === 'fixed'
+                                  ? `$${discount.amount.toFixed(2)} off`
+                                  : `${discount.amount}% off`}
+                              </Typography>
+                            )}
+
+                            {price !== finalPrice && (
+                              <Typography
+                                variant='body2'
+                                sx={{ textAlign: 'center', ml: 1 }}
+                                color='GrayText'
+                              >
+                                Was ${price.toFixed(2)}
+                              </Typography>
+                            )}
+                          </Box>
+
+                          {product.url?.affiliate && (
+                            <Typography variant='body2'>Sold on {product.url.affiliate.name}</Typography>
                           )}
                         </Box>
                       </ListItem>

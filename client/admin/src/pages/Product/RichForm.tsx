@@ -6,7 +6,7 @@ import { useEditor } from '@tiptap/react';
 import { useSnackbar } from 'notistack';
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { ProductsInterface, ProductVariantsInterface } from '../../../../../_shared/types';
+import { ProductsInterface } from '../../../../../_shared/types';
 import { generateKey, deepEqual } from '../../../../../_shared/utils';
 import { retrieveProducts, useCreateProduct } from '../../../../_shared/api';
 import { RichTextEditor } from '../../../../_shared/components';
@@ -40,10 +40,10 @@ const RichForm = ({ field }: Props) => {
     createdAt: '',
     updatedAt: ''
   };
-  const [initialState, setInitialState] = useState<ProductVariantsInterface | ProductsInterface>({
+  const [initialState, setInitialState] = useState<ProductsInterface>({
     ...initialProduct
   });
-  const [form, setForm] = useState<ProductVariantsInterface | ProductsInterface>({ ...initialProduct });
+  const [form, setForm] = useState<ProductsInterface>({ ...initialProduct });
   const [status, setStatus] = useState('');
   const { enqueueSnackbar } = useSnackbar();
 

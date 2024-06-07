@@ -492,7 +492,7 @@ export const retrieveProductShowcase = async (req: Request, resp: Response, next
 
 export const retrieveMarketplaceProduct = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
-  const { productId } = req.query;
+  const { productId, country } = req.query;
 
   const product = await database.retrieve<ProductUrlsInterface[]>(
     `WITH
@@ -506,7 +506,47 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
       LEFT JOIN specifications AS s
       ON s.id = ps.specification_id
     ),
-    
+    pd AS (
+      SELECT
+        pd.id,
+        pd.amount,
+        pd.amount_type,
+        pd.product_url_id,
+        pd.limited_time_only
+      FROM product_discounts AS pd
+      WHERE pd.status = 'active'
+      AND pd.starts_at <= NOW()
+      AND (pd.ends_at IS NULL OR pd.ends_at > NOW())
+    ),
+    a AS (
+      SELECT
+        a.id,
+        a.name
+      FROM affiliates AS a
+    ),
+    pu AS (
+      SELECT
+        pu.url,
+        pu.price,
+        pu.currency,
+        pu.product_id,
+        pu.type,
+        a.affiliate,
+        pd.discount
+      FROM product_urls AS pu
+      LEFT JOIN LATERAL (
+        SELECT TO_JSONB(a.*) AS affiliate
+        FROM a
+        WHERE a.id = pu.affiliate_id
+      ) AS a ON true
+      LEFT JOIN LATERAL (
+        SELECT TO_JSONB(pd.*) AS discount
+        FROM pd
+        WHERE pd.product_url_id = pu.id
+      ) AS pd ON true
+      WHERE LOWER(pu.country) = LOWER($1)
+      ORDER BY pu.created_at
+    ),
     pm AS (
       SELECT
         pm.id,
@@ -535,6 +575,7 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
         pr.excerpt,
         pr.details,
         pr.about,
+        pr.status,
         COALESCE(ps.specifications, '[]'::JSONB) AS specifications,
         COALESCE(pm.media, '[]'::JSONB) AS media
       FROM products AS pr
@@ -560,6 +601,7 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
       p.details,
       p.about,
       pb.brand,
+      pu.url,
       COALESCE(pr.variants, '[]'::JSONB) AS variants,
       COALESCE(ps.specifications, '[]'::JSONB) AS specifications,
       COALESCE(pm.media, '[]'::JSONB) AS media
@@ -583,10 +625,15 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
       SELECT TO_JSONB(pb.*) AS brand
       FROM pb
       WHERE pb.id = p.brand_id
-    ) AS pb ON true`,
+    ) AS pb ON true
+    LEFT JOIN LATERAL (
+      SELECT TO_JSONB(pu.*) AS url
+      FROM pu
+      WHERE pu.product_id = p.id
+    ) AS pu ON true`,
     {
-      where: `p.id = $1`,
-      params: [productId],
+      where: `p.id = $2`,
+      params: [country, productId],
       client
     }
   );

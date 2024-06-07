@@ -1,7 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
 import { HttpException, validations } from '../../../utils';
-import DOMPurify from 'dompurify';
-import { JSDOM } from 'jsdom';
 import { database } from '../../../middlewares';
 import {
   CategoriesInterface,
@@ -13,8 +11,6 @@ import {
 import dayjs from 'dayjs';
 
 export const validateCreateProduct = async (req: Request, resp: Response, next: NextFunction) => {
-  const window = new JSDOM('').window;
-  const purify = DOMPurify(window);
   const { product, brand }: { product: ProductsInterface; brand: ProductBrandsInterface } = req.body;
   const { client } = resp.locals;
 
@@ -65,14 +61,6 @@ export const validateCreateProduct = async (req: Request, resp: Response, next: 
     if (exists.length) {
       return next(new HttpException(400, `A same brand and owner already exists`));
     }
-  }
-
-  if (product.about) {
-    product.about = purify.sanitize(product.about);
-  }
-
-  if (product.details) {
-    product.details = purify.sanitize(product.details);
   }
 
   const { name, excerpt, categoryId, brandId, description, about, details, urls } = product;
