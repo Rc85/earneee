@@ -15,4 +15,5 @@ export interface ProductUrlsInterface {
   updatedAt: string | null;
   affiliate?: AffiliatesInterface;
   discounts?: ProductDiscountsInterface[];
+  discount?: ProductDiscountsInterface;
 }

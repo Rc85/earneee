@@ -181,8 +181,7 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
       pd.amount,
       pd.amount_type,
       pd.product_url_id,
-      pd.limited_time_only,
-      pd.status
+      pd.limited_time_only
     FROM product_discounts AS pd
     WHERE pd.status = 'active'
     AND pd.starts_at <= NOW()
@@ -213,13 +212,19 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
       pu.price,
       pu.currency,
       pu.type,
-      a.affiliate
+      a.affiliate,
+      pd.discount
     FROM product_urls AS pu
     LEFT JOIN LATERAL (
       SELECT TO_JSONB(a.*) AS affiliate
       FROM a
       WHERE a.id = pu.affiliate_id
     ) AS a ON true
+    LEFT JOIN LATERAL (
+      SELECT TO_JSONB(pd.*) AS discount
+      FROM pd
+      WHERE pd.product_url_id = pu.id
+    ) AS pd ON true
     WHERE LOWER(pu.country) = LOWER($1)
     ORDER BY pu.price DESC
   ),
@@ -272,7 +277,7 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
     pr.excerpt,
     pr.status,
     pb.brand,
-    COALESCE(pu.urls, '[]'::JSONB) AS urls,
+    pu.url,
     COALESCE(pm.media, '[]'::JSONB) AS media,
     COALESCE(s.specifications, '[]'::JSONB) AS specifications
   FROM products AS pr
@@ -287,7 +292,7 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
     WHERE pm.product_id = pr.id
   ) AS pm ON true
   LEFT JOIN LATERAL (
-    SELECT JSONB_AGG(pu.*) AS urls
+    SELECT TO_JSONB(pu.*) AS url
     FROM pu
     WHERE pu.product_id = pr.id
   ) AS pu ON true
@@ -395,8 +400,7 @@ export const retrieveProductShowcase = async (req: Request, resp: Response, next
         pd.amount,
         pd.amount_type,
         pd.product_url_id,
-        pd.limited_time_only,
-        pd.status
+        pd.limited_time_only
       FROM product_discounts AS pd
       WHERE pd.status = 'active'
       AND pd.starts_at <= NOW()
@@ -425,13 +429,19 @@ export const retrieveProductShowcase = async (req: Request, resp: Response, next
         pu.currency,
         pu.product_id,
         pu.type,
-        a.affiliate
+        a.affiliate,
+        pd.discount
       FROM product_urls AS pu
       LEFT JOIN LATERAL (
         SELECT TO_JSONB(a.*) AS affiliate
         FROM a
         WHERE a.id = pu.affiliate_id
       ) AS a ON true
+      LEFT JOIN LATERAL (
+        SELECT TO_JSONB(pd.*) AS discount
+        FROM pd
+        WHERE pd.product_url_id = pu.id
+      ) AS pd ON true
       WHERE LOWER(pu.country) = LOWER($1)
       ORDER BY pu.created_at
     ),
@@ -448,8 +458,8 @@ export const retrieveProductShowcase = async (req: Request, resp: Response, next
       p.description,
       p.excerpt,
       pb.brand,
-      COALESCE(pm.media, '[]'::JSONB) AS media,
-      COALESCE(pu.urls, '[]'::JSONB) AS urls
+      pu.url,
+      COALESCE(pm.media, '[]'::JSONB) AS media
     FROM products AS p
     LEFT JOIN LATERAL (
       SELECT TO_JSONB(pb.*) AS brand
@@ -462,7 +472,7 @@ export const retrieveProductShowcase = async (req: Request, resp: Response, next
       WHERE pm.product_id = p.id
     ) AS pm ON true
     LEFT JOIN LATERAL (
-      SELECT JSONB_AGG(pu.*) AS urls
+      SELECT TO_JSONB(pu.*) AS url
       FROM pu
       WHERE pu.product_id = p.id
     ) AS pu ON true`,
@@ -496,6 +506,7 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
       LEFT JOIN specifications AS s
       ON s.id = ps.specification_id
     ),
+    
     pm AS (
       SELECT
         pm.id,
@@ -652,7 +663,7 @@ const filterByPrice = (
   filters: { minPrice: string | undefined; maxPrice: string | undefined }
 ) => {
   return products.filter((product) => {
-    const price = product.urls?.[0]?.price || 0;
+    const price = product.url?.price || 0;
 
     return (
       (!filters.maxPrice && filters.minPrice && price >= parseFloat(filters.minPrice)) ||

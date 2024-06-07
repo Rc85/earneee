@@ -50,7 +50,8 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
         pd.id,
         pd.amount,
         pd.amount_type,
-        pd.product_id
+        pd.product_url_id,
+        pd.limited_time_only
       FROM product_discounts AS pd
       WHERE pd.status = 'active'
       AND pd.starts_at <= NOW()
@@ -84,13 +85,19 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
         pu.currency,
         pu.product_id,
         pu.type,
-        a.affiliate
+        a.affiliate,
+        pd.discount
       FROM product_urls AS pu
       LEFT JOIN LATERAL (
         SELECT TO_JSONB(a.*) AS affiliate
         FROM a
         WHERE a.id = pu.affiliate_id
       ) AS a ON true
+      LEFT JOIN LATERAL (
+        SELECT TO_JSONB(pd.*) AS discount
+        FROM pd
+        WHERE pd.product_url_id = pu.id
+      ) AS pd ON true
       WHERE pu.country = $1
     )
     
@@ -100,9 +107,8 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
       p.excerpt,
       p.category_id,
       pb.brand,
-      pd.discount,
-      COALESCE(pm.media, '[]'::JSONB) AS media,
-      COALESCE(pu.urls, '[]'::JSONB) AS urls
+      pu.url,
+      COALESCE(pm.media, '[]'::JSONB) AS media
     FROM products AS p
     LEFT JOIN LATERAL (
       SELECT JSONB_AGG(pm.*) AS media
@@ -110,7 +116,7 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
       WHERE pm.product_id = p.id
     ) AS pm ON true
     LEFT JOIN LATERAL (
-      SELECT JSONB_AGG(pu.*) AS urls
+      SELECT TO_JSONB(pu.*) AS url
       FROM pu
       WHERE pu.product_id = p.id
     ) AS pu ON true
@@ -118,12 +124,7 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
       SELECT TO_JSONB(pb.*) AS brand
       FROM pb
       WHERE pb.id = p.brand_id
-    ) AS pb ON true
-    LEFT JOIN LATERAL (
-      SELECT TO_JSONB(pd.*) AS discount
-      FROM pd
-      WHERE pd.product_id = p.id
-    ) AS pd ON true`,
+    ) AS pb ON true`,
     {
       where: where.join(' AND '),
       params,

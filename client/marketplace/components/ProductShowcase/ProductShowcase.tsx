@@ -47,47 +47,21 @@ const ProductShowcase = ({ type }: Props) => {
           const mediaWidth = media?.width || 0;
           const mediaHeight = media?.height || 0;
           const excerpt = product.excerpt;
-          const urls = product?.urls || [];
+          const price = product.url?.price || 0;
+          const currency = product.url?.currency || 'CAD';
+          const discount = product.url?.discount;
 
-          urls.sort((a, b) => (a.price < b.price ? -1 : 1));
+          let discountAmount = 0;
 
-          const lowestPrice = urls[0]?.price || 0;
-          const highestPrice = urls.length > 1 ? urls[urls.length - 1]?.price : 0;
-          const currency = urls[0]?.currency || 'cad';
-          const affiliateName = urls[0]?.affiliate?.name;
-          const discountTexts = [];
-          const totalFixedDiscount = (
-            product.discounts?.filter((discount) => discount.amountType === 'fixed') || []
-          )
-            .map((discount) => discount.amount)
-            .reduce((acc, amount) => acc + amount, 0);
-          const totalPercentageDiscount = (
-            product.discounts?.filter((discount) => discount.amountType === 'percentage') || []
-          )
-            .map((discount) => discount.amount)
-            .reduce((acc, amount) => acc + amount, 0);
-
-          const discountedLowestPrice =
-            lowestPrice -
-            totalFixedDiscount -
-            (lowestPrice - totalFixedDiscount) * (totalPercentageDiscount / 100);
-
-          const discountedHighestPrice =
-            highestPrice -
-            totalFixedDiscount -
-            (highestPrice - totalFixedDiscount) * (totalPercentageDiscount / 100);
-
-          if (product.discounts) {
-            for (const discount of product.discounts) {
-              if (discount.amountType === 'percentage') {
-                discountTexts.push(`${discount.amount}% off`);
-              }
-
-              if (discount.amountType === 'fixed') {
-                discountTexts.push(`$${discount.amount} off`);
-              }
+          if (discount) {
+            if (discount.amountType === 'fixed') {
+              discountAmount = discount.amount;
+            } else if (discount.amountType === 'percentage') {
+              discountAmount = price * (discount.amount / 100);
             }
           }
+
+          const finalPrice = price - discountAmount;
 
           return (
             <Grid2 key={product.id} xs={12} sm={4}>
@@ -142,35 +116,34 @@ const ProductShowcase = ({ type }: Props) => {
 
                     <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                       <Typography variant='h6' sx={{ mb: 0 }}>
-                        ${discountedLowestPrice.toFixed(2)}
-                        {discountedHighestPrice ? ` - $${discountedHighestPrice.toFixed(2)}` : ''}{' '}
-                        {currency.toUpperCase()}
+                        ${finalPrice.toFixed(2)} {currency.toUpperCase()}
                       </Typography>
 
                       <Box sx={{ display: 'flex' }}>
-                        {discountTexts.length > 0 && (
+                        {discount && (
                           <Typography variant='body2' color='red' sx={{ textAlign: 'center' }}>
-                            {discountTexts.join(', ')}
+                            {discount.amountType === 'fixed'
+                              ? `$${discount.amount.toFixed(2)} off`
+                              : `${discount.amount}% off`}
                           </Typography>
                         )}
 
-                        {lowestPrice !== discountedLowestPrice && (
+                        {price !== finalPrice && (
                           <Typography variant='body2' sx={{ textAlign: 'center', ml: 1 }} color='GrayText'>
-                            Was ${lowestPrice.toFixed(2)}
-                            {highestPrice ? ` - ${highestPrice.toFixed(2)}` : ''}
+                            Was ${price.toFixed(2)}
                           </Typography>
                         )}
                       </Box>
                     </Box>
                   </Box>
 
-                  {Boolean(affiliateName) && (
+                  {product.url?.affiliate && (
                     <>
                       <Divider />
 
                       <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                         <Typography variant='body2' sx={{ textAlign: 'center' }}>
-                          Sold on {affiliateName}
+                          Sold on {product.url.affiliate.name}
                         </Typography>
                       </Box>
                     </>

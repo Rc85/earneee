@@ -25,6 +25,7 @@ export interface ProductsInterface {
   brand?: ProductBrandsInterface;
   specifications?: ProductSpecificationsInterface[];
   urls?: ProductUrlsInterface[];
+  url?: ProductUrlsInterface;
   product?: ProductsInterface;
   variants?: ProductsInterface[];
 }
