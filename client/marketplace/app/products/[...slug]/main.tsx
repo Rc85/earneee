@@ -378,7 +378,10 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
 
                             <Box sx={{ display: 'flex' }}>
                               {discount && (
-                                <Typography variant='body2' color='red' sx={{ textAlign: 'center' }}>
+                                <Typography
+                                  variant='body2'
+                                  sx={{ color: 'success.main', fontWeight: 500, textAlign: 'center' }}
+                                >
                                   {discount.amountType === 'fixed'
                                     ? `$${discount.amount.toFixed(2)} off`
                                     : `${discount.amount}% off`}
@@ -493,7 +496,10 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
 
                           <Box sx={{ display: 'flex' }}>
                             {discount && (
-                              <Typography variant='body2' color='red' sx={{ textAlign: 'center' }}>
+                              <Typography
+                                variant='body2'
+                                sx={{ color: 'success.main', fontWeight: 500, textAlign: 'center' }}
+                              >
                                 {discount.amountType === 'fixed'
                                   ? `$${discount.amount.toFixed(2)} off`
                                   : `${discount.amount}% off`}

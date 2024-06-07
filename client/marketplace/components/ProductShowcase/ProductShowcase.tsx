@@ -109,7 +109,10 @@ const ProductShowcase = ({ type }: Props) => {
 
                       <Box sx={{ display: 'flex' }}>
                         {discount && (
-                          <Typography variant='body2' color='red' sx={{ textAlign: 'center' }}>
+                          <Typography
+                            variant='body2'
+                            sx={{ textAlign: 'center', fontWeight: 500, color: 'success.main' }}
+                          >
                             {discount.amountType === 'fixed'
                               ? `$${discount.amount.toFixed(2)} off`
                               : `${discount.amount}% off`}

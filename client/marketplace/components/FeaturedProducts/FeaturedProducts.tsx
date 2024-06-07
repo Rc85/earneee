@@ -201,7 +201,10 @@ const FeaturedProducts = () => {
 
                         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                           {discount && (
-                            <Typography variant='body2' color='red' sx={{ textAlign: 'center' }}>
+                            <Typography
+                              variant='body2'
+                              sx={{ textAlign: 'center', fontWeight: 500, color: 'success.light' }}
+                            >
                               {discount.amountType === 'fixed'
                                 ? `$${discount.amount.toFixed(2)} off`
                                 : `${discount.amount}% off`}
@@ -209,7 +212,7 @@ const FeaturedProducts = () => {
                           )}
 
                           {price !== finalPrice && (
-                            <Typography variant='body2' sx={{ textAlign: 'center', ml: 1 }} color='GrayText'>
+                            <Typography variant='body2' sx={{ textAlign: 'center', ml: 1, color: grey[400] }}>
                               Was ${price.toFixed(2)}
                             </Typography>
                           )}

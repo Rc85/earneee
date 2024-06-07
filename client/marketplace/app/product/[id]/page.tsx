@@ -255,7 +255,7 @@ const Product = ({ params: { id } }: Props) => {
 
                   <Box sx={{ display: 'flex' }}>
                     {discount && (
-                      <Typography variant='body2' color='red'>
+                      <Typography variant='body2' sx={{ color: 'success.main', fontWeight: 500 }}>
                         {discount.amountType === 'fixed'
                           ? `$${discount.amount.toFixed(2)} off`
                           : `${discount.amount}% off`}
@@ -268,6 +268,12 @@ const Product = ({ params: { id } }: Props) => {
                       </Typography>
                     )}
                   </Box>
+
+                  {discount?.limitedTimeOnly && (
+                    <Typography variant='caption' sx={{ fontWeight: 500, color: 'error.main' }}>
+                      Limited Time Only
+                    </Typography>
+                  )}
 
                   {product?.url?.affiliate && (
                     <Typography variant='body2'>Sold on {product.url.affiliate.name}</Typography>
