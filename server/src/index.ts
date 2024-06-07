@@ -95,8 +95,8 @@ app.use(routers.productSpecificationRouter);
 app.use(routers.productMediaRouter);
 app.use(routers.statusRouter);
 app.use(routers.offerRouter);
+app.use(routers.discountRouter);
 /*
-app.use(routers.productVariantRouter);
 app.use(routers.productOptionRouter);
  */
 

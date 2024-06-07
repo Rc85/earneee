@@ -14,3 +14,4 @@ export type { DatabaseCreateOptions, DatabaseQueryOptions, DatabaseRetrieveOptio
 export type { StatusesInterface } from './statuses';
 export type { UserBansInterface } from './user_bans';
 export type { SessionsInterface } from './sessions';
+export type { ProductDiscountsInterface } from './product_discounts';
