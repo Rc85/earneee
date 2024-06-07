@@ -15,8 +15,7 @@ exports.up = (pgm) => {
         notNull: true
       },
       url: {
-        type: 'varchar',
-        notNull: true
+        type: 'varchar'
       },
       country: {
         type: 'varchar',

@@ -4,19 +4,19 @@ import { mdiChevronLeft, mdiChevronRight, mdiCircle } from '@mdi/js';
 import { Box, IconButton, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { useState, useRef, useEffect } from 'react';
-import { retrieveMarketplaceVariants } from '../../../_shared/api';
+import { retrieveMarketplaceProducts } from '../../../_shared/api';
 import { Loading } from '../../../_shared/components';
 import { useAppSelector } from '../../../_shared/redux/store';
 import Icon from '@mdi/react';
 import { useRouter } from 'next/navigation';
-import { ProductVariantsInterface } from '../../../../_shared/types';
+import { ProductsInterface } from '../../../../_shared/types';
 
 let carouselInterval: NodeJS.Timer | undefined | void = undefined;
 
 const FeaturedProducts = () => {
   const { country } = useAppSelector((state) => state.App);
-  const { data } = retrieveMarketplaceVariants({ featured: true, limit: 5, country });
-  const { variants = [] } = data || {};
+  const { data } = retrieveMarketplaceProducts({ featured: true, limit: 5, country });
+  const { products = [] } = data || {};
   const [imageIndex, setImageIndex] = useState(0);
   const [carouselTimer, setCarouselTimer] = useState(5);
   const [containerLoaded, setContainerLoaded] = useState(false);
@@ -30,7 +30,7 @@ const FeaturedProducts = () => {
   }, [containerRef.current]);
 
   useEffect(() => {
-    if (variants.length > 1) {
+    if (products.length > 1) {
       handleWindowOnFocus();
 
       window.addEventListener('focus', handleWindowOnFocus);
@@ -43,11 +43,11 @@ const FeaturedProducts = () => {
 
       window.removeEventListener('blur', handleWindowOnBlur);
     };
-  }, [variants]);
+  }, [products]);
 
   useEffect(() => {
     if (carouselTimer === 0) {
-      if (imageIndex === variants.length - 1) {
+      if (imageIndex === products.length - 1) {
         setImageIndex(0);
       } else {
         setImageIndex(imageIndex + 1);
@@ -79,10 +79,10 @@ const FeaturedProducts = () => {
     setImageIndex(imageIndex + 1);
   };
 
-  const handleProductClick = (variant: ProductVariantsInterface) => {
-    if (variant.product?.type === 'affiliate') {
-      const urls = variant.urls?.[0];
+  const handleProductClick = (product: ProductsInterface) => {
+    const urls = product.urls?.[0];
 
+    if (urls?.type === 'affiliate') {
       if (urls) {
         const { url } = urls;
 
@@ -91,7 +91,7 @@ const FeaturedProducts = () => {
         }
       }
     } else {
-      router.push(`/product/${variant.product?.id}?variant=${variant.id}`);
+      router.push(`/product/${product.id}`);
     }
   };
 
@@ -135,24 +135,24 @@ const FeaturedProducts = () => {
             <Loading />
           ) : (
             <>
-              {variants.map((variant, i) => {
-                const urls = variant.urls || [];
+              {products.map((product, i) => {
+                const urls = product.urls || [];
 
                 urls.sort((a, b) => (a.price < b.price ? -1 : 1));
 
                 const lowestPrice = urls[0]?.price || 0;
                 const highestPrice = urls.length > 1 ? urls[urls.length - 1]?.price : 0;
                 const currency = urls[0]?.currency || 'cad';
-                const media = variant.media?.[0] || variant.product?.media?.[0];
+                const media = product?.media?.[0];
                 const mediaUrl = media?.url;
                 const affiliateName = urls[0]?.affiliate?.name;
 
                 return (
                   <Box
-                    key={variant.id}
+                    key={product.id}
                     onMouseOver={handleOnMouseOver}
                     onMouseLeave={handleOnMouseLeave}
-                    onClick={() => handleProductClick(variant)}
+                    onClick={() => handleProductClick(product)}
                     sx={{
                       cursor: 'pointer',
                       display: 'flex',
@@ -182,7 +182,7 @@ const FeaturedProducts = () => {
                     >
                       <Box sx={{ flexGrow: 1, mr: 1 }}>
                         <Typography variant='h5' color='white'>
-                          {variant.product?.name} - {variant.name}
+                          {product.brand?.name} {product.name}
                         </Typography>
 
                         <Typography
@@ -195,17 +195,15 @@ const FeaturedProducts = () => {
                             WebkitLineClamp: 3
                           }}
                         >
-                          {variant.excerpt || variant.product?.excerpt}
+                          {product.excerpt}
                         </Typography>
                       </Box>
 
                       <Box sx={{ ml: 1, flexShrink: 0 }}>
                         <Typography sx={{ mb: 0, textAlign: 'center' }} color='white' variant='h4'>
-                          {variant.product?.type === 'affiliate'
-                            ? `$${lowestPrice.toFixed(2)}${
-                                highestPrice ? ` - $${highestPrice.toFixed(2)}` : ''
-                              } ${currency.toUpperCase()}`
-                            : `$${(variant.price || 0).toFixed(2)} ${variant.currency?.toUpperCase()}`}
+                          {`$${lowestPrice.toFixed(2)}${
+                            highestPrice ? ` - $${highestPrice.toFixed(2)}` : ''
+                          } ${currency.toUpperCase()}`}
                         </Typography>
 
                         {Boolean(affiliateName) && (
@@ -232,7 +230,7 @@ const FeaturedProducts = () => {
           <IconButton
             size='small'
             onClick={handleNextClick}
-            disabled={!Boolean(imageIndex !== variants.length - 1)}
+            disabled={!Boolean(imageIndex !== products.length - 1)}
           >
             <Icon path={mdiChevronRight} size={2} />
           </IconButton>
@@ -240,13 +238,13 @@ const FeaturedProducts = () => {
       </Box>
 
       <Box sx={{ p: 1, display: 'flex', justifyContent: 'center' }}>
-        {variants.map((_, i) => (
+        {products.map((_, i) => (
           <Icon
             key={i}
             path={mdiCircle}
             size={0.75}
             color={imageIndex === i ? undefined : grey[400]}
-            style={{ marginRight: i - 1 !== variants.length ? '10px' : 0 }}
+            style={{ marginRight: i - 1 !== products.length ? '10px' : 0 }}
           />
         ))}
       </Box>

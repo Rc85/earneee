@@ -103,10 +103,8 @@ export const validateCreateProduct = async (req: Request, resp: Response, next: 
 
   if (urls) {
     for (const url of urls) {
-      if (!validations.urlCheck.test(url.url)) {
+      if (url.url && !validations.urlCheck.test(url.url)) {
         return next(new HttpException(400, `Invalid URL`));
-      } else if (!url.url || validations.blankCheck.test(url.url)) {
-        return next(new HttpException(400, `URL required`));
       } else if (!url.country || validations.blankCheck.test(url.country)) {
         return next(new HttpException(400, `Country required`));
       } else if (!validations.countryShortCodeCheck.test(url.country)) {

@@ -60,7 +60,6 @@ const AddUrl = ({ cancel, url, submit }: Props) => {
         label='URL'
         value={form.url}
         onChange={(e) => setForm({ ...form, url: e.target.value })}
-        required
         autoFocus
       />
 

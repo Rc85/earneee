@@ -1,7 +1,6 @@
 export type { CategoriesInterface } from './categories';
 export type { ProductsInterface } from './products';
 export type { ProductMediaInterface } from './product_media';
-export type { ProductVariantsInterface } from './product_variants';
 export type { ProductOptionsInterface } from './product_options';
 export type { OptionSelectionsInterface } from './option_selections';
 export type { AffiliatesInterface } from './affiliates';

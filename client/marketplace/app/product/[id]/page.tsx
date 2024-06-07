@@ -1,52 +1,46 @@
 'use client';
 
 import Section from '../../../../_shared/components/Section/Section';
-import {
-  Box,
-  Breadcrumbs,
-  Button,
-  Checkbox,
-  Divider,
-  FormControlLabel,
-  ListItemText,
-  Paper,
-  Typography
-} from '@mui/material';
+import { Box, Breadcrumbs, Button, Divider, Paper, Typography } from '@mui/material';
 import Link from 'next/link';
-import { ProductVariantsInterface } from '../../../../../_shared/types';
 import { Loading } from '../../../../_shared/components';
 import { retrieveMarketplaceProduct } from '../../../../_shared/api';
 import Grid2 from '@mui/material/Unstable_Grid2';
 import { useState, Fragment, useEffect } from 'react';
 import { Gallery } from '../../../components';
-import { useSearchParams } from 'next/navigation';
 import { useAppSelector } from '../../../../_shared/redux/store';
+import { ProductsInterface } from '../../../../../_shared/types';
+import { grey } from '@mui/material/colors';
+import Icon from '@mdi/react';
+import { mdiImageOff } from '@mdi/js';
 
 interface Props {
   params: { id: string };
 }
 
 const Product = ({ params: { id } }: Props) => {
-  const searchParams = useSearchParams();
-  const variantId = searchParams.get('variant');
   const { country } = useAppSelector((state) => state.App);
   const { isLoading, data } = retrieveMarketplaceProduct({ productId: id, country });
   const product = data?.product;
-  const [selectedVariant, setSelectVariant] = useState<ProductVariantsInterface | undefined>(
-    variantId ? product?.variants?.find((variant) => variant.id === variantId) : product?.variants?.[0]
-  );
+  const [selectedVariant, setSelectVariant] = useState<ProductsInterface | undefined>();
   const selectedVariantSpecifications = selectedVariant?.specifications || [];
   const productSpecifications = product?.specifications || [];
   const allSpecifications = [...selectedVariantSpecifications, ...productSpecifications];
-  const options = selectedVariant?.options || [];
+  //const options = selectedVariant?.options || [];
   const selectedVariantMedia = selectedVariant?.media || [];
   const productMedia = product?.media || [];
-  const media = [...selectedVariantMedia, ...productMedia];
-  const excerpt = selectedVariant?.excerpt || product?.excerpt || '';
+  const media = [...productMedia, ...selectedVariantMedia];
+  const excerpt = product?.excerpt || '';
   const about = selectedVariant?.about || product?.about;
   const details = selectedVariant?.details || product?.details;
   const description = selectedVariant?.description || product?.description;
   const specifications: { name: string; value: string[] }[] = [];
+
+  useEffect(() => {
+    if (product?.variants?.[0]) {
+      setSelectVariant(product?.variants?.[0]);
+    }
+  }, [product?.variants]);
 
   for (const specification of allSpecifications) {
     const index = specifications.findIndex((s) => s.name === specification.name);
@@ -57,14 +51,6 @@ const Product = ({ params: { id } }: Props) => {
       specifications.push({ name: specification.name, value: [specification.value] });
     }
   }
-
-  useEffect(() => {
-    if (variantId) {
-      setSelectVariant(product?.variants?.find((variant) => variant.id === variantId));
-    } else {
-      setSelectVariant(product?.variants?.[0]);
-    }
-  }, [product]);
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -82,7 +68,7 @@ const Product = ({ params: { id } }: Props) => {
         <Typography>{product?.name}</Typography>
       </Breadcrumbs>
 
-      <Section title={product?.name} titleVariant='h3' maxWidth='xl' disableGutters>
+      <Section title={product?.name} subtitle={excerpt} titleVariant='h3' maxWidth='xl' disableGutters>
         {isLoading ? (
           <Loading />
         ) : (
@@ -172,7 +158,7 @@ const Product = ({ params: { id } }: Props) => {
             </Box>
             <Box sx={{ width: '25%', minWidth: '400px', maxWidth: '400px', ml: 2 }}>
               {product?.variants?.map((variant) => {
-                const media = variant.media?.[0] || product?.media?.[0];
+                const media = variant.media?.[0];
                 const mediaUrl = media?.url;
 
                 return (
@@ -193,11 +179,17 @@ const Product = ({ params: { id } }: Props) => {
                         height: '75px',
                         flexShrink: 0,
                         backgroundImage: mediaUrl ? `url('${mediaUrl}')` : undefined,
+                        backgroundColor: grey[300],
                         backgroundRepeat: 'no-repeat',
                         backgroundSize: 'cover',
-                        backgroundPosition: 'center center'
+                        backgroundPosition: 'center center',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center'
                       }}
-                    />
+                    >
+                      {!mediaUrl && <Icon path={mdiImageOff} size={1} color={grey[600]} />}
+                    </Box>
 
                     <Box sx={{ flexGrow: 1, p: 1 }}>
                       <Typography>{variant.name}</Typography>
@@ -208,7 +200,7 @@ const Product = ({ params: { id } }: Props) => {
 
               {selectedVariant?.status === 'available' && (
                 <>
-                  {options.map((option) => (
+                  {/* options.map((option) => (
                     <Box key={option.id}>
                       <Typography variant='h6'>
                         {option.name} {option.required && <Typography color='red'>Required</Typography>}
@@ -227,16 +219,17 @@ const Product = ({ params: { id } }: Props) => {
                           }
                           control={<Checkbox color='info' />}
                           onChange={(e) => {
-                            /* TODO */
+                            
                           }}
                         />
                       ))}
                     </Box>
-                  ))}
+                  )) */}
 
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <Typography variant='h6' sx={{ ml: 1 }}>
-                      ${(selectedVariant.price || 0).toFixed(2)} {selectedVariant.currency?.toUpperCase()}
+                      ${(selectedVariant.urls?.[0]?.price || 0).toFixed(2)}{' '}
+                      {selectedVariant.urls?.[0]?.currency?.toUpperCase()}
                     </Typography>
 
                     <Button
@@ -252,11 +245,13 @@ const Product = ({ params: { id } }: Props) => {
               )}
 
               <Box sx={{ mt: 3 }}>
-                {Boolean(excerpt) && <Typography>{excerpt}</Typography>}
+                {Boolean(selectedVariant?.excerpt) && <Typography>{selectedVariant?.excerpt}</Typography>}
 
-                {Boolean(about) && (
+                {Boolean(selectedVariant?.about || product?.about) && (
                   <>
                     <Typography variant='h6'>About this item</Typography>
+
+                    <div dangerouslySetInnerHTML={{ __html: product?.about! }} />
 
                     <div dangerouslySetInnerHTML={{ __html: about! }} />
                   </>

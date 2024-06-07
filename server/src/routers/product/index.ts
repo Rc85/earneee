@@ -32,6 +32,20 @@ router.put(
   response
 );
 
-//router.get('/v1/product/showcase', dbConnect, middleware(controllers.retrieveProductShowcase), response);
+router.get(
+  '/v1/auth/marketplace/products',
+  dbConnect,
+  middleware(controllers.retrieveMarketplaceProducts),
+  response
+);
+
+router.get(
+  '/v1/auth/marketplace/product',
+  dbConnect,
+  middleware(controllers.retrieveMarketplaceProduct),
+  response
+);
+
+router.get('/v1/product/showcase', dbConnect, middleware(controllers.retrieveProductShowcase), response);
 
 export default router;

@@ -19,9 +19,9 @@ const ProductShowcase = ({ type }: Props) => {
   const router = useRouter();
 
   const handleProductClick = (product: ProductsInterface) => {
-    if (product.type === 'affiliate') {
-      const urls = product.variants?.[0].urls?.[0];
+    const urls = product.urls?.[0];
 
+    if (urls?.type === 'affiliate') {
       if (urls) {
         const { url } = urls;
 
@@ -30,7 +30,7 @@ const ProductShowcase = ({ type }: Props) => {
         }
       }
     } else {
-      router.push(`/product/${product.id}?variant=${product.variants?.[0]?.id}`);
+      router.push(`/product/${product.id}`);
     }
   };
 
@@ -42,13 +42,12 @@ const ProductShowcase = ({ type }: Props) => {
     >
       <Grid2 container spacing={1}>
         {products?.map((product) => {
-          const variant = product.variants?.[0];
-          const media = product.media?.[0] || variant?.media?.[0];
+          const media = product.media?.[0];
           const mediaUrl = media?.url;
           const mediaWidth = media?.width || 0;
           const mediaHeight = media?.height || 0;
-          const excerpt = product.excerpt || variant?.excerpt;
-          const urls = variant?.urls || [];
+          const excerpt = product.excerpt;
+          const urls = product?.urls || [];
 
           urls.sort((a, b) => (a.price < b.price ? -1 : 1));
 
@@ -84,7 +83,7 @@ const ProductShowcase = ({ type }: Props) => {
 
                   <Box sx={{ p: 2, flexGrow: 1 }}>
                     <Typography variant='h6' sx={{ mb: 0 }}>
-                      {product.name} {variant?.name ? `- ${variant?.name}` : ''}
+                      {product.brand?.name} {product.name}
                     </Typography>
 
                     {Boolean(excerpt) && (
@@ -110,11 +109,8 @@ const ProductShowcase = ({ type }: Props) => {
 
                   <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                     <Typography variant='h6' sx={{ mb: 0 }}>
-                      {product?.type === 'affiliate'
-                        ? `$${lowestPrice.toFixed(2)}${
-                            highestPrice ? ` - $${highestPrice.toFixed(2)}` : ''
-                          } ${currency.toUpperCase()}`
-                        : `$${(variant?.price || 0).toFixed(2)} ${variant?.currency?.toUpperCase()}`}
+                      ${lowestPrice.toFixed(2)}
+                      {highestPrice ? ` - $${highestPrice.toFixed(2)}` : ''} {currency.toUpperCase()}
                     </Typography>
 
                     {Boolean(affiliateName) && (

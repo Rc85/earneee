@@ -13,7 +13,7 @@ interface Props {
 
 const AddSpecification = ({ cancel }: Props) => {
   const params = useParams();
-  const { productId, parentId } = params;
+  const { productId, id } = params;
   const [status, setStatus] = useState('');
   const [name, setName] = useState('');
   const { enqueueSnackbar } = useSnackbar();
@@ -62,7 +62,7 @@ const AddSpecification = ({ cancel }: Props) => {
           id: generateKey(1),
           name,
           value,
-          productId: parentId || productId!,
+          productId: productId || id!,
           ordinance: null,
           createdAt: new Date().toISOString(),
           updatedAt: null

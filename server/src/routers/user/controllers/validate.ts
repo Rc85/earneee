@@ -33,7 +33,7 @@ export const validateLogin = async (req: Request, resp: Response, next: NextFunc
     return next(new HttpException(400, `Email required`));
   }
 
-  const user: UsersInterface[] = await database.retrieve('users', {
+  const user: UsersInterface[] = await database.retrieve<UsersInterface[]>('SELECT * FROM users', {
     where: 'email = $1',
     params: [email],
     client

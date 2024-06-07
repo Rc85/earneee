@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { database } from '../../../middlewares';
+import { generateKey } from '../../../../../_shared/utils';
 
 export const addProductMedia = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
@@ -8,7 +9,7 @@ export const addProductMedia = async (req: Request, resp: Response, next: NextFu
   await database.create(
     'product_media',
     ['id', 'url', 'path', 'height', 'width', 'type', 'status', 'product_id'],
-    [id, url, path, height, width, type, status, productId],
+    [id || generateKey(1), url, path, height, width, type, status, productId],
     {
       conflict: {
         columns: 'id',

@@ -4,10 +4,10 @@ import { ProductsInterface } from '../../../../../_shared/types';
 
 export const searchProducts = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
-  const { value, category } = req.query;
+  const { value, category, country } = req.query;
   const offset = req.query.offset?.toString() || '0';
-  const params: any = [];
-  const where = [];
+  const params: any = [country];
+  const where = [`p.parent_id IS NULL`];
 
   if (value) {
     const splitBySpaces = value.toString().split(' ');
@@ -18,7 +18,7 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
     params.push(splitByPeriods.join(' '));
 
     where.push(`(WORD_SIMILARITY(p.name, $${params.length}) > 0.5
-    OR b.brand->>'name' ILIKE '%' || $${params.length} || '%')
+    OR pb.brand->>'name' ILIKE '%' || $${params.length} || '%')
     ${category ? `AND (p.category_id)::INT IN (SELECT id FROM pc)` : ''}`);
   }
 
@@ -36,7 +36,7 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
         name,
         parent_id
       FROM categories
-      ${category ? 'WHERE id = $2' : 'WHERE parent_id IS NULL'}
+      ${category ? `WHERE id = $${params.length}` : 'WHERE parent_id IS NULL'}
       UNION ALL
       SELECT
         c.id,
@@ -45,7 +45,7 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
       FROM categories AS c
       JOIN pc ON pc.id = c.parent_id
     ),
-    b AS (
+    pb AS (
       SELECT
         b.id,
         b.name,
@@ -72,6 +72,7 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
         pu.price,
         pu.currency,
         pu.product_id,
+        pu.type,
         a.affiliate
       FROM product_urls AS pu
       LEFT JOIN LATERAL (
@@ -79,6 +80,7 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
         FROM a
         WHERE a.id = pu.affiliate_id
       ) AS a ON true
+      WHERE LOWER(pu.country) = LOWER($1)
     )
     
     SELECT
@@ -86,8 +88,7 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
       p.name,
       p.excerpt,
       p.category_id,
-      p.type,
-      b.brand,
+      pb.brand,
       COALESCE(pm.media, '[]'::JSONB) AS media,
       COALESCE(pu.urls, '[]'::JSONB) AS urls
     FROM products AS p
@@ -100,7 +101,12 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
       SELECT JSONB_AGG(pu.*) AS urls
       FROM pu
       WHERE pu.product_id = p.id
-    ) AS pu ON true`,
+    ) AS pu ON true
+    LEFT JOIN LATERAL (
+      SELECT TO_JSONB(pb.*) AS brand
+      FROM pb
+      WHERE pb.id = p.brand_id
+    ) AS pb ON true`,
     {
       where: where.join(' AND '),
       params,
@@ -111,45 +117,28 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
     }
   );
 
-  const count = await database.retrieve<number>(
+  const count = await database.retrieve<{ count: number }[]>(
     `WITH
-    b AS (
+    pb AS (
       SELECT
         b.id,
         b.name,
         b.logo_url
       FROM product_brands AS b
-    ),
-    p AS (
-      SELECT
-        p.id,
-        p.name,
-        p.excerpt,
-        p.category_id,
-        b.brand
-      FROM products AS p
-      LEFT JOIN LATERAL (
-        SELECT TO_JSONB(b.*) AS brand
-        FROM b
-        WHERE b.id = p.brand_id
-      ) AS b ON true
-      ${category ? `WHERE p.category_id = $2` : ''}
     )
     
     SELECT
-      pv.id,
-      pv.name,
-      pv.price,
-      pv.currency,
-      pv.description,
-      pv.excerpt,
-      p.product
-    FROM product_variants AS pv
+      p.id,
+      p.name,
+      p.excerpt,
+      p.category_id,
+      pb.brand
+    FROM products AS p
     LEFT JOIN LATERAL (
-      SELECT TO_JSONB(p) AS product
-      FROM p
-      WHERE p.id = pv.product_id
-    ) AS p ON true`,
+      SELECT TO_JSONB(pb.*) AS brand
+      FROM pb
+      WHERE pb.id = p.brand_id
+    ) AS pb ON true`,
     {
       where: where.join(' AND '),
       params,
@@ -157,7 +146,7 @@ export const searchProducts = async (req: Request, resp: Response, next: NextFun
     }
   );
 
-  resp.locals.response = { data: { products, count } };
+  resp.locals.response = { data: { products, count: count[0].count } };
 
   return next();
 };

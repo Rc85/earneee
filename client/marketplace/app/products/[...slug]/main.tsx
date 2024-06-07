@@ -29,7 +29,7 @@ import {
   retrieveMarketplaceProducts
 } from '../../../../_shared/api';
 import Link from 'next/link';
-import { ProductSpecificationsInterface, ProductVariantsInterface } from '../../../../../_shared/types';
+import { ProductSpecificationsInterface, ProductsInterface } from '../../../../../_shared/types';
 import { PriceFilter } from '../../../components';
 import { mdiCloseBoxMultiple, mdiImageOff, mdiViewGrid, mdiViewList } from '@mdi/js';
 import Icon from '@mdi/react';
@@ -75,7 +75,7 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
     country
   });
   const { isLoading } = p;
-  const { variants, count = 0 } = p.data || {};
+  const { products, count = 0 } = p.data || {};
   const s = retrieveMarketplaceProductSpecifications({ categoryId: groupId, enabled: Boolean(groupId) });
   const { specifications = [] } = s.data || {};
   const specificationLabels = [
@@ -116,10 +116,10 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
     setFilters({ minPrice: undefined, maxPrice: undefined, specifications: {} });
   };
 
-  const handleProductClick = (variant: ProductVariantsInterface) => {
-    if (variant.product?.type === 'affiliate') {
-      const urls = variant.urls?.[0];
+  const handleProductClick = (product: ProductsInterface) => {
+    const urls = product.urls?.[0];
 
+    if (urls?.type === 'affiliate') {
       if (urls) {
         const { url } = urls;
 
@@ -128,7 +128,7 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
         }
       }
     } else {
-      router.push(`/product/${variant.product?.id}?variant=${variant.id}`);
+      router.push(`/product/${product.id}`);
     }
   };
 
@@ -307,9 +307,9 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
 
               {view === 'grid' ? (
                 <Grid2 container spacing={1}>
-                  {variants?.map((variant) => {
-                    const mediaUrl = variant.media?.[0]?.url || variant.product?.media?.[0]?.url;
-                    const urls = variant.urls || [];
+                  {products?.map((product) => {
+                    const mediaUrl = product.media?.[0]?.url;
+                    const urls = product.urls || [];
 
                     urls.sort((a, b) => (a.price < b.price ? -1 : 1));
 
@@ -319,11 +319,11 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
                     const affiliateName = urls[0]?.affiliate?.name;
 
                     return (
-                      <Grid2 key={variant.id} xs={12} sm={6} md={4} xl={3}>
+                      <Grid2 key={product.id} xs={12} sm={6} md={4} xl={3}>
                         <Paper
                           variant='outlined'
                           className='product-card'
-                          onClick={() => handleProductClick(variant)}
+                          onClick={() => handleProductClick(product)}
                           sx={{ width: 0, minWidth: '100%', cursor: 'pointer' }}
                         >
                           <Box
@@ -347,11 +347,11 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
 
                           <Box sx={{ p: 1 }}>
                             <Typography sx={{ fontWeight: 'bold' }}>
-                              {variant.product?.name} - {variant.name}
+                              {product.brand?.name} {product.name}
                             </Typography>
                           </Box>
 
-                          {Boolean(variant.excerpt || variant.product?.excerpt) && (
+                          {Boolean(product.excerpt) && (
                             <Box sx={{ p: 1 }}>
                               <Typography
                                 sx={{
@@ -362,7 +362,7 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
                                   WebkitLineClamp: 3
                                 }}
                               >
-                                {variant.excerpt || variant.product?.excerpt}
+                                {product.excerpt}
                               </Typography>
                             </Box>
                           )}
@@ -378,11 +378,8 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
                             }}
                           >
                             <Typography variant='h6' sx={{ mb: 0 }}>
-                              {variant.product?.type === 'affiliate'
-                                ? `$${lowestPrice.toFixed(2)}${
-                                    highestPrice ? ` - $${highestPrice.toFixed(2)}` : ''
-                                  } ${currency.toUpperCase()}`
-                                : `$${(variant.price || 0).toFixed(2)} ${variant.currency?.toUpperCase()}`}
+                              ${lowestPrice.toFixed(2)}
+                              {highestPrice ? ` - $${highestPrice.toFixed(2)}` : ''} {currency.toUpperCase()}
                             </Typography>
 
                             {Boolean(affiliateName) && (
@@ -396,9 +393,9 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
                 </Grid2>
               ) : (
                 <List disablePadding>
-                  {variants?.map((variant) => {
-                    const mediaUrl = variant.media?.[0]?.url || variant.product?.media?.[0]?.url;
-                    const urls = variant.urls || [];
+                  {products?.map((product) => {
+                    const mediaUrl = product.media?.[0]?.url;
+                    const urls = product.urls || [];
 
                     urls.sort((a, b) => (a.price < b.price ? -1 : 1));
 
@@ -408,16 +405,16 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
                     const affiliateName = urls[0]?.affiliate?.name;
 
                     return (
-                      <ListItem key={variant.id} disableGutters divider>
+                      <ListItem key={product.id} disableGutters divider>
                         <ListItemButton
                           sx={{ alignItems: 'flex-start' }}
-                          onClick={() => handleProductClick(variant)}
+                          onClick={() => handleProductClick(product)}
                         >
                           <ListItemIcon sx={{ mr: 1 }}>
                             <Avatar
                               src={mediaUrl || '/broken.jpg'}
                               variant='rounded'
-                              alt={variant.name}
+                              alt={product.name}
                               sx={{
                                 width: 100,
                                 height: 100,
@@ -430,19 +427,21 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
                           </ListItemIcon>
 
                           <Box>
-                            <ListItemText primary={variant.product?.name} secondary={variant.name} />
+                            <ListItemText primary={product.name} secondary={product.brand?.name} />
 
-                            <Typography
-                              sx={{
-                                display: '-webkit-box',
-                                WebkitBoxOrient: 'vertical',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                WebkitLineClamp: 3
-                              }}
-                            >
-                              {variant.excerpt || variant.product?.excerpt}
-                            </Typography>
+                            {Boolean(product.excerpt) && (
+                              <Typography
+                                sx={{
+                                  display: '-webkit-box',
+                                  WebkitBoxOrient: 'vertical',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  WebkitLineClamp: 3
+                                }}
+                              >
+                                {product.excerpt}
+                              </Typography>
+                            )}
                           </Box>
                         </ListItemButton>
 
@@ -455,14 +454,11 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
                           }}
                         >
                           <Typography variant='h6' sx={{ mb: 0 }}>
-                            {variant.product?.type === 'affiliate'
-                              ? `$${lowestPrice.toFixed(2)}${
-                                  highestPrice ? ` - $${highestPrice.toFixed(2)}` : ''
-                                } ${currency.toUpperCase()}`
-                              : `$${(variant.price || 0).toFixed(2)} ${variant.currency?.toUpperCase()}`}
+                            ${lowestPrice.toFixed(2)}
+                            {highestPrice ? ` - $${highestPrice.toFixed(2)}` : ''} {currency.toUpperCase()}
                           </Typography>
 
-                          {variant.product?.type === 'affiliate' && (
+                          {Boolean(affiliateName) && (
                             <Typography variant='body2'>Sold on {affiliateName}</Typography>
                           )}
                         </Box>

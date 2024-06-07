@@ -4,7 +4,6 @@ import { Icon } from '@mdi/react';
 import { mdiImage, mdiPlusBox, mdiUpload, mdiVideo } from '@mdi/js';
 import { ChangeEvent, useRef, useState } from 'react';
 import AddMedia from './AddMedia';
-import { generateKey } from '../../../../../_shared/utils';
 import { useSnackbar } from 'notistack';
 import { useParams } from 'react-router-dom';
 import MediaRow from './MediaRow';
@@ -75,18 +74,15 @@ const VariantMedia = () => {
     setStatus('Loading');
 
     if (media) {
-      const id = generateKey(1);
-
       if (type === 'image') {
         const image = new Image();
 
         image.onload = () => {
-          console.log('1');
           const { width, height } = image;
           const ordinance = media.length;
 
           addProductMedia.mutate({
-            id,
+            id: '',
             url,
             path: videoId || null,
             height,
@@ -103,7 +99,7 @@ const VariantMedia = () => {
         image.src = url;
       } else {
         addProductMedia.mutate({
-          id,
+          id: '',
           url,
           path: videoId,
           height: 0,

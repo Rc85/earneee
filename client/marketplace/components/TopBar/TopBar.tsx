@@ -97,8 +97,6 @@ const TopBar = () => {
             }}
           >
             {[
-              { code: 'AU', name: 'Australia' },
-              { code: 'GB', name: 'United Kingdom' },
               { code: 'CA', name: 'Canada' },
               { code: 'US', name: 'United States' }
             ].map((country) => (
