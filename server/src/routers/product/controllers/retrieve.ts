@@ -197,7 +197,7 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
       pm.type
     FROM product_media AS pm
     WHERE pm.status = 'enabled'
-    ORDER BY pm.ordinance
+    ORDER BY pm.created_at
   ),
   a AS (
     SELECT
@@ -414,6 +414,7 @@ export const retrieveProductShowcase = async (req: Request, resp: Response, next
         pm.height,
         pm.product_id
       FROM product_media AS pm
+      WHERE pm.status = 'enabled'
       ORDER BY pm.created_at
     ),
     a AS (
@@ -528,7 +529,9 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
         pd.amount,
         pd.amount_type,
         pd.product_url_id,
-        pd.limited_time_only
+        pd.limited_time_only,
+        pd.starts_at,
+        pd.ends_at
       FROM product_discounts AS pd
       WHERE pd.status = 'active'
       AND pd.starts_at <= NOW()
@@ -574,6 +577,8 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
         pm.height,
         pm.type
       FROM product_media AS pm
+      WHERE pm.status = 'enabled'
+      ORDER BY pm.ordinance, pm.created_at
     ),
     pb AS (
       SELECT
@@ -616,6 +621,7 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
       p.excerpt,
       p.details,
       p.about,
+      p.status,
       pb.brand,
       pu.url,
       ac.ancestors,

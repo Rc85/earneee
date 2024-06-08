@@ -1,7 +1,7 @@
 'use client';
 
 import Section from '../../../../_shared/components/Section/Section';
-import { Box, Breadcrumbs, Button, Divider, Paper, Typography } from '@mui/material';
+import { Box, Breadcrumbs, Button, Chip, Divider, Paper, Typography } from '@mui/material';
 import Link from 'next/link';
 import { Loading } from '../../../../_shared/components';
 import { retrieveMarketplaceProduct } from '../../../../_shared/api';
@@ -12,7 +12,8 @@ import { useAppSelector } from '../../../../_shared/redux/store';
 import { ProductsInterface } from '../../../../../_shared/types';
 import { grey } from '@mui/material/colors';
 import Icon from '@mdi/react';
-import { mdiImageOff } from '@mdi/js';
+import { mdiCartPlus, mdiImageOff, mdiOpenInNew } from '@mdi/js';
+import dayjs from 'dayjs';
 
 interface Props {
   params: { id: string };
@@ -31,13 +32,15 @@ const Product = ({ params: { id } }: Props) => {
   const productMedia = product?.media || [];
   const media = [...productMedia, ...selectedVariantMedia];
   const excerpt = product?.excerpt || '';
-  const about = selectedVariant?.about || product?.about;
   const details = selectedVariant?.details || product?.details;
   const description = selectedVariant?.description || product?.description;
   const specifications: { name: string; value: string[] }[] = [];
   const price = product?.url?.price || 0;
   const currency = product?.url?.currency || 'CAD';
   const discount = product?.url?.discount;
+  const unavailableVariants = product?.variants?.filter((variant) => variant.status === 'unavailable') || [];
+  const unavailable =
+    unavailableVariants.length === (product?.variants?.length || 0) || product?.status === 'unavailable';
 
   let discountAmount = 0;
 
@@ -67,250 +70,287 @@ const Product = ({ params: { id } }: Props) => {
     }
   }
 
+  const handleBuyNowClick = () => {
+    if (product?.url?.type === 'affiliate') {
+      window.open(product?.url.url, '_blank', 'noopener, noreferrer');
+    } else {
+      // ADD TO CART
+    }
+  };
+
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <Breadcrumbs>
-        {product?.ancestors?.map((ancestor, i, arr) => {
-          const paths = arr.slice(0, i + 1);
+      {isLoading ? (
+        <Loading />
+      ) : (
+        <>
+          <Breadcrumbs>
+            {product?.ancestors?.map((ancestor, i, arr) => {
+              const paths = arr.slice(0, i + 1);
 
-          return (
-            <Link key={ancestor.id} href={`/products/${paths.map((path) => path.id).join('/')}`}>
-              {ancestor.name}
-            </Link>
-          );
-        })}
-      </Breadcrumbs>
+              return (
+                <Link key={ancestor.id} href={`/products/${paths.map((path) => path.id).join('/')}`}>
+                  {ancestor.name}
+                </Link>
+              );
+            })}
+          </Breadcrumbs>
 
-      <Section
-        title={`${product?.brand?.name} ${product?.name}`}
-        subtitle={excerpt}
-        titleVariant='h3'
-        maxWidth='xl'
-        disableGutters
-      >
-        {isLoading ? (
-          <Loading />
-        ) : (
-          <Box sx={{ display: 'flex' }}>
-            <Box sx={{ flexGrow: 1 }}>
-              <Gallery media={media} />
+          <Section
+            title={`${product?.brand?.name} ${product?.name}`}
+            subtitle={excerpt}
+            titleVariant='h3'
+            maxWidth='xl'
+            disableGutters
+          >
+            <Box sx={{ display: 'flex' }}>
+              <Box sx={{ flexGrow: 1 }}>
+                <Gallery media={media} />
 
-              {Boolean(details) && (
-                <Box sx={{ mb: 3 }}>
-                  <Divider sx={{ mb: 1 }} />
+                {Boolean(details) && (
+                  <Box sx={{ mb: 3 }}>
+                    <Divider sx={{ mb: 1 }} />
 
-                  <Typography variant='h6'>Details</Typography>
+                    <Typography variant='h6'>Details</Typography>
 
-                  {selectedVariant?.details ? (
-                    <div
-                      className='product-description'
-                      dangerouslySetInnerHTML={{ __html: selectedVariant?.details }}
-                    />
-                  ) : (
-                    product?.details && (
+                    {selectedVariant?.details ? (
                       <div
                         className='product-description'
-                        dangerouslySetInnerHTML={{ __html: product.details }}
+                        dangerouslySetInnerHTML={{ __html: selectedVariant?.details }}
                       />
-                    )
-                  )}
-                </Box>
-              )}
+                    ) : (
+                      product?.details && (
+                        <div
+                          className='product-description'
+                          dangerouslySetInnerHTML={{ __html: product.details }}
+                        />
+                      )
+                    )}
+                  </Box>
+                )}
 
-              {specifications.length > 0 && (
-                <Box sx={{ mb: 3 }}>
-                  <Divider sx={{ mb: 1 }} />
+                {Boolean(description) && (
+                  <Box sx={{ mb: 3 }}>
+                    <Divider sx={{ mb: 1 }} />
 
-                  <Typography variant='h6'>Specifications</Typography>
+                    <Typography variant='h6'>Description</Typography>
 
-                  <Grid2
-                    container
-                    sx={{
-                      '--Grid-borderWidth': '1px',
-                      borderTop: 'var(--Grid-borderWidth) solid',
-                      borderLeft: 'var(--Grid-borderWidth) solid',
-                      borderColor: 'divider',
-                      '& > div': {
-                        borderRight: 'var(--Grid-borderWidth) solid',
-                        borderBottom: 'var(--Grid-borderWidth) solid',
-                        borderColor: 'divider'
-                      },
-                      mb: 3
-                    }}
-                  >
-                    {specifications.map((specification) => (
-                      <Fragment key={specification.name}>
-                        <Grid2 xs={4}>
-                          <Typography sx={{ margin: 2 }}>{specification.name}</Typography>
-                        </Grid2>
-
-                        <Grid2 xs={8}>
-                          <Typography sx={{ margin: 2 }}>{specification.value.join(', ')}</Typography>
-                        </Grid2>
-                      </Fragment>
-                    ))}
-                  </Grid2>
-                </Box>
-              )}
-
-              {Boolean(description) && (
-                <Box sx={{ mb: 3 }}>
-                  <Divider sx={{ mb: 1 }} />
-
-                  <Typography variant='h6'>Description</Typography>
-
-                  {selectedVariant?.description ? (
-                    <div
-                      className='product-description'
-                      dangerouslySetInnerHTML={{ __html: selectedVariant?.description }}
-                    />
-                  ) : (
-                    product?.description && (
+                    {selectedVariant?.description ? (
                       <div
                         className='product-description'
-                        dangerouslySetInnerHTML={{ __html: product.description }}
+                        dangerouslySetInnerHTML={{ __html: selectedVariant?.description }}
                       />
-                    )
-                  )}
-                </Box>
-              )}
-            </Box>
-            <Box sx={{ width: '25%', minWidth: '400px', maxWidth: '400px', ml: 2 }}>
-              {product?.variants?.map((variant) => {
-                const media = variant.media?.[0];
-                const mediaUrl = media?.url;
+                    ) : (
+                      product?.description && (
+                        <div
+                          className='product-description'
+                          dangerouslySetInnerHTML={{ __html: product.description }}
+                        />
+                      )
+                    )}
+                  </Box>
+                )}
+              </Box>
 
-                return (
-                  <Paper
-                    key={variant.id}
-                    onClick={() => setSelectVariant(variant)}
-                    variant='outlined'
-                    sx={{
-                      display: 'flex',
-                      opacity: selectedVariant?.id === variant.id ? 1 : 0.5,
-                      mb: 1,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <Box
+              <Box sx={{ width: '35%', minWidth: '400px', maxWidth: '400px', ml: 2 }}>
+                {product?.variants?.map((variant) => {
+                  const media = variant.media?.[0];
+                  const mediaUrl = media?.url;
+
+                  return (
+                    <Paper
+                      key={variant.id}
+                      onClick={() => setSelectVariant(variant)}
+                      variant='outlined'
                       sx={{
-                        width: '75px',
-                        height: '75px',
-                        flexShrink: 0,
-                        backgroundImage: mediaUrl ? `url('${mediaUrl}')` : undefined,
-                        backgroundColor: grey[300],
-                        backgroundRepeat: 'no-repeat',
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center center',
                         display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center'
+                        opacity: selectedVariant?.id === variant.id ? 1 : 0.5,
+                        mb: 1,
+                        cursor: 'pointer'
                       }}
                     >
-                      {!mediaUrl && <Icon path={mdiImageOff} size={1} color={grey[600]} />}
-                    </Box>
-
-                    <Box sx={{ flexGrow: 1, p: 1 }}>
-                      <Typography>{variant.name}</Typography>
-                    </Box>
-                  </Paper>
-                );
-              })}
-
-              {selectedVariant?.status === 'available' && (
-                <>
-                  {/* options.map((option) => (
-                      <Box key={option.id}>
-                        <Typography variant='h6'>
-                          {option.name} {option.required && <Typography color='red'>Required</Typography>}
-                        </Typography>
-
-                        {option.selections?.map((selection) => (
-                          <FormControlLabel
-                            key={selection.id}
-                            label={
-                              <ListItemText
-                                primary={selection.name}
-                                secondary={`+$${selection.price?.toFixed(
-                                  2
-                                )} ${selectedVariant.currency?.toUpperCase()}`}
-                              />
-                            }
-                            control={<Checkbox color='info' />}
-                            onChange={(e) => {
-                              
-                            }}
-                          />
-                        ))}
+                      <Box
+                        sx={{
+                          width: '75px',
+                          height: '75px',
+                          flexShrink: 0,
+                          backgroundImage: mediaUrl ? `url('${mediaUrl}')` : undefined,
+                          backgroundColor: grey[300],
+                          backgroundRepeat: 'no-repeat',
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center center',
+                          display: 'flex',
+                          justifyContent: 'center',
+                          alignItems: 'center'
+                        }}
+                      >
+                        {!mediaUrl && <Icon path={mdiImageOff} size={1} color={grey[600]} />}
                       </Box>
-                    )) */}
-                </>
-              )}
 
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Box>
-                  <Typography variant='h6' sx={{ mb: 0 }}>
-                    ${finalPrice.toFixed(2)} {currency.toUpperCase()}
-                  </Typography>
+                      <Box sx={{ flexGrow: 1, p: 1 }}>
+                        <Typography>{variant.name}</Typography>
 
-                  <Box sx={{ display: 'flex' }}>
-                    {discount && (
-                      <Typography variant='body2' sx={{ color: 'success.main', fontWeight: 500 }}>
-                        {discount.amountType === 'fixed'
-                          ? `$${discount.amount.toFixed(2)} off`
-                          : `${discount.amount}% off`}
+                        {variant.status === 'unavailable' && (
+                          <Chip size='small' color='error' label='Unavailable' />
+                        )}
+                      </Box>
+                    </Paper>
+                  );
+                })}
+
+                {selectedVariant?.status === 'available' && (
+                  <>
+                    {/* options.map((option) => (
+                        <Box key={option.id}>
+                          <Typography variant='h6'>
+                            {option.name} {option.required && <Typography color='red'>Required</Typography>}
+                          </Typography>
+  
+                          {option.selections?.map((selection) => (
+                            <FormControlLabel
+                              key={selection.id}
+                              label={
+                                <ListItemText
+                                  primary={selection.name}
+                                  secondary={`+$${selection.price?.toFixed(
+                                    2
+                                  )} ${selectedVariant.currency?.toUpperCase()}`}
+                                />
+                              }
+                              control={<Checkbox color='info' />}
+                              onChange={(e) => {
+                                
+                              }}
+                            />
+                          ))}
+                        </Box>
+                      )) */}
+                  </>
+                )}
+
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      {price !== finalPrice && (
+                        <Typography sx={{ mr: 1, fontWeight: 'bold', textDecoration: 'line-through' }}>
+                          ${price.toFixed(2)}
+                        </Typography>
+                      )}
+
+                      <Typography variant='h6' sx={{ mb: 0 }}>
+                        ${finalPrice.toFixed(2)} {currency.toUpperCase()}
                       </Typography>
-                    )}
+                    </Box>
 
-                    {price !== finalPrice && (
-                      <Typography variant='body2' sx={{ ml: 1 }} color='GrayText'>
-                        Was ${price.toFixed(2)}
-                      </Typography>
+                    <Box sx={{ display: 'flex' }}>
+                      {discount && (
+                        <Typography variant='body2' sx={{ color: 'success.main', fontWeight: 500 }}>
+                          {discount.amountType === 'fixed'
+                            ? `$${discount.amount.toFixed(2)} off`
+                            : `${discount.amount}% off`}
+                        </Typography>
+                      )}
+
+                      {discount?.limitedTimeOnly ? (
+                        <Typography variant='body2' sx={{ ml: 1, fontWeight: 500, color: 'error.main' }}>
+                          Limited Time Only
+                        </Typography>
+                      ) : (
+                        discount?.startsAt &&
+                        discount?.endsAt && (
+                          <Typography variant='body2' sx={{ ml: 1, fontWeight: 500, color: 'error.main' }}>
+                            {dayjs(discount?.startsAt).format('MMM DD')} -{' '}
+                            {dayjs(discount?.endsAt).format('MMM DD')}
+                          </Typography>
+                        )
+                      )}
+                    </Box>
+
+                    {product?.url?.affiliate && (
+                      <Typography variant='body2'>Sold on {product.url.affiliate.name}</Typography>
                     )}
                   </Box>
 
-                  {discount?.limitedTimeOnly && (
-                    <Typography variant='caption' sx={{ fontWeight: 500, color: 'error.main' }}>
-                      Limited Time Only
-                    </Typography>
-                  )}
-
-                  {product?.url?.affiliate && (
-                    <Typography variant='body2'>Sold on {product.url.affiliate.name}</Typography>
+                  {unavailable ? (
+                    <Chip size='small' color='error' label='Unavailable' />
+                  ) : (
+                    <Button
+                      variant='contained'
+                      onClick={handleBuyNowClick}
+                      startIcon={
+                        <Icon
+                          path={product?.url?.type === 'affiliate' ? mdiOpenInNew : mdiCartPlus}
+                          size={1}
+                        />
+                      }
+                    >
+                      {product?.url?.type === 'affiliate' ? 'Buy Now' : 'Add to Cart'}
+                    </Button>
                   )}
                 </Box>
 
-                <Button
-                  variant='contained'
-                  onClick={() => {
-                    /* TODO */
-                  }}
-                >
-                  Buy Now
-                </Button>
-              </Box>
+                {Boolean(
+                  selectedVariant && (product?.about || selectedVariant?.excerpt || selectedVariant?.about)
+                ) && (
+                  <Box>
+                    <Divider sx={{ my: 2 }} />
 
-              <Divider sx={{ my: 2 }} />
+                    {Boolean(selectedVariant?.excerpt) && (
+                      <Typography sx={{ mb: 2 }}>{selectedVariant?.excerpt}</Typography>
+                    )}
 
-              <Box>
-                {Boolean(selectedVariant?.excerpt) && (
-                  <Typography sx={{ mb: 2 }}>{selectedVariant?.excerpt}</Typography>
+                    {Boolean(selectedVariant?.about || product?.about) && (
+                      <>
+                        <Typography variant='h6'>About this item</Typography>
+
+                        <div dangerouslySetInnerHTML={{ __html: product?.about! }} />
+
+                        <div dangerouslySetInnerHTML={{ __html: selectedVariant?.about! }} />
+                      </>
+                    )}
+                  </Box>
                 )}
 
-                {Boolean(selectedVariant?.about || product?.about) && (
-                  <>
-                    <Typography variant='h6'>About this item</Typography>
+                {specifications.length > 0 && (
+                  <Box sx={{ my: 3 }}>
+                    <Divider sx={{ mb: 1 }} />
 
-                    <div dangerouslySetInnerHTML={{ __html: product?.about! }} />
+                    <Typography variant='h6'>Specifications</Typography>
 
-                    <div dangerouslySetInnerHTML={{ __html: about! }} />
-                  </>
+                    <Grid2
+                      container
+                      sx={{
+                        '--Grid-borderWidth': '1px',
+                        borderTop: 'var(--Grid-borderWidth) solid',
+                        borderLeft: 'var(--Grid-borderWidth) solid',
+                        borderColor: 'divider',
+                        '& > div': {
+                          borderRight: 'var(--Grid-borderWidth) solid',
+                          borderBottom: 'var(--Grid-borderWidth) solid',
+                          borderColor: 'divider'
+                        },
+                        mb: 3
+                      }}
+                    >
+                      {specifications.map((specification) => (
+                        <Fragment key={specification.name}>
+                          <Grid2 xs={4}>
+                            <Typography sx={{ margin: 2 }}>{specification.name}</Typography>
+                          </Grid2>
+
+                          <Grid2 xs={8}>
+                            <Typography sx={{ margin: 2 }}>{specification.value.join(', ')}</Typography>
+                          </Grid2>
+                        </Fragment>
+                      ))}
+                    </Grid2>
+                  </Box>
                 )}
               </Box>
             </Box>
-          </Box>
-        )}
-      </Section>
+          </Section>
+        </>
+      )}
     </Box>
   );
 };

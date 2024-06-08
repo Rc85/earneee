@@ -89,7 +89,11 @@ const ProductRow = ({ product, onClick, sortable }: Props) => {
       )}
 
       <ListItemButton onClick={onClick}>
-        <ListItemText primary={`${product.brand?.name ? `${product.brand?.name} ` : ''}${product.name}`} />
+        <ListItemText
+          primary={`${!product.parentId && product.brand?.name ? `${product.brand.name} ` : ''}${
+            product.name
+          }`}
+        />
       </ListItemButton>
 
       <Switch
