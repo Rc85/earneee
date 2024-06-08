@@ -46,6 +46,9 @@ exports.up = (pgm) => {
       about: {
         type: 'varchar'
       },
+      review: {
+        type: 'varchar'
+      },
       excerpt: {
         type: 'varchar'
       },

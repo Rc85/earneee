@@ -620,6 +620,7 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
       p.description,
       p.excerpt,
       p.details,
+      p.review,
       p.about,
       p.status,
       pb.brand,

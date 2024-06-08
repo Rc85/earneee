@@ -122,7 +122,7 @@ const App = () => {
                         path='/product/:id/about'
                         element={
                           <AuthenticatedRoute>
-                            <Pages.Product.About />
+                            <Pages.Product.About title='About' field='about' />
                           </AuthenticatedRoute>
                         }
                       />
@@ -131,7 +131,16 @@ const App = () => {
                         path='/product/:id/details'
                         element={
                           <AuthenticatedRoute>
-                            <Pages.Product.Details />
+                            <Pages.Product.Details title='Main Details' field='details' />
+                          </AuthenticatedRoute>
+                        }
+                      />
+
+                      <Route
+                        path='/product/:id/review'
+                        element={
+                          <AuthenticatedRoute>
+                            <Pages.Product.Review title='Review' field='review' />
                           </AuthenticatedRoute>
                         }
                       />
@@ -203,7 +212,7 @@ const App = () => {
                         path='/product/:id/variant/:productId/about'
                         element={
                           <AuthenticatedRoute>
-                            <Pages.Product.About />
+                            <Pages.Product.About title='About' field='about' />
                           </AuthenticatedRoute>
                         }
                       />
@@ -212,7 +221,7 @@ const App = () => {
                         path='/product/:id/variant/:productId/details'
                         element={
                           <AuthenticatedRoute>
-                            <Pages.Product.Details />
+                            <Pages.Product.Details title='Main Details' field='details' />
                           </AuthenticatedRoute>
                         }
                       />

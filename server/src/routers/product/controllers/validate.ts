@@ -63,7 +63,23 @@ export const validateCreateProduct = async (req: Request, resp: Response, next: 
     }
   }
 
-  const { name, excerpt, categoryId, brandId, description, about, details, urls } = product;
+  if (req.body.product.review && /^<p>\s*<\/p>$/.test(req.body.product.review)) {
+    req.body.product.review = null;
+  }
+
+  if (req.body.product.about && /^<p>\s*<\/p>$/.test(req.body.product.about)) {
+    req.body.product.about = null;
+  }
+
+  if (req.body.product.details && /^<p>\s*<\/p>$/.test(req.body.product.details)) {
+    req.body.product.details = null;
+  }
+
+  if (req.body.product.description && /^<p>\s*<\/p>$/.test(req.body.product.description)) {
+    req.body.product.description = null;
+  }
+
+  const { name, excerpt, categoryId, brandId, description, about, details, urls, review } = product;
 
   if (!name || validations.blankCheck.test(name)) {
     return next(new HttpException(400, `Name required`));
@@ -87,6 +103,8 @@ export const validateCreateProduct = async (req: Request, resp: Response, next: 
     return next(new HttpException(400, `Invalid about`));
   } else if (details && typeof details !== 'string') {
     return next(new HttpException(400, `Invalid details`));
+  } else if (review && typeof review !== 'string') {
+    return next(new HttpException(400, `Invalid review`));
   }
 
   if (urls) {

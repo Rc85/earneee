@@ -50,6 +50,7 @@ const ProductForm = ({ product, variant }: Props) => {
     about: null,
     ordinance: null,
     details: null,
+    review: null,
     featured: false,
     categoryId: 0,
     brandId: '',

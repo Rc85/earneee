@@ -9,8 +9,20 @@ import { ProductUrlsInterface } from '../../../../../_shared/types';
 export const createProduct = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
   const { product, brand } = req.body;
-  const { id, name, excerpt, categoryId, description, status, about, details, urls, parentId, featured } =
-    product;
+  const {
+    id,
+    name,
+    excerpt,
+    categoryId,
+    description,
+    status,
+    about,
+    details,
+    urls,
+    parentId,
+    featured,
+    review
+  } = product;
 
   let { brandId } = product;
 
@@ -62,7 +74,8 @@ export const createProduct = async (req: Request, resp: Response, next: NextFunc
       'about',
       'details',
       'parent_id',
-      'featured'
+      'featured',
+      'review'
     ],
     [
       id || generateKey(1),
@@ -75,7 +88,8 @@ export const createProduct = async (req: Request, resp: Response, next: NextFunc
       about || null,
       details || null,
       parentId || null,
-      Boolean(featured)
+      Boolean(featured),
+      review || null
     ],
     {
       conflict: {
@@ -91,6 +105,7 @@ export const createProduct = async (req: Request, resp: Response, next: NextFunc
           details = EXCLUDED.details,
           parent_id = EXCLUDED.parent_id,
           featured = EXCLUDED.featured,
+          review = EXCLUDED.review,
           updated_at = NOW()`
       },
       client

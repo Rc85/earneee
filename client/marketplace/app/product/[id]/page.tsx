@@ -40,7 +40,8 @@ const Product = ({ params: { id } }: Props) => {
   const discount = product?.url?.discount;
   const unavailableVariants = product?.variants?.filter((variant) => variant.status === 'unavailable') || [];
   const unavailable =
-    unavailableVariants.length === (product?.variants?.length || 0) || product?.status === 'unavailable';
+    (unavailableVariants.length > 0 && unavailableVariants.length === (product?.variants?.length || 0)) ||
+    product?.status === 'unavailable';
 
   let discountAmount = 0;
 
@@ -106,6 +107,16 @@ const Product = ({ params: { id } }: Props) => {
             <Box sx={{ display: 'flex' }}>
               <Box sx={{ flexGrow: 1 }}>
                 <Gallery media={media} />
+
+                {Boolean(product?.review) && (
+                  <Box sx={{ mb: 3 }}>
+                    <Divider sx={{ mb: 1 }} />
+
+                    <Typography variant='h6'>Our Review</Typography>
+
+                    <div className='product-review' dangerouslySetInnerHTML={{ __html: product?.review! }} />
+                  </Box>
+                )}
 
                 {Boolean(details) && (
                   <Box sx={{ mb: 3 }}>

@@ -15,6 +15,7 @@ export interface ProductsInterface {
   description: string | null;
   about: string | null;
   featured: boolean;
+  review: string | null;
   details: string | null;
   status: string;
   createdAt: string;

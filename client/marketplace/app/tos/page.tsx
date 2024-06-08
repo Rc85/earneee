@@ -40,6 +40,12 @@ const TermsOfService = () => {
           damage, disable, overburden, or impair the Website or interfere with any other party's use and
           enjoyment of the Website.
         </ListItem>
+
+        <ListItem disableGutters>
+          Limited Time Only Discount: Limited only discount cannot be guaranteed that the discount will still
+          be available on our affiliates' page when you decide to make a purchase. The availability of the
+          discount is solely at the discretion of our affiliates.
+        </ListItem>
       </List>
 
       <Typography variant='h6' sx={{ mt: 3 }}>

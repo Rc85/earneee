@@ -17,6 +17,7 @@ import {
   mdiImage,
   mdiImageText,
   mdiInformation,
+  mdiMessageDraw,
   mdiPencil,
   mdiPlusBox,
   mdiViewGridPlus
@@ -26,11 +27,10 @@ import ProductVariants from './ProductVariants';
 import AddVariant from './AddVariant';
 import { retrieveProducts } from '../../../../_shared/api';
 import { Loading } from '../../../../_shared/components';
-import About from './About';
 import Media from './Media';
 import Specifications from './Specifications';
-import Details from './Details';
 import Options from './Options';
+import RichFormPage from './RichFormPage';
 
 const Product = () => {
   const navigate = useNavigate();
@@ -88,6 +88,20 @@ const Product = () => {
               <ListItemText primary='Main Details' />
             </ListItemButton>
           </ListItem>
+
+          {!productId && (
+            <ListItem disablePadding disableGutters>
+              <ListItemButton
+                onClick={() => navigate(`/product/${id}${productId ? `/variant/${productId}` : ''}/review`)}
+              >
+                <ListItemIcon>
+                  <Icon path={mdiMessageDraw} size={1} />
+                </ListItemIcon>
+
+                <ListItemText primary='Review' />
+              </ListItemButton>
+            </ListItem>
+          )}
 
           <ListItem disablePadding disableGutters>
             <ListItemButton
@@ -163,10 +177,11 @@ const Product = () => {
 Product.Edit = EditProduct;
 Product.Variants = ProductVariants;
 Product.AddVariant = AddVariant;
-Product.About = About;
+Product.About = RichFormPage;
 Product.Media = Media;
 Product.Specifications = Specifications;
-Product.Details = Details;
+Product.Details = RichFormPage;
 Product.Options = Options;
+Product.Review = RichFormPage;
 
 export default Product;

@@ -30,6 +30,7 @@ const RichForm = ({ field }: Props) => {
     description: null,
     about: null,
     parentId: null,
+    review: null,
     featured: false,
     ordinance: null,
     details: null,
@@ -90,7 +91,12 @@ const RichForm = ({ field }: Props) => {
 
   return (
     <>
-      <RichTextEditor sx={editorStyle} editor={editor} />
+      <RichTextEditor
+        sx={editorStyle}
+        editor={editor}
+        onHtmlChange={(html) => setForm({ ...form, [field]: html })}
+        rawHtml={(form[field] as string) || ''}
+      />
 
       <LoadingButton
         variant='contained'
