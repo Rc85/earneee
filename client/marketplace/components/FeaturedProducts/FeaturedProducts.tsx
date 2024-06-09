@@ -8,8 +8,7 @@ import { retrieveMarketplaceProducts } from '../../../_shared/api';
 import { Loading } from '../../../_shared/components';
 import { useAppSelector } from '../../../_shared/redux/store';
 import Icon from '@mdi/react';
-import { useRouter } from 'next/navigation';
-import { ProductsInterface } from '../../../../_shared/types';
+import Link from 'next/link';
 
 let carouselInterval: NodeJS.Timer | undefined | void = undefined;
 
@@ -20,7 +19,6 @@ const FeaturedProducts = () => {
   const [imageIndex, setImageIndex] = useState(0);
   const [carouselTimer, setCarouselTimer] = useState(5);
   const [containerLoaded, setContainerLoaded] = useState(false);
-  const router = useRouter();
   const containerRef = useRef<any>(null);
 
   useEffect(() => {
@@ -77,10 +75,6 @@ const FeaturedProducts = () => {
     setCarouselTimer(5);
 
     setImageIndex(imageIndex + 1);
-  };
-
-  const handleProductClick = (product: ProductsInterface) => {
-    router.push(`/product/${product.id}`);
   };
 
   const handleOnMouseOver = () => {
@@ -143,88 +137,94 @@ const FeaturedProducts = () => {
                 const finalPrice = price - discountAmount;
 
                 return (
-                  <Box
-                    key={product.id}
-                    onMouseOver={handleOnMouseOver}
-                    onMouseLeave={handleOnMouseLeave}
-                    onClick={() => handleProductClick(product)}
-                    sx={{
-                      cursor: 'pointer',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'flex-end',
-                      backgroundColor: 'white',
-                      backgroundImage: mediaUrl ? `url("${mediaUrl}")` : undefined,
-                      backgroundRepeat: 'no-repeat',
-                      backgroundPosition: 'center',
-                      backgroundSize: (media?.width || 0) / (media?.height || 0) > 1.5 ? 'cover' : 'contain',
-                      width: '100%',
-                      height: '500px',
-                      position: 'absolute',
-                      transition: '0.15s linear',
-                      top: 0,
-                      right: `${imageIndex * 100 - i * 100}%`
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                        width: '100%',
+                  <Box key={product.id} className='product'>
+                    <Link
+                      key={product.id}
+                      onMouseOver={handleOnMouseOver}
+                      onMouseLeave={handleOnMouseLeave}
+                      href={`/product/${product.id}`}
+                      style={{
+                        cursor: 'pointer',
                         display: 'flex',
-                        alignItems: 'center',
-                        p: 2
+                        flexDirection: 'column',
+                        justifyContent: 'flex-end',
+                        backgroundColor: 'white',
+                        backgroundImage: mediaUrl ? `url("${mediaUrl}")` : undefined,
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: 'center',
+                        backgroundSize:
+                          (media?.width || 0) / (media?.height || 0) > 1.5 ? 'cover' : 'contain',
+                        width: '100%',
+                        height: '500px',
+                        position: 'absolute',
+                        transition: '0.15s linear',
+                        top: 0,
+                        right: `${imageIndex * 100 - i * 100}%`
                       }}
                     >
-                      <Box sx={{ flexGrow: 1, mr: 1 }}>
-                        <Typography variant='h5' color='white'>
-                          {product.brand?.name} {product.name}
-                        </Typography>
+                      <Box
+                        sx={{
+                          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                          width: '100%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          p: 2
+                        }}
+                      >
+                        <Box sx={{ flexGrow: 1, mr: 1 }}>
+                          <Typography variant='h5' color='white'>
+                            {product.brand?.name} {product.name}
+                          </Typography>
 
-                        <Typography
-                          color='white'
-                          sx={{
-                            display: '-webkit-box',
-                            WebkitBoxOrient: 'vertical',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            WebkitLineClamp: 3
-                          }}
-                        >
-                          {product.excerpt}
-                        </Typography>
-                      </Box>
+                          <Typography
+                            color='white'
+                            sx={{
+                              display: '-webkit-box',
+                              WebkitBoxOrient: 'vertical',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              WebkitLineClamp: 3
+                            }}
+                          >
+                            {product.excerpt}
+                          </Typography>
+                        </Box>
 
-                      <Box sx={{ ml: 1, flexShrink: 0 }}>
-                        <Typography sx={{ mb: 0, textAlign: 'center' }} color='white' variant='h4'>
-                          ${finalPrice.toFixed(2)} {currency.toUpperCase()}
-                        </Typography>
+                        <Box sx={{ ml: 1, flexShrink: 0 }}>
+                          <Typography sx={{ mb: 0, textAlign: 'center' }} color='white' variant='h4'>
+                            ${finalPrice.toFixed(2)} {currency.toUpperCase()}
+                          </Typography>
 
-                        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                          {discount && (
-                            <Typography
-                              variant='body2'
-                              sx={{ textAlign: 'center', fontWeight: 500, color: 'success.light' }}
-                            >
-                              {discount.amountType === 'fixed'
-                                ? `$${discount.amount.toFixed(2)} off`
-                                : `${discount.amount}% off`}
-                            </Typography>
-                          )}
+                          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                            {discount && (
+                              <Typography
+                                variant='body2'
+                                sx={{ textAlign: 'center', fontWeight: 500, color: 'success.light' }}
+                              >
+                                {discount.amountType === 'fixed'
+                                  ? `$${discount.amount.toFixed(2)} off`
+                                  : `${discount.amount}% off`}
+                              </Typography>
+                            )}
 
-                          {price !== finalPrice && (
-                            <Typography variant='body2' sx={{ textAlign: 'center', ml: 1, color: grey[400] }}>
-                              Was ${price.toFixed(2)}
+                            {price !== finalPrice && (
+                              <Typography
+                                variant='body2'
+                                sx={{ textAlign: 'center', ml: 1, color: grey[400] }}
+                              >
+                                Was ${price.toFixed(2)}
+                              </Typography>
+                            )}
+                          </Box>
+
+                          {product.url?.affiliate && (
+                            <Typography variant='body2' color='white' sx={{ textAlign: 'center' }}>
+                              Sold on {product.url.affiliate.name}
                             </Typography>
                           )}
                         </Box>
-
-                        {product.url?.affiliate && (
-                          <Typography variant='body2' color='white' sx={{ textAlign: 'center' }}>
-                            Sold on {product.url.affiliate.name}
-                          </Typography>
-                        )}
                       </Box>
-                    </Box>
+                    </Link>
                   </Box>
                 );
               })}

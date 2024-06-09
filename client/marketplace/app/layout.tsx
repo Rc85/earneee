@@ -1,6 +1,6 @@
 import '../index.css';
 import { brandName } from '../../_shared/constants/brand-name';
-import type { Viewport } from 'next';
+import type { Metadata, Viewport } from 'next';
 import Main from './main';
 
 export const viewport: Viewport = {
@@ -8,6 +8,8 @@ export const viewport: Viewport = {
   initialScale: 0.1,
   maximumScale: 1
 };
+
+export const metadata: Metadata = {};
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (

@@ -3,10 +3,10 @@
 import { Box, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 import { useState } from 'react';
 import { CategoriesInterface } from '../../../../_shared/types';
-import { useRouter } from 'next/navigation';
 import { mdiChevronRight, mdiChevronLeft } from '@mdi/js';
 import Icon from '@mdi/react';
 import { retrieveCategories } from '../../../_shared/api';
+import Link from 'next/link';
 
 interface Props {
   onClick: () => void;
@@ -16,7 +16,6 @@ const Categories = ({ onClick }: Props) => {
   const { data } = retrieveCategories({ hasProducts: true });
   const { categories } = data || {};
   const [selectedCategories, setSelectedCategories] = useState<CategoriesInterface[]>([]);
-  const router = useRouter();
 
   const handleCategoryClick = (category: CategoriesInterface) => {
     const categories = [...selectedCategories];
@@ -36,9 +35,7 @@ const Categories = ({ onClick }: Props) => {
     }
   };
 
-  const handleOnClick = (path: string) => {
-    router.push(path);
-
+  const handleOnClick = () => {
     setSelectedCategories([]);
 
     onClick();
@@ -66,15 +63,23 @@ const Categories = ({ onClick }: Props) => {
           transition: '0.15s ease-in-out'
         }}
       >
-        <ListItem disableGutters divider sx={{ width: '100%' }} onClick={() => handleOnClick('/')}>
-          <ListItemButton sx={{ flexShrink: 1 }}>Main</ListItemButton>
+        <ListItem disableGutters divider sx={{ width: '100%' }} className='product'>
+          <Link href='/' style={{ flexGrow: 1, flexShrink: 1 }}>
+            <ListItemButton onClick={handleOnClick}>Main</ListItemButton>
+          </Link>
         </ListItem>
 
         {categories?.map((category) => (
-          <ListItem key={category.id} disableGutters divider sx={{ width: '100%', pr: 1 }}>
-            <ListItemButton sx={{ flexShrink: 1 }} onClick={() => handleOnClick(`/products/${category.id}`)}>
-              {category.name}
-            </ListItemButton>
+          <ListItem
+            key={category.id}
+            disableGutters
+            divider
+            sx={{ width: '100%', pr: 1 }}
+            className='product'
+          >
+            <Link href={`/products/${category.id}`} style={{ flexGrow: 1, flexShrink: 1 }}>
+              <ListItemButton onClick={handleOnClick}>{category.name}</ListItemButton>
+            </Link>
 
             {category.subcategories && category.subcategories.length > 0 && (
               <IconButton size='small' sx={{ flexShrink: 1 }} onClick={() => handleCategoryClick(category)}>
@@ -105,13 +110,19 @@ const Categories = ({ onClick }: Props) => {
         </ListItem>
 
         {selectedCategories[0]?.subcategories?.map((category) => (
-          <ListItem key={category.id} disableGutters divider sx={{ width: '100%', pr: 1 }}>
-            <ListItemButton
-              sx={{ flexShrink: 1 }}
-              onClick={() => handleOnClick(`/products/${selectedCategories[0]?.id}/${category.id}`)}
+          <ListItem
+            key={category.id}
+            disableGutters
+            divider
+            sx={{ width: '100%', pr: 1 }}
+            className='product'
+          >
+            <Link
+              href={`/products/${selectedCategories[0]?.id}/${category.id}`}
+              style={{ flexShrink: 1, flexGrow: 1 }}
             >
-              {category.name}
-            </ListItemButton>
+              <ListItemButton onClick={handleOnClick}>{category.name}</ListItemButton>
+            </Link>
 
             {category.subcategories && category.subcategories.length > 0 && (
               <IconButton size='small' sx={{ flexShrink: 1 }} onClick={() => handleCategoryClick(category)}>
@@ -142,17 +153,13 @@ const Categories = ({ onClick }: Props) => {
         </ListItem>
 
         {selectedCategories[0]?.subcategories?.[0]?.subcategories?.map((category) => (
-          <ListItem key={category.id} disableGutters divider sx={{ width: '100%' }}>
-            <ListItemButton
-              sx={{ flexShrink: 1 }}
-              onClick={() =>
-                handleOnClick(
-                  `/products/${selectedCategories[0]?.id}/${selectedCategories[1]?.id}/${category.id}`
-                )
-              }
+          <ListItem key={category.id} disableGutters divider sx={{ width: '100%' }} className='product'>
+            <Link
+              href={`/products/${selectedCategories[0]?.id}/${selectedCategories[1]?.id}/${category.id}`}
+              style={{ flexShrink: 1, flexGrow: 1 }}
             >
-              {category.name}
-            </ListItemButton>
+              <ListItemButton onClick={handleOnClick}>{category.name}</ListItemButton>
+            </Link>
           </ListItem>
         ))}
       </List>

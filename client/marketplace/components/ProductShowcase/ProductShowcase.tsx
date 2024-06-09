@@ -4,9 +4,8 @@ import Section from '../../../_shared/components/Section/Section';
 import { Box, Divider, Paper, Typography } from '@mui/material';
 import { retrieveProductShowcase } from '../../../_shared/api';
 import { useAppSelector } from '../../../_shared/redux/store';
-import { useRouter } from 'next/navigation';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
-import { ProductsInterface } from '../../../../_shared/types';
+import Link from 'next/link';
 
 interface Props {
   type: 'new' | 'popular';
@@ -16,11 +15,6 @@ const ProductShowcase = ({ type }: Props) => {
   const { country } = useAppSelector((state) => state.App);
   const { data } = retrieveProductShowcase({ type, country });
   const { products } = data || {};
-  const router = useRouter();
-
-  const handleProductClick = (product: ProductsInterface) => {
-    router.push(`/product/${product.id}`);
-  };
 
   return products && products.length > 0 ? (
     <Section
@@ -60,10 +54,10 @@ const ProductShowcase = ({ type }: Props) => {
                   flexDirection: 'column',
                   flexShrink: 0
                 }}
-                className='product-card'
+                className='product'
               >
                 <Box>
-                  <Box sx={{ cursor: 'pointer' }} onClick={() => handleProductClick(product)}>
+                  <Link href={`/product/${product.id}`}>
                     <Box
                       sx={{
                         borderTopRightRadius: 4,
@@ -126,7 +120,7 @@ const ProductShowcase = ({ type }: Props) => {
                         )}
                       </Box>
                     </Box>
-                  </Box>
+                  </Link>
 
                   {product.url?.affiliate && (
                     <>

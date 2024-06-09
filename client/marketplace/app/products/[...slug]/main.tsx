@@ -29,12 +29,11 @@ import {
   retrieveMarketplaceProducts
 } from '../../../../_shared/api';
 import Link from 'next/link';
-import { ProductSpecificationsInterface, ProductsInterface } from '../../../../../_shared/types';
+import { ProductSpecificationsInterface } from '../../../../../_shared/types';
 import { PriceFilter } from '../../../components';
 import { mdiCloseBoxMultiple, mdiImageOff, mdiViewGrid, mdiViewList } from '@mdi/js';
 import Icon from '@mdi/react';
 import { grey } from '@mui/material/colors';
-import { useRouter } from 'next/navigation';
 import { useAppSelector } from '../../../../_shared/redux/store';
 import { Section } from '../../../../_shared/components';
 
@@ -81,7 +80,6 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
   const specificationLabels = [
     ...new Set(specifications.map((specification) => specification.name.toUpperCase()))
   ];
-  const router = useRouter();
 
   const handleSpecificationChange = (specification: ProductSpecificationsInterface) => {
     const specifications = { ...filters.specifications };
@@ -114,10 +112,6 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
 
   const handleClearAllClick = () => {
     setFilters({ minPrice: undefined, maxPrice: undefined, specifications: {} });
-  };
-
-  const handleProductClick = (product: ProductsInterface) => {
-    router.push(`/product/${product.id}`);
   };
 
   return (
@@ -315,90 +309,87 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
 
                     return (
                       <Grid2 key={product.id} xs={12} sm={6} md={4} xl={3}>
-                        <Paper
-                          variant='outlined'
-                          className='product-card'
-                          onClick={() => handleProductClick(product)}
-                          sx={{ width: 0, minWidth: '100%', cursor: 'pointer' }}
-                        >
-                          <Box
-                            sx={{
-                              width: '100%',
-                              height: '200px',
-                              borderTopRightRadius: '3px',
-                              borderTopLeftRadius: '3px',
-                              backgroundPosition: 'center',
-                              backgroundImage: mediaUrl ? `url('${mediaUrl}')` : undefined,
-                              backgroundRepeat: 'no-repeat',
-                              backgroundSize: 'contain',
-                              backgroundColor: mediaUrl ? 'transparent' : grey[300],
-                              display: 'flex',
-                              justifyContent: 'center',
-                              alignItems: 'center'
-                            }}
-                          >
-                            {!mediaUrl && <Icon path={mdiImageOff} size={5} color={grey[500]} />}
-                          </Box>
+                        <Paper variant='outlined' className='product' sx={{ width: 0, minWidth: '100%' }}>
+                          <Link href={`/product/${product.id}`}>
+                            <Box
+                              sx={{
+                                width: '100%',
+                                height: '200px',
+                                borderTopRightRadius: '3px',
+                                borderTopLeftRadius: '3px',
+                                backgroundPosition: 'center',
+                                backgroundImage: mediaUrl ? `url('${mediaUrl}')` : undefined,
+                                backgroundRepeat: 'no-repeat',
+                                backgroundSize: 'contain',
+                                backgroundColor: mediaUrl ? 'transparent' : grey[300],
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center'
+                              }}
+                            >
+                              {!mediaUrl && <Icon path={mdiImageOff} size={5} color={grey[500]} />}
+                            </Box>
 
-                          <Box sx={{ p: 1 }}>
-                            <Typography sx={{ fontWeight: 'bold' }}>
-                              {product.brand?.name} {product.name}
-                            </Typography>
-                          </Box>
-
-                          {Boolean(product.excerpt) && (
                             <Box sx={{ p: 1 }}>
-                              <Typography
-                                sx={{
-                                  display: '-webkit-box',
-                                  WebkitBoxOrient: 'vertical',
-                                  overflow: 'hidden',
-                                  textOverflow: 'ellipsis',
-                                  WebkitLineClamp: 3
-                                }}
-                              >
-                                {product.excerpt}
+                              <Typography sx={{ fontWeight: 'bold' }}>
+                                {product.brand?.name} {product.name}
                               </Typography>
                             </Box>
-                          )}
 
-                          <Divider />
-
-                          <Box
-                            sx={{
-                              p: 1,
-                              display: 'flex',
-                              flexDirection: 'column',
-                              alignItems: 'flex-end'
-                            }}
-                          >
-                            <Typography variant='h6' sx={{ mb: 0 }}>
-                              ${finalPrice.toFixed(2)} {currency.toUpperCase()}
-                            </Typography>
-
-                            <Box sx={{ display: 'flex' }}>
-                              {discount && (
+                            {Boolean(product.excerpt) && (
+                              <Box sx={{ p: 1 }}>
                                 <Typography
-                                  variant='body2'
-                                  sx={{ color: 'success.main', fontWeight: 500, textAlign: 'center' }}
+                                  sx={{
+                                    display: '-webkit-box',
+                                    WebkitBoxOrient: 'vertical',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    WebkitLineClamp: 3
+                                  }}
                                 >
-                                  {discount.amountType === 'fixed'
-                                    ? `$${discount.amount.toFixed(2)} off`
-                                    : `${discount.amount}% off`}
+                                  {product.excerpt}
                                 </Typography>
-                              )}
+                              </Box>
+                            )}
 
-                              {price !== finalPrice && (
-                                <Typography
-                                  variant='body2'
-                                  sx={{ textAlign: 'center', ml: 1 }}
-                                  color='GrayText'
-                                >
-                                  Was ${price.toFixed(2)}
-                                </Typography>
-                              )}
+                            <Divider />
+
+                            <Box
+                              sx={{
+                                p: 1,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'flex-end'
+                              }}
+                            >
+                              <Typography variant='h6' sx={{ mb: 0 }}>
+                                ${finalPrice.toFixed(2)} {currency.toUpperCase()}
+                              </Typography>
+
+                              <Box sx={{ display: 'flex' }}>
+                                {discount && (
+                                  <Typography
+                                    variant='body2'
+                                    sx={{ color: 'success.main', fontWeight: 500, textAlign: 'center' }}
+                                  >
+                                    {discount.amountType === 'fixed'
+                                      ? `$${discount.amount.toFixed(2)} off`
+                                      : `${discount.amount}% off`}
+                                  </Typography>
+                                )}
+
+                                {price !== finalPrice && (
+                                  <Typography
+                                    variant='body2'
+                                    sx={{ textAlign: 'center', ml: 1 }}
+                                    color='GrayText'
+                                  >
+                                    Was ${price.toFixed(2)}
+                                  </Typography>
+                                )}
+                              </Box>
                             </Box>
-                          </Box>
+                          </Link>
 
                           {product.url?.affiliate && (
                             <>
@@ -443,43 +434,42 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
 
                     return (
                       <ListItem key={product.id} disableGutters divider>
-                        <ListItemButton
-                          sx={{ alignItems: 'flex-start' }}
-                          onClick={() => handleProductClick(product)}
-                        >
-                          <ListItemIcon sx={{ mr: 1 }}>
-                            <Avatar
-                              src={mediaUrl || '/broken.jpg'}
-                              variant='rounded'
-                              alt={product.name}
-                              sx={{
-                                width: 100,
-                                height: 100,
-                                backgroundColor: !mediaUrl ? grey[300] : undefined
-                              }}
-                              imgProps={{ sx: { objectFit: 'contain' } }}
-                            >
-                              <Icon path={mdiImageOff} size={1} color={grey[500]} />
-                            </Avatar>
-                          </ListItemIcon>
-
-                          <Box>
-                            <ListItemText primary={product.name} secondary={product.brand?.name} />
-
-                            {Boolean(product.excerpt) && (
-                              <Typography
+                        <ListItemButton className='product' sx={{ alignItems: 'flex-start' }}>
+                          <Link href={`/product/${product.id}`} style={{ flexGrow: 1 }}>
+                            <ListItemIcon sx={{ mr: 1 }}>
+                              <Avatar
+                                src={mediaUrl || '/broken.jpg'}
+                                variant='rounded'
+                                alt={product.name}
                                 sx={{
-                                  display: '-webkit-box',
-                                  WebkitBoxOrient: 'vertical',
-                                  overflow: 'hidden',
-                                  textOverflow: 'ellipsis',
-                                  WebkitLineClamp: 3
+                                  width: 100,
+                                  height: 100,
+                                  backgroundColor: !mediaUrl ? grey[300] : undefined
                                 }}
+                                imgProps={{ sx: { objectFit: 'contain' } }}
                               >
-                                {product.excerpt}
-                              </Typography>
-                            )}
-                          </Box>
+                                <Icon path={mdiImageOff} size={1} color={grey[500]} />
+                              </Avatar>
+                            </ListItemIcon>
+
+                            <Box>
+                              <ListItemText primary={product.name} secondary={product.brand?.name} />
+
+                              {Boolean(product.excerpt) && (
+                                <Typography
+                                  sx={{
+                                    display: '-webkit-box',
+                                    WebkitBoxOrient: 'vertical',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    WebkitLineClamp: 3
+                                  }}
+                                >
+                                  {product.excerpt}
+                                </Typography>
+                              )}
+                            </Box>
+                          </Link>
                         </ListItemButton>
 
                         <Box

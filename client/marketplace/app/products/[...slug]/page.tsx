@@ -50,6 +50,8 @@ const CategoryContainer = async ({ params: { slug } }: Props) => {
     category = categories[0];
   }
 
+  console.log(category, subcategory, group);
+
   const name = group?.name || subcategory?.name || category?.name;
 
   return !category && !subcategory && !group ? (
@@ -66,15 +68,13 @@ const CategoryContainer = async ({ params: { slug } }: Props) => {
             {subcategory ? subcategory.name.charAt(0).toUpperCase() + subcategory?.name.substring(1) : ''}
           </Link>
         </Breadcrumbs>
-      ) : (
-        subcategory?.name && (
-          <Breadcrumbs>
-            <Link href={`/products/${category?.id}`}>
-              {category ? category.name.charAt(0).toUpperCase() + category.name.substring(1) : ''}
-            </Link>
-          </Breadcrumbs>
-        )
-      )}
+      ) : subcategory?.name ? (
+        <Breadcrumbs>
+          <Link href={`/products/${category?.id}`}>
+            {category ? category.name.charAt(0).toUpperCase() + category.name.substring(1) : ''}
+          </Link>
+        </Breadcrumbs>
+      ) : null}
 
       <Main name={name} categoryId={categoryId} subcategoryId={subcategoryId} groupId={groupId} />
     </Box>
