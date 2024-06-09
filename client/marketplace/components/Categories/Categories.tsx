@@ -1,11 +1,11 @@
 'use client';
 
 import { Box, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CategoriesInterface } from '../../../../_shared/types';
 import { mdiChevronRight, mdiChevronLeft } from '@mdi/js';
 import Icon from '@mdi/react';
-import { retrieveCategories } from '../../../_shared/api';
+import { listCategories } from '../../../_shared/api';
 import Link from 'next/link';
 
 interface Props {
@@ -13,32 +13,36 @@ interface Props {
 }
 
 const Categories = ({ onClick }: Props) => {
-  const { data } = retrieveCategories({ hasProducts: true });
+  const { data } = listCategories();
   const { categories } = data || {};
-  const [selectedCategories, setSelectedCategories] = useState<CategoriesInterface[]>([]);
+  const topCategories = categories?.[0] || [];
+  const [prevCategories, setPrevCategories] = useState<CategoriesInterface[][]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<CategoriesInterface[]>(topCategories);
 
-  const handleCategoryClick = (category: CategoriesInterface) => {
-    const categories = [...selectedCategories];
+  useEffect(() => {
+    setSelectedCategories(topCategories);
+  }, [topCategories]);
 
-    categories.push(category);
+  const handleCategoryClick = (category: CategoriesInterface, prev: CategoriesInterface[]) => {
+    const cat = categories?.find((c) => c[0]?.parentId === category.id) || [];
 
-    setSelectedCategories(categories);
+    setPrevCategories([...prevCategories, prev]);
+    setSelectedCategories([...cat]);
   };
 
   const handleBackClick = () => {
-    if (selectedCategories.length > 0) {
-      const categories = [...selectedCategories];
+    const prev = [...prevCategories];
+    const prevCategory = prev.pop();
 
-      categories.pop();
-
-      setSelectedCategories(categories);
-    }
+    setSelectedCategories(!prevCategory || !prevCategory[0].parentId ? [] : prevCategory);
+    setPrevCategories(prev);
   };
 
   const handleOnClick = () => {
-    setSelectedCategories([]);
-
     onClick();
+
+    setPrevCategories([]);
+    setSelectedCategories(topCategories);
   };
 
   return (
@@ -54,7 +58,7 @@ const Categories = ({ onClick }: Props) => {
         flexShrink: 0
       }}
     >
-      <List
+      {/* <List
         disablePadding
         sx={{
           width: '100%',
@@ -69,7 +73,7 @@ const Categories = ({ onClick }: Props) => {
           </Link>
         </ListItem>
 
-        {categories?.map((category) => (
+        {topCategories.map((category) => (
           <ListItem
             key={category.id}
             disableGutters
@@ -81,16 +85,85 @@ const Categories = ({ onClick }: Props) => {
               <ListItemButton onClick={handleOnClick}>{category.name}</ListItemButton>
             </Link>
 
-            {category.subcategories && category.subcategories.length > 0 && (
-              <IconButton size='small' sx={{ flexShrink: 1 }} onClick={() => handleCategoryClick(category)}>
+            {categories?.find((c) => c[0]?.parentId === category.id) && (
+              <IconButton
+                size='small'
+                sx={{ flexShrink: 1 }}
+                onClick={() => handleCategoryClick(category, topCategories)}
+              >
                 <Icon path={mdiChevronRight} size={1} />
               </IconButton>
             )}
           </ListItem>
         ))}
-      </List>
+      </List> */}
 
-      <List
+      {categories?.map((subcategory) => (
+        <List
+          disablePadding
+          sx={{
+            width: '100%',
+            position: 'absolute',
+            left: prevCategories.find((categories) => categories[0]?.parentId === subcategory[0]?.parentId)
+              ? '-100%'
+              : selectedCategories[0] &&
+                (!selectedCategories[0].parentId ||
+                  selectedCategories[0]?.parentId === subcategory[0]?.parentId)
+              ? 0
+              : '100%',
+            transition: '0.15s ease-in-out'
+          }}
+        >
+          {topCategories[0].parentId !== subcategory[0].parentId ? (
+            <ListItem disableGutters divider sx={{ width: '100%' }}>
+              <ListItemButton onClick={handleBackClick}>
+                <ListItemIcon>
+                  <Icon path={mdiChevronLeft} size={1} />
+                </ListItemIcon>
+
+                <ListItemText primary='Back' />
+              </ListItemButton>
+            </ListItem>
+          ) : (
+            <ListItem disableGutters divider sx={{ width: '100%' }} className='product'>
+              <Link href='/' style={{ flexGrow: 1, flexShrink: 1 }}>
+                <ListItemButton onClick={handleOnClick}>Main</ListItemButton>
+              </Link>
+            </ListItem>
+          )}
+
+          {subcategory.map((category) => (
+            <ListItem
+              key={category.id}
+              disableGutters
+              divider
+              sx={{ width: '100%', pr: 1 }}
+              className='product'
+            >
+              <Link
+                href={`/products/${prevCategories.map((category) => category[0]?.id).join('/')}${
+                  prevCategories.length > 0 ? '/' : ''
+                }${category.id}`}
+                style={{ flexGrow: 1, flexShrink: 1 }}
+              >
+                <ListItemButton onClick={handleOnClick}>{category.name}</ListItemButton>
+              </Link>
+
+              {categories?.find((c) => c[0]?.parentId === category.id) && (
+                <IconButton
+                  size='small'
+                  sx={{ flexShrink: 1 }}
+                  onClick={() => handleCategoryClick(category, subcategory)}
+                >
+                  <Icon path={mdiChevronRight} size={1} />
+                </IconButton>
+              )}
+            </ListItem>
+          ))}
+        </List>
+      ))}
+
+      {/* <List
         disablePadding
         sx={{
           width: '100%',
@@ -162,7 +235,7 @@ const Categories = ({ onClick }: Props) => {
             </Link>
           </ListItem>
         ))}
-      </List>
+      </List> */}
     </Box>
   );
 };

@@ -18,4 +18,6 @@ router.put('/v1/auth/admin/category', dbConnect, middleware(controllers.sortCate
 
 router.delete('/v1/auth/admin/category', dbConnect, middleware(controllers.deleteCategory), response);
 
+router.get('/v1/category/list', dbConnect, middleware(controllers.listCategories), response);
+
 export default router;

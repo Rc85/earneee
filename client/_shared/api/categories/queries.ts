@@ -21,3 +21,18 @@ export const retrieveCategories = (options?: {
     }
   });
 };
+
+export const listCategories = () => {
+  return useQuery<{ categories: CategoriesInterface[][] }>({
+    queryKey: ['categories list'],
+    queryFn: async () => {
+      const { data } = await axios({
+        method: 'get',
+        url: '/v1/category/list',
+        withCredentials: true
+      });
+
+      return data;
+    }
+  });
+};

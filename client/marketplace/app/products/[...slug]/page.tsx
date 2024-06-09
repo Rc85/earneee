@@ -50,8 +50,6 @@ const CategoryContainer = async ({ params: { slug } }: Props) => {
     category = categories[0];
   }
 
-  console.log(category, subcategory, group);
-
   const name = group?.name || subcategory?.name || category?.name;
 
   return !category && !subcategory && !group ? (
