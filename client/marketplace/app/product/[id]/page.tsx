@@ -3,7 +3,6 @@
 import Section from '../../../../_shared/components/Section/Section';
 import { Box, Breadcrumbs, Button, Chip, Divider, Paper, Typography } from '@mui/material';
 import Link from 'next/link';
-import { Loading } from '../../../../_shared/components';
 import { retrieveMarketplaceProduct } from '../../../../_shared/api';
 import Grid2 from '@mui/material/Unstable_Grid2';
 import { useState, Fragment, useEffect } from 'react';
@@ -14,6 +13,7 @@ import { grey } from '@mui/material/colors';
 import Icon from '@mdi/react';
 import { mdiCartPlus, mdiImageOff, mdiOpenInNew } from '@mdi/js';
 import dayjs from 'dayjs';
+import Loading from './loading';
 
 interface Props {
   params: { id: string };

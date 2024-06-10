@@ -1,7 +1,9 @@
 import '../index.css';
 import { brandName } from '../../_shared/constants/brand-name';
-import type { Metadata, Viewport } from 'next';
+import type { Viewport } from 'next';
 import Main from './main';
+import { Container, Typography } from '@mui/material';
+import { StatusesInterface } from '../../../_shared/types';
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -9,9 +11,14 @@ export const viewport: Viewport = {
   maximumScale: 1
 };
 
-export const metadata: Metadata = {};
+const RootLayout = async ({ children }: { children: React.ReactNode }) => {
+  const status = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/v1/statuses`, {
+    next: { revalidate: 5 }
+  });
+  const statusData = await status.json();
+  const statuses: StatusesInterface[] = statusData.statuses;
+  const online = statuses?.find((status) => status.name === 'marketplace')?.online;
 
-const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <html lang='en'>
       <head>
@@ -42,7 +49,28 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
       </head>
 
       <body>
-        <Main>{children}</Main>
+        {!Boolean(online) ? (
+          <Container
+            maxWidth='md'
+            sx={{
+              flexGrow: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}
+          >
+            <Typography variant='h3' sx={{ fontWeight: 900, mb: 5, textAlign: 'center' }}>
+              Offline
+            </Typography>
+
+            <Typography>
+              {brandName} is running some maintenance and will be back online as soon as possible.
+            </Typography>
+          </Container>
+        ) : (
+          <Main>{children}</Main>
+        )}
       </body>
     </html>
   );

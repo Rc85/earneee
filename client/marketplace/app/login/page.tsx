@@ -5,7 +5,6 @@ import Icon from '@mdi/react';
 import { LoadingButton } from '@mui/lab';
 import {
   Box,
-  Button,
   Checkbox,
   CircularProgress,
   Container,
@@ -15,15 +14,17 @@ import {
   TextField,
   Typography
 } from '@mui/material';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSnackbar } from 'notistack';
-import { retrieveStatuses, useLogin } from '../../../_shared/api';
-import { Loading } from '../../../_shared/components';
+import { useLogin } from '../../../_shared/api';
 import Link from 'next/link';
+import { StatusesInterface } from '../../../../_shared/types';
+import Loading from './loading';
 
 export default function Login() {
-  const [status, setStatus] = useState('');
+  const [status, setStatus] = useState('Loading');
+  const [online, setOnline] = useState(false);
   const [form, setForm] = useState<{
     email: string;
     password: string;
@@ -39,9 +40,20 @@ export default function Login() {
   const redirect = searchParams.get('redirect');
   const router = useRouter();
   const { enqueueSnackbar } = useSnackbar();
-  const { isLoading, data } = retrieveStatuses();
-  const { statuses } = data || {};
-  const loginStatus = statuses?.find((status) => status.name === 'login');
+
+  useEffect(() => {
+    (async () => {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/v1/statuses`, {
+        next: { revalidate: 5 }
+      });
+      const data = await res.json();
+      const { statuses }: { statuses: StatusesInterface[] } = data;
+      const online = statuses?.find((status) => status.name === 'login')?.online;
+
+      setOnline(Boolean(online));
+      setStatus('');
+    })();
+  }, []);
 
   const handleSuccess = () => {
     router.push(redirect || '/');
@@ -71,9 +83,9 @@ export default function Login() {
     login.mutate(form);
   };
 
-  return isLoading ? (
+  return status === 'Loading' ? (
     <Loading />
-  ) : !loginStatus?.online ? (
+  ) : !online ? (
     <Container
       maxWidth='md'
       sx={{
@@ -183,9 +195,11 @@ export default function Login() {
               onChange={() => setForm({ ...form, remember: !form.remember })}
             />
 
-            <Button color='error' onClick={() => router.push('/reset-password')}>
-              Reset Password
-            </Button>
+            <Typography variant='button'>
+              <Link color='error' href='/reset-password'>
+                Reset Password
+              </Link>
+            </Typography>
           </Box>
 
           <LoadingButton

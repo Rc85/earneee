@@ -79,7 +79,7 @@ const Contact = () => {
     <Section
       title='Contact Us'
       titleVariant='h3'
-      maxWidth='md'
+      maxWidth='sm'
       position='center'
       component='form'
       onSubmit={handleSubmit}
@@ -102,11 +102,12 @@ const Contact = () => {
       <TextField
         label='Message'
         multiline
-        rows={4}
+        rows={5}
         required
         onChange={handleMessageChange}
         value={form.message}
         helperText={`${form.message.length} / 5000`}
+        inputProps={{ style: { resize: 'vertical' } }}
         FormHelperTextProps={{ sx: { display: 'flex', justifyContent: 'flex-end' } }}
       />
 

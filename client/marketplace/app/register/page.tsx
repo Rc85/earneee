@@ -14,15 +14,17 @@ import {
   Typography,
   useTheme
 } from '@mui/material';
-import { FormEvent, useRef, useState } from 'react';
-import { retrieveStatuses, useCreateUser } from '../../../_shared/api';
+import { FormEvent, useEffect, useRef, useState } from 'react';
+import { useCreateUser } from '../../../_shared/api';
 import { useSnackbar } from 'notistack';
 import Recaptcha from 'react-google-recaptcha';
 import { countries } from '../../../../_shared';
-import { Loading } from '../../../_shared/components';
+import { StatusesInterface } from '../../../../_shared/types';
+import Loading from './loading';
 
 const Register = () => {
-  const [status, setStatus] = useState('');
+  const [status, setStatus] = useState('Loading');
+  const [online, setOnline] = useState(false);
   const [form, setForm] = useState({
     email: '',
     password: '',
@@ -34,9 +36,20 @@ const Register = () => {
   const theme = useTheme();
   const { enqueueSnackbar } = useSnackbar();
   const recaptchaRef = useRef<Recaptcha>(null);
-  const { isLoading, data } = retrieveStatuses();
-  const { statuses } = data || {};
-  const registrationStatus = statuses?.find((status) => status.name === 'registration');
+
+  useEffect(() => {
+    (async () => {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/v1/statuses`, {
+        next: { revalidate: 5 }
+      });
+      const data = await res.json();
+      const { statuses }: { statuses: StatusesInterface[] } = data;
+      const online = statuses?.find((status) => status.name === 'registration')?.online;
+
+      setOnline(Boolean(online));
+      setStatus('');
+    })();
+  }, []);
 
   const handleSuccess = () => {
     setStatus('Success');
@@ -78,9 +91,9 @@ const Register = () => {
     }
   };
 
-  return isLoading ? (
+  return status === 'Loading' ? (
     <Loading />
-  ) : !registrationStatus?.online ? (
+  ) : !online ? (
     <Container
       maxWidth='md'
       sx={{
@@ -91,7 +104,7 @@ const Register = () => {
         flexGrow: 1
       }}
     >
-      <Typography variant='h3'>Disabled</Typography>
+      <Typography variant='h3'>Offline</Typography>
 
       <Typography>Registration is currently disabled. Please check back later.</Typography>
     </Container>

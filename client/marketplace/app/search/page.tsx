@@ -6,6 +6,7 @@ import { retrieveCategories, searchProducts } from '../../../_shared/api';
 import { Avatar, Box, List, ListItem, ListItemButton, ListItemIcon, Typography } from '@mui/material';
 import { useAppSelector } from '../../../_shared/redux/store';
 import { ProductsInterface } from '../../../../_shared/types';
+import Loading from './loading';
 
 const Search = () => {
   const searchParams = useSearchParams();
@@ -14,7 +15,7 @@ const Search = () => {
   const c = retrieveCategories({ categoryId: category as unknown as number });
   const { categories } = c.data || {};
   const { country } = useAppSelector((state) => state.App);
-  const { data } = searchProducts({ value: searchValue, category, country });
+  const { isLoading, data } = searchProducts({ value: searchValue, category, country });
   const { products } = data || {};
   const router = useRouter();
 
@@ -22,7 +23,9 @@ const Search = () => {
     router.push(`/product/${product.id}`);
   };
 
-  return (
+  return isLoading ? (
+    <Loading />
+  ) : (
     <Section
       title='Search Results'
       subtitle={`Searching for "${searchValue}"${category ? ` in ${categories?.[0]?.name}` : ''}`}

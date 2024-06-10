@@ -100,6 +100,7 @@ const Categories = ({ onClick }: Props) => {
 
       {categories?.map((subcategory) => (
         <List
+          key={subcategory[0].id}
           disablePadding
           sx={{
             width: '100%',

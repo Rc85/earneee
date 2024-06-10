@@ -80,13 +80,14 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
   const specificationLabels = [
     ...new Set(specifications.map((specification) => specification.name.toUpperCase()))
   ];
-  const savedView = localStorage.getItem('earneee.products_view');
 
   useEffect(() => {
+    const savedView = localStorage.getItem('earneee.products_view');
+
     if (savedView && ['grid', 'list'].includes(savedView)) {
       setView(savedView);
     }
-  }, [savedView]);
+  }, []);
 
   const handleSpecificationChange = (specification: ProductSpecificationsInterface) => {
     const specifications = { ...filters.specifications };
@@ -135,10 +136,10 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
       disableGutters
       truncateTitle
       /* actions={[
-        <IconButton size='small'>
-          <Icon path={mdiHeart} size={1} />
-        </IconButton>
-      ]} */
+          <IconButton size='small'>
+            <Icon path={mdiHeart} size={1} />
+          </IconButton>
+        ]} */
     >
       <Box sx={{ display: 'flex' }}>
         <Box sx={{ width: '25%', minWidth: '200px', maxWidth: '300px', flexShrink: 0 }}>
