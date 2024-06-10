@@ -173,7 +173,8 @@ const FeaturedProducts = () => {
                       >
                         <Box sx={{ flexGrow: 1, mr: 1 }}>
                           <Typography variant='h5' color='white'>
-                            {product.brand?.name} {product.name}
+                            {product?.brand?.name ? `${product?.brand?.name} ` : ''}
+                            {product.name}
                           </Typography>
 
                           <Typography

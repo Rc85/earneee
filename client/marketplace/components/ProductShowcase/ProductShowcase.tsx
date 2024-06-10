@@ -72,7 +72,8 @@ const ProductShowcase = ({ type }: Props) => {
 
                     <Box sx={{ p: 2, flexGrow: 1 }}>
                       <Typography variant='h6' sx={{ mb: 0 }}>
-                        {product.brand?.name} {product.name}
+                        {product?.brand?.name ? `${product?.brand?.name} ` : ''}
+                        {product.name}
                       </Typography>
 
                       {Boolean(excerpt) && (

@@ -185,7 +185,7 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
     FROM product_discounts AS pd
     WHERE pd.status = 'active'
     AND pd.starts_at <= NOW()
-    AND (pd.ends_at IS NULL OR pd.ends_at > NOW())
+    AND (pd.ends_at IS NULL OR pd.ends_at >= NOW())
   ),
   pm AS (
     SELECT
@@ -404,7 +404,7 @@ export const retrieveProductShowcase = async (req: Request, resp: Response, next
       FROM product_discounts AS pd
       WHERE pd.status = 'active'
       AND pd.starts_at <= NOW()
-      AND (pd.ends_at IS NULL OR pd.ends_at > NOW())
+      AND (pd.ends_at IS NULL OR pd.ends_at >= NOW())
     ),
     pm AS (
       SELECT
@@ -535,7 +535,7 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
       FROM product_discounts AS pd
       WHERE pd.status = 'active'
       AND pd.starts_at <= NOW()
-      AND (pd.ends_at IS NULL OR pd.ends_at > NOW())
+      AND (pd.ends_at IS NULL OR pd.ends_at >= NOW())
     ),
     a AS (
       SELECT

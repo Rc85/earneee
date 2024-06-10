@@ -144,8 +144,12 @@ export const validateCreateProduct = async (req: Request, resp: Response, next: 
             return next(new HttpException(400, `Invalid start date`));
           } else if (discount.endsAt && !dayjs(discount.endsAt).isValid()) {
             return next(new HttpException(400, `Invalid end date`));
-          } else if (discount.endsAt && dayjs().isAfter(dayjs(discount.endsAt))) {
-            return next(new HttpException(400, `End date cannot be in the past`));
+          } else if (
+            discount.startsAt &&
+            discount.endsAt &&
+            dayjs(discount.endsAt).isBefore(dayjs(discount.startsAt))
+          ) {
+            return next(new HttpException(400, `End date cannot be before start date`));
           } else if (!['active', 'inactive'].includes(discount.status)) {
             return next(new HttpException(400, `Invalid status`));
           } else if (typeof discount.limitedTimeOnly !== 'boolean') {

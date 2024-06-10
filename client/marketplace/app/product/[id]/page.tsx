@@ -98,7 +98,7 @@ const Product = ({ params: { id } }: Props) => {
           </Breadcrumbs>
 
           <Section
-            title={`${product?.brand?.name} ${product?.name}`}
+            title={`${product?.brand?.name ? `${product?.brand?.name} ` : ''}${product?.name}`}
             subtitle={excerpt}
             titleVariant='h3'
             maxWidth='xl'

@@ -5,6 +5,7 @@ import sharp from 'sharp';
 import { ObjectCannedACL } from '@aws-sdk/client-s3';
 import { s3 } from '../../../services';
 import { ProductUrlsInterface } from '../../../../../_shared/types';
+import dayjs from 'dayjs';
 
 export const createProduct = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
@@ -172,8 +173,12 @@ export const createProduct = async (req: Request, resp: Response, next: NextFunc
                 discount.amount,
                 discount.amountType,
                 url.id,
-                discount.startsAt,
-                discount.endsAt,
+                discount.startsAt
+                  ? dayjs(discount.startsAt).set('hour', 23).set('minute', 59).set('second', 59).toDate()
+                  : dayjs().toDate(),
+                discount.endsAt
+                  ? dayjs(discount.endsAt).set('hour', 23).set('minute', 59).set('second', 59).toDate()
+                  : null,
                 discount.status,
                 discount.limitedTimeOnly
               ],

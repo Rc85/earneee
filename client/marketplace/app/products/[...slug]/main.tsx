@@ -343,7 +343,8 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
 
                             <Box sx={{ p: 1 }}>
                               <Typography sx={{ fontWeight: 'bold' }}>
-                                {product.brand?.name} {product.name}
+                                {product?.brand?.name ? `${product?.brand?.name} ` : ''}
+                                {product.name}
                               </Typography>
                             </Box>
 
