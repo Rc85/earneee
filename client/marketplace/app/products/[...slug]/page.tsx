@@ -16,6 +16,7 @@ const CategoryContainer = async ({ params: { slug } }: Props) => {
   let category: CategoriesInterface | undefined = undefined;
   let subcategory: CategoriesInterface | undefined = undefined;
   let group: CategoriesInterface | undefined = undefined;
+  let breadcrumbs: CategoriesInterface[] = [];
 
   if (groupId) {
     const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/v1/category?groupId=${groupId}`, {
@@ -50,29 +51,36 @@ const CategoryContainer = async ({ params: { slug } }: Props) => {
     category = categories[0];
   }
 
+  const id = groupId || subcategoryId || categoryId;
+
+  if (id) {
+    const breadcrumbsData = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/v1/category?categoryId=${id}&withAncestors=true`,
+      {
+        next: { revalidate: 3600 },
+        credentials: 'include'
+      }
+    );
+    const data = await breadcrumbsData.json();
+
+    breadcrumbs = data.categories;
+  }
+
   const name = group?.name || subcategory?.name || category?.name;
 
   return !category && !subcategory && !group ? (
     notFound()
   ) : (
     <Box sx={{ flexGrow: 1 }}>
-      {group ? (
-        <Breadcrumbs>
-          <Link href={`/products/${category?.id}`}>
-            {category ? category.name.charAt(0).toUpperCase() + category.name.substring(1) : ''}
-          </Link>
-
-          <Link href={`/products/${category?.id}/${subcategory?.id}`}>
-            {subcategory ? subcategory.name.charAt(0).toUpperCase() + subcategory?.name.substring(1) : ''}
-          </Link>
-        </Breadcrumbs>
-      ) : subcategory?.name ? (
-        <Breadcrumbs>
-          <Link href={`/products/${category?.id}`}>
-            {category ? category.name.charAt(0).toUpperCase() + category.name.substring(1) : ''}
-          </Link>
-        </Breadcrumbs>
-      ) : null}
+      <Breadcrumbs>
+        {breadcrumbs.map((category) =>
+          category.ancestors?.map((ancestor) => (
+            <Link key={ancestor.id} href={`/products/${ancestor.id}`}>
+              {ancestor.name}
+            </Link>
+          ))
+        )}
+      </Breadcrumbs>
 
       <Main name={name} categoryId={categoryId} subcategoryId={subcategoryId} groupId={groupId} />
     </Box>

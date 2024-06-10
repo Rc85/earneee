@@ -21,7 +21,7 @@ import {
   ToggleButtonGroup,
   Typography
 } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
 import {
   retrieveCategories,
@@ -80,6 +80,13 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
   const specificationLabels = [
     ...new Set(specifications.map((specification) => specification.name.toUpperCase()))
   ];
+  const savedView = localStorage.getItem('earneee.products_view');
+
+  useEffect(() => {
+    if (savedView && ['grid', 'list'].includes(savedView)) {
+      setView(savedView);
+    }
+  }, [savedView]);
 
   const handleSpecificationChange = (specification: ProductSpecificationsInterface) => {
     const specifications = { ...filters.specifications };
@@ -114,6 +121,12 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
     setFilters({ minPrice: undefined, maxPrice: undefined, specifications: {} });
   };
 
+  const HandleViewClick = (value: string) => {
+    setView(value);
+
+    localStorage.setItem('earneee.products_view', value);
+  };
+
   return (
     <Section
       title={name?.toUpperCase()}
@@ -134,9 +147,7 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
               <Typography sx={{ fontWeight: 500, mb: 1 }}>Categories</Typography>
 
               {categories?.map((category) => {
-                const url = subcategoryId
-                  ? `/products/${categoryId}/${subcategoryId}/${category.id}`
-                  : `/products/${categoryId}/${category.id}`;
+                const url = `/products/${category.id}`;
 
                 return (
                   <Box key={category.id}>
@@ -266,7 +277,7 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
                   size='small'
                   exclusive
                   value={view}
-                  onChange={(_, value) => setView(value)}
+                  onChange={(_, value) => HandleViewClick(value)}
                 >
                   <ToggleButton value='grid'>
                     <Icon path={mdiViewGrid} size={1} />

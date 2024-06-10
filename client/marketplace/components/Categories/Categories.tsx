@@ -140,12 +140,7 @@ const Categories = ({ onClick }: Props) => {
               sx={{ width: '100%', pr: 1 }}
               className='product'
             >
-              <Link
-                href={`/products/${prevCategories.map((category) => category[0]?.id).join('/')}${
-                  prevCategories.length > 0 ? '/' : ''
-                }${category.id}`}
-                style={{ flexGrow: 1, flexShrink: 1 }}
-              >
+              <Link href={`/products/${category.id}`} style={{ flexGrow: 1, flexShrink: 1 }}>
                 <ListItemButton onClick={handleOnClick}>{category.name}</ListItemButton>
               </Link>
 

@@ -7,4 +7,5 @@ export interface CategoriesInterface {
   createdAt: string;
   updatedAt: string | null;
   subcategories?: CategoriesInterface[];
+  ancestors?: CategoriesInterface[];
 }
