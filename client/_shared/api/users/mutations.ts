@@ -210,3 +210,60 @@ export const useUpdateProfile = (onSuccess?: (data: any) => void, onError?: (err
     }
   });
 };
+
+export const useUpdateMessage = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (options?: { messageId: string }) =>
+      axios({
+        method: 'put',
+        url: '/v1/auth/user/messages',
+        withCredentials: true,
+        data: options
+      }),
+
+    onSuccess: (data) => {
+      dispatch(setIsLoading(false));
+
+      queryClient.invalidateQueries({ queryKey: ['user messages'] });
+      queryClient.invalidateQueries({ queryKey: ['user messages count'] });
+
+      onSuccess?.(data);
+    },
+    onError: (err) => {
+      dispatch(setIsLoading(false));
+
+      onError?.(err);
+    }
+  });
+};
+
+export const useDeleteMessage = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (messageIds: string[]) =>
+      axios({
+        method: 'delete',
+        url: '/v1/auth/user/messages',
+        withCredentials: true,
+        params: { messageIds }
+      }),
+
+    onSuccess: (data) => {
+      dispatch(setIsLoading(false));
+
+      queryClient.invalidateQueries({ queryKey: ['user messages'] });
+
+      onSuccess?.(data);
+    },
+    onError: (err) => {
+      dispatch(setIsLoading(false));
+
+      onError?.(err);
+    }
+  });
+};

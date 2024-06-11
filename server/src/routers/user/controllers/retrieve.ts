@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { database } from '../../../middlewares';
-import { UserProfilesInterface, UsersInterface } from '../../../../../_shared/types';
+import { UserMessagesInterface, UserProfilesInterface, UsersInterface } from '../../../../../_shared/types';
 
 export const retrieveUserProfiles = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
@@ -138,6 +138,54 @@ export const retrieveUserProfile = async (req: Request, resp: Response, next: Ne
 
     resp.locals.response = { data: { userProfile: userProfile[0] } };
   }
+
+  return next();
+};
+
+export const retrieveMessageCount = async (req: Request, resp: Response, next: NextFunction) => {
+  const { client } = resp.locals;
+
+  if (req.session.user?.id) {
+    const count = await database.retrieve<{ count: number }[]>('SELECT COUNT(*)::INT FROM user_messages', {
+      where: 'user_id = $1 AND status = $2',
+      params: [req.session.user.id, 'new'],
+      client
+    });
+
+    resp.locals.response = { data: { count: count[0].count } };
+  }
+
+  return next();
+};
+
+export const retrieveMessages = async (req: Request, resp: Response, next: NextFunction) => {
+  const { client } = resp.locals;
+  const offset = req.query.offset?.toString() || '0';
+  const limit = req.query.limit?.toString() || undefined;
+
+  if (req.session.user?.id) {
+    const messages = await database.retrieve<UserMessagesInterface[]>('SELECT * FROM user_messages', {
+      where: 'user_id = $1 AND status = ANY($2)',
+      offset,
+      limit,
+      params: [req.session.user.id, ['new', 'read']],
+      client
+    });
+
+    const count = await database.retrieve<{ count: number }[]>('SELECT COUNT(*)::INT FROM user_messages', {
+      where: 'user_id = $1 AND status = ANY($2)',
+      params: [req.session.user.id, ['new', 'read']],
+      client
+    });
+
+    resp.locals.response = { data: { messages, count: count[0].count } };
+  }
+
+  return next();
+};
+
+export const retrieveOrders = async (req: Request, resp: Response, next: NextFunction) => {
+  resp.locals.response = { data: { orders: [] } };
 
   return next();
 };

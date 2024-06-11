@@ -6,14 +6,16 @@ import { setIsLoading } from '../redux/app';
 export const authenticate = (application: 'admin' | 'marketplace') => {
   const url = application === 'marketplace' ? '/v1/auth/user' : '/v1/auth/admin';
 
-  return useQuery<{ user: { id: string; email: string; isAdmin: boolean; country: string } }>({
-    queryKey: ['authenticate', application],
-    queryFn: async () => {
-      const { data } = await axios({ method: 'post', url, withCredentials: true });
+  return useQuery<{ user: { id: string; email: string; isAdmin: boolean; country: string; status: string } }>(
+    {
+      queryKey: ['authenticate', application],
+      queryFn: async () => {
+        const { data } = await axios({ method: 'post', url, withCredentials: true });
 
-      return data;
+        return data;
+      }
     }
-  });
+  );
 };
 
 export const useContact = (onSuccess?: (response: any) => void, onError?: (err: any) => void) => {

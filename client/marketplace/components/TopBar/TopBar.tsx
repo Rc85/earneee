@@ -19,7 +19,7 @@ import { useEffect, useState } from 'react';
 import Categories from '../Categories/Categories';
 import { brandName } from '../../../_shared/constants';
 import { usePathname } from 'next/navigation';
-import { authenticate, useLogout } from '../../../_shared/api';
+import { authenticate, retrieveMessageCount, useLogout } from '../../../_shared/api';
 import { retrieveStatuses } from '../../../_shared/api/statuses/queries';
 import Link from 'next/link';
 import { useDispatch } from 'react-redux';
@@ -38,6 +38,8 @@ const TopBar = () => {
   const registrationStatus = statuses?.find((status) => status.name === 'registration');
   const dispatch = useDispatch();
   const redirect = /^\/account\/activate\/.*$/.test(pathname) ? '/' : pathname;
+  const userMessages = retrieveMessageCount(Boolean(user));
+  const { count = 0 } = userMessages.data || {};
 
   useEffect(() => {
     if (user) {
@@ -50,6 +52,10 @@ const TopBar = () => {
       }, 250);
     }
   }, [user]);
+
+  useEffect(() => {
+    userMessages.refetch();
+  }, [pathname]);
 
   const handleLogout = () => {
     logout.mutate('marketplace');
@@ -127,7 +133,7 @@ const TopBar = () => {
                 </IconButton>
               </Link>
 
-              <Badge badgeContent={0} color='error' overlap='circular' sx={{ mr: 2 }}>
+              <Badge badgeContent={count} color='info' overlap='circular' sx={{ mr: 2 }}>
                 <Link href='/user/messages'>
                   <IconButton size='small'>
                     <Icon path={mdiEmail} size={1} color='black' />

@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { useQuery } from '@tanstack/react-query';
-import { UserProfilesInterface, UsersInterface } from '../../../../_shared/types';
+import { UserMessagesInterface, UserProfilesInterface, UsersInterface } from '../../../../_shared/types';
 
 export const retrieveUserProfiles = (options?: { userId?: string; offset?: number; limit?: number }) => {
   return useQuery<{ userProfiles: UserProfilesInterface[]; count: number }>({
@@ -42,6 +42,54 @@ export const retrieveUserProfile = () => {
         method: 'get',
         url: `/v1/auth/user/profile`,
         withCredentials: true
+      });
+
+      return data;
+    }
+  });
+};
+
+export const retrieveMessages = (offset: number, limit?: number) => {
+  return useQuery<{ messages: UserMessagesInterface[]; count: number }>({
+    queryKey: ['user messages', offset, limit],
+    queryFn: async () => {
+      const { data } = await axios({
+        method: 'get',
+        url: `/v1/auth/user/messages`,
+        withCredentials: true,
+        params: { offset, limit }
+      });
+
+      return data;
+    }
+  });
+};
+
+export const retrieveMessageCount = (enabled: boolean) => {
+  return useQuery<{ count: number }>({
+    queryKey: ['user messages count'],
+    queryFn: async () => {
+      const { data } = await axios({
+        method: 'get',
+        url: `/v1/auth/user/messages/count`,
+        withCredentials: true
+      });
+
+      return data;
+    },
+    enabled
+  });
+};
+
+export const retrieveOrders = (offset: number) => {
+  return useQuery<{ orders: any[]; count: number }>({
+    queryKey: ['user orders', offset],
+    queryFn: async () => {
+      const { data } = await axios({
+        method: 'get',
+        url: `/v1/auth/user/orders`,
+        withCredentials: true,
+        params: { offset }
       });
 
       return data;

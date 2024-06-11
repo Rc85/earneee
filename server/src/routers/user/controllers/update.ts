@@ -130,3 +130,27 @@ export const updateProfile = async (req: Request, resp: Response, next: NextFunc
 
   return next();
 };
+
+export const updateMessage = async (req: Request, resp: Response, next: NextFunction) => {
+  const { client } = resp.locals;
+  const { messageId } = req.body;
+
+  if (req.session.user?.id) {
+    const params = ['read', req.session.user.id];
+    const where = [`user_id = $${params.length}`, `status != 'deleted'`];
+
+    if (messageId) {
+      params.push(messageId);
+
+      where.push(`id = $${params.length} `);
+    }
+
+    await database.update('user_messages', ['status'], {
+      where: where.join(' AND '),
+      params,
+      client
+    });
+  }
+
+  return next();
+};

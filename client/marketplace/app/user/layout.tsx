@@ -2,16 +2,20 @@
 
 import { Box, Typography } from '@mui/material';
 import Link from 'next/link';
-import { Section } from '../../../_shared/components';
-import { usePathname } from 'next/navigation';
+import { Loading, Section } from '../../../_shared/components';
+import { redirect, usePathname } from 'next/navigation';
 import { authenticate } from '../../../_shared/api';
 
 const layout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
-  const { data } = authenticate('marketplace');
+  const { isLoading, data } = authenticate('marketplace');
   const { user } = data || {};
 
-  return (
+  return isLoading ? (
+    <Loading />
+  ) : !user || user.status !== 'active' ? (
+    redirect('/')
+  ) : (
     <Section
       title='ACCOUNT'
       subtitle={user?.email}
@@ -59,7 +63,9 @@ const layout = ({ children }: { children: React.ReactNode }) => {
           </Box>
         </Box>
 
-        <Box sx={{ flexGrow: 1 }}>{children}</Box>
+        <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, overflow: 'hidden' }}>
+          {children}
+        </Box>
       </Box>
     </Section>
   );

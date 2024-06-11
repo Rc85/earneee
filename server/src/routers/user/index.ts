@@ -88,4 +88,20 @@ router.put(
   response
 );
 
+router.get('/v1/auth/user/messages/count', dbConnect, middleware(controllers.retrieveMessageCount), response);
+
+router.get('/v1/auth/user/messages', dbConnect, middleware(controllers.retrieveMessages), response);
+
+router.put('/v1/auth/user/messages', dbConnect, middleware(controllers.updateMessage), response);
+
+router.delete(
+  '/v1/auth/user/messages',
+  dbConnect,
+  middleware(controllers.validateDeleteMessages),
+  middleware(controllers.deleteMessages),
+  response
+);
+
+router.get('/v1/auth/user/orders', dbConnect, middleware(controllers.retrieveOrders), response);
+
 export default router;

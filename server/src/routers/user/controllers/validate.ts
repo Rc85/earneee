@@ -206,3 +206,19 @@ export const validateUpdateProfile = (req: Request, _: Response, next: NextFunct
 
   return next();
 };
+
+export const validateDeleteMessages = async (req: Request, resp: Response, next: NextFunction) => {
+  const { messageIds } = req.query;
+
+  if (!messageIds || !(messageIds instanceof Array)) {
+    return next(new HttpException(400, `Message(s) required`));
+  }
+
+  for (const messageId of messageIds) {
+    if (typeof messageId !== 'string') {
+      return next(new HttpException(400, `Invalid message`));
+    }
+  }
+
+  return next();
+};

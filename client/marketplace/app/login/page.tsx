@@ -82,7 +82,7 @@ export default function Login() {
       return enqueueSnackbar('Password required', { variant: 'error' });
     }
 
-    setStatus('Loading');
+    setStatus('Logging In');
 
     login.mutate(form);
   };
@@ -221,7 +221,7 @@ export default function Login() {
             type='submit'
             variant='contained'
             fullWidth
-            loading={status === 'Loading'}
+            loading={status === 'Logging In'}
             loadingIndicator={<CircularProgress size={20} />}
             loadingPosition='start'
             startIcon={<Icon path={mdiLoginVariant} size={1} />}

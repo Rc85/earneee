@@ -68,8 +68,6 @@ const page = () => {
     updateProfile.mutate(form);
   };
 
-  console.log(form, initialState);
-
   return isLoading ? (
     <Loading />
   ) : (
@@ -121,7 +119,7 @@ const page = () => {
         select
         SelectProps={{ native: true }}
         value={form.country || ''}
-        onChange={(e) => setForm({ ...form, country: e.target.value || null })}
+        onChange={(e) => setForm({ ...form, country: e.target.value })}
       >
         <option value=''></option>
         {countries.map((country) => (
