@@ -39,12 +39,8 @@ export const validateLogin = async (req: Request, resp: Response, next: NextFunc
     client
   });
 
-  if (user.length === 0 || user[0].status === 'terminated') {
+  if (user.length === 0) {
     return next(new HttpException(400, `Incorrect password`));
-  } else if (user[0].status === 'inactive') {
-    return next(new HttpException(400, `Please activate your account`));
-  } else if (user[0].status === 'suspended') {
-    return next(new HttpException(400, `Your account has been suspended`));
   }
 
   const match = await bcrypt.compare(password, user[0].password);
@@ -62,10 +58,41 @@ export const validateLogin = async (req: Request, resp: Response, next: NextFunc
   });
 
   if (ban.length) {
-    return next(new HttpException(400, `Account is banned`));
+    if (ban[0].bannedUntil) {
+      return next(new HttpException(400, `This account has been temporarily suspended`));
+    } else {
+      return next(new HttpException(400, `This account has been permanently banned`));
+    }
   }
 
   resp.locals.user = user[0];
+
+  return next();
+};
+
+export const validateActivateAccount = async (req: Request, resp: Response, next: NextFunction) => {
+  const { key } = req.body;
+  const { client } = resp.locals;
+
+  if (!key || validations.blankCheck.test(key)) {
+    return next(new HttpException(400, `Confirmation key required`));
+  } else if (!validations.uuidCheck.test(key)) {
+    return next(new HttpException(400, `Invalid confirmation key`));
+  }
+
+  const user = await database.retrieve<UsersInterface[]>('SELECT * FROM users', {
+    where: 'confirmation_key = $1',
+    params: [key],
+    client
+  });
+
+  if (!user.length) {
+    return next(new HttpException(400, `Invalid confirmation key`));
+  } else if (dayjs().diff(dayjs(user[0].createdAt), 'hours') > 24) {
+    return next(new HttpException(400, `Please login to your account again`));
+  } else if (user[0].status === 'active') {
+    return next(new HttpException(400, `Account already activated`));
+  }
 
   return next();
 };

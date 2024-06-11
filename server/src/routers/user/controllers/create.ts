@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import { database } from '../../../middlewares';
+import { sendEmail } from '../../../services';
 
 export const createUser = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
@@ -15,6 +16,8 @@ export const createUser = async (req: Request, resp: Response, next: NextFunctio
 
   if (user.length === 1 && country) {
     await database.create('user_profiles', ['id', 'country'], [user[0].id, country], { client });
+
+    await sendEmail.newAccount.send(req.body.email, user[0].confirmationKey);
   }
 
   resp.locals.response = { status: 201, data: { statusText: 'Account created' } };

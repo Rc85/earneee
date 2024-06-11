@@ -8,5 +8,6 @@ export { resetPassword } from './reset-password';
 export { contact } from './contact';
 export { updateUser } from './update';
 export { subscribe } from './subscribe';
+export { activateAccount } from './activate';
 
 export * from './validate';

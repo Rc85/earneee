@@ -1,6 +1,6 @@
 'use client';
 
-import { mdiCheckCircle, mdiPlusBox } from '@mdi/js';
+import { mdiCheckCircleOutline, mdiPlusBox } from '@mdi/js';
 import Icon from '@mdi/react';
 import { LoadingButton } from '@mui/lab';
 import {
@@ -80,7 +80,7 @@ const Register = () => {
       return enqueueSnackbar('You must read and agree with our terms and policy', { variant: 'error' });
     }
 
-    setStatus('Loading');
+    setStatus('Creating Account');
 
     const key = await recaptchaRef.current?.executeAsync();
 
@@ -115,7 +115,7 @@ const Register = () => {
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <Typography variant='h3'>Account created!</Typography>
 
-            <Icon path={mdiCheckCircle} size={5} color={theme.palette.success.main} />
+            <Icon path={mdiCheckCircleOutline} size={3} color={theme.palette.success.main} />
 
             <Typography sx={{ textAlign: 'center' }}>
               Check your email's inbox for a confirmation email to confirm your account.
@@ -175,7 +175,7 @@ const Register = () => {
               type='submit'
               variant='contained'
               fullWidth
-              loading={status === 'Loading'}
+              loading={status === 'Creating Account'}
               loadingIndicator={<CircularProgress size={20} />}
               loadingPosition='start'
               startIcon={<Icon path={mdiPlusBox} size={1} />}

@@ -21,6 +21,14 @@ router.put(
   response
 );
 
+router.patch(
+  '/v1/user',
+  dbConnect,
+  middleware(controllers.validateActivateAccount),
+  middleware(controllers.activateAccount),
+  response
+);
+
 router.post(
   /^\/v1\/auth\/(admin|user)\/login/,
   dbConnect,

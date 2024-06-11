@@ -24,6 +24,12 @@ const PrivacyPolicy = () => {
         type, operating system, referring URLs, and pages visited on our website.
       </Typography>
 
+      <Typography>
+        When you create an account, your email, password, and country will be required. Your password and all
+        other sensitive data will be encrypted and stored. We may also collect other information such as your
+        address for shipping and payment information if you decide to purchase anything from our website.
+      </Typography>
+
       <Typography variant='h6' sx={{ mt: 3 }}>
         Affiliate Product Links
       </Typography>

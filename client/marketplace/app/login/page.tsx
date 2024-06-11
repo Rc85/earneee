@@ -55,8 +55,12 @@ export default function Login() {
     })();
   }, []);
 
-  const handleSuccess = () => {
-    router.push(redirect || '/');
+  const handleSuccess = (response: any) => {
+    if (response.status === 202) {
+      setStatus('Confirmation Sent');
+    } else if (response.status === 200) {
+      router.push(redirect || '/');
+    }
   };
 
   const handleError = (err: any) => {
@@ -91,14 +95,25 @@ export default function Login() {
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        flexGrow: 1
+        alignItems: 'center'
       }}
     >
       <Typography variant='h3'>Offline</Typography>
 
       <Typography>The login server is currently offline. Please check back later.</Typography>
+    </Container>
+  ) : status === 'Confirmation Sent' ? (
+    <Container
+      maxWidth='md'
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center'
+      }}
+    >
+      <Typography variant='h3'>Confirmation Sent</Typography>
+
+      <Typography>Check your email for a new confirmation link.</Typography>
     </Container>
   ) : (
     <Container maxWidth='sm'>

@@ -37,6 +37,7 @@ const TopBar = () => {
   const loginStatus = statuses?.find((status) => status.name === 'login');
   const registrationStatus = statuses?.find((status) => status.name === 'registration');
   const dispatch = useDispatch();
+  const redirect = /^\/account\/activate\/.*$/.test(pathname) ? '/' : pathname;
 
   useEffect(() => {
     if (user) {
@@ -142,7 +143,7 @@ const TopBar = () => {
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               {loginStatus?.online && (
                 <Link
-                  href={`/login?redirect=${pathname}`}
+                  href={`/login?redirect=${redirect}`}
                   style={{
                     color: 'black',
                     display: 'flex',
