@@ -125,3 +125,19 @@ export const retrieveUsers = async (req: Request, resp: Response, next: NextFunc
 
   return next();
 };
+
+export const retrieveUserProfile = async (req: Request, resp: Response, next: NextFunction) => {
+  const { client } = resp.locals;
+
+  if (req.session.user?.id) {
+    const userProfile = await database.retrieve<UserProfilesInterface[]>('SELECT * FROM user_profiles', {
+      where: 'id = $1',
+      params: [req.session.user.id],
+      client
+    });
+
+    resp.locals.response = { data: { userProfile: userProfile[0] } };
+  }
+
+  return next();
+};

@@ -24,3 +24,28 @@ export const createUser = async (req: Request, resp: Response, next: NextFunctio
 
   return next();
 };
+
+export const contact = async (req: Request, resp: Response, next: NextFunction) => {
+  const { client } = resp.locals;
+  const { name, email, message } = req.body;
+
+  await database.create('feedback', ['name', 'email', 'message'], [name, email, message], { client });
+
+  resp.locals.response = { data: { statusText: 'Message received' } };
+
+  return next();
+};
+
+export const subscribe = async (req: Request, resp: Response, next: NextFunction) => {
+  const { client } = resp.locals;
+  const { email } = req.body;
+
+  await database.create('subscribers', ['email'], [email], {
+    conflict: { columns: 'email', do: `NOTHING` },
+    client
+  });
+
+  resp.locals.response = { data: { statusText: 'Thank you for subscribing' } };
+
+  return next();
+};

@@ -15,12 +15,12 @@ interface Props {
 const Categories = ({ onClick }: Props) => {
   const { data } = listCategories();
   const { categories } = data || {};
-  const topCategories = categories?.[0] || [];
+  const topCategories = categories?.[0];
   const [prevCategories, setPrevCategories] = useState<CategoriesInterface[][]>([]);
-  const [selectedCategories, setSelectedCategories] = useState<CategoriesInterface[]>(topCategories);
+  const [selectedCategories, setSelectedCategories] = useState<CategoriesInterface[]>([]);
 
   useEffect(() => {
-    setSelectedCategories(topCategories);
+    setSelectedCategories(topCategories || []);
   }, [topCategories]);
 
   const handleCategoryClick = (category: CategoriesInterface, prev: CategoriesInterface[]) => {
@@ -42,7 +42,7 @@ const Categories = ({ onClick }: Props) => {
     onClick();
 
     setPrevCategories([]);
-    setSelectedCategories(topCategories);
+    setSelectedCategories(topCategories || []);
   };
 
   return (
@@ -115,7 +115,7 @@ const Categories = ({ onClick }: Props) => {
             transition: '0.15s ease-in-out'
           }}
         >
-          {topCategories[0].parentId !== subcategory[0].parentId ? (
+          {topCategories?.[0]?.parentId !== subcategory[0].parentId ? (
             <ListItem disableGutters divider sx={{ width: '100%' }}>
               <ListItemButton onClick={handleBackClick}>
                 <ListItemIcon>

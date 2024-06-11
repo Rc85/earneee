@@ -4,6 +4,7 @@ import { database } from '../../../middlewares';
 import bcrypt from 'bcrypt';
 import { UserBansInterface, UsersInterface } from '../../../../../_shared/types';
 import dayjs from 'dayjs';
+import { parsePhoneNumber } from 'awesome-phonenumber';
 
 export const validateCreateUser = (req: Request, _: Response, next: NextFunction) => {
   if (!req.body.email || validations.blankCheck.test(req.body.email)) {
@@ -165,6 +166,42 @@ export const validateSubscribe = (req: Request, _: Response, next: NextFunction)
     return next(new HttpException(400, `Email required`));
   } else if (!validations.emailCheck.test(req.body.email)) {
     return next(new HttpException(400, 'Invalid email'));
+  }
+
+  return next();
+};
+
+export const validateUpdateProfile = (req: Request, _: Response, next: NextFunction) => {
+  if (!req.body.profile) {
+    return next(new HttpException(400, `Profile required`));
+  }
+
+  const { firstName, lastName, phoneNumber, address, city, region, country, postalCode } = req.body.profile;
+
+  if (firstName && (typeof firstName !== 'string' || !validations.nameCheck.test(firstName))) {
+    return next(new HttpException(400, `Invalid first name`));
+  } else if (lastName && (typeof lastName !== 'string' || !validations.nameCheck.test(lastName))) {
+    return next(new HttpException(400, `Invalid last name`));
+  } else if (address && typeof address !== 'string') {
+    return next(new HttpException(400, `Invalid address`));
+  } else if (city && typeof city !== 'string') {
+    return next(new HttpException(400, `Invalid city`));
+  } else if (region && (typeof region !== 'string' || !validations.regionShortCodeCheck.test(region))) {
+    return next(new HttpException(400, `Invalid state/province`));
+  } else if (country && (typeof country !== 'string' || !validations.countryShortCodeCheck.test(country))) {
+    return next(new HttpException(400, `Invalid country`));
+  } else if (postalCode && typeof postalCode !== 'string') {
+    return next(new HttpException(400, `Invalid postal/zip code`));
+  }
+
+  if (phoneNumber) {
+    const pn = parsePhoneNumber(phoneNumber, { regionCode: country });
+
+    if (!pn.valid) {
+      return next(new HttpException(400, `Invalid phone number`));
+    }
+
+    req.body.profile.phoneNumber = pn.number.e164;
   }
 
   return next();

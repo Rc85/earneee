@@ -50,7 +50,7 @@ router.put(
 );
 
 router.get(
-  /^\/v1\/auth\/(admin|user)\/profile/,
+  /^\/v1\/auth\/(admin|user)\/profiles/,
   dbConnect,
   middleware(controllers.retrieveUserProfiles),
   response
@@ -75,6 +75,16 @@ router.post(
   middleware(recaptcha),
   middleware(controllers.validateSubscribe),
   middleware(controllers.subscribe),
+  response
+);
+
+router.get('/v1/auth/user/profile', dbConnect, middleware(controllers.retrieveUserProfile), response);
+
+router.put(
+  '/v1/auth/user/profile',
+  dbConnect,
+  middleware(controllers.validateUpdateProfile),
+  middleware(controllers.updateProfile),
   response
 );
 

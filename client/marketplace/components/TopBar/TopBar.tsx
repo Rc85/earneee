@@ -121,14 +121,18 @@ const TopBar = () => {
             <CircularProgress size={20} />
           ) : user ? (
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <IconButton size='small' sx={{ mr: 2 }}>
-                <Icon path={mdiAccountCircle} size={1} color='black' />
-              </IconButton>
+              <Link href='/user/profile'>
+                <IconButton size='small' sx={{ mr: 2 }}>
+                  <Icon path={mdiAccountCircle} size={1} color='black' />
+                </IconButton>
+              </Link>
 
               <Badge badgeContent={0} color='error' overlap='circular' sx={{ mr: 2 }}>
-                <IconButton size='small'>
-                  <Icon path={mdiEmail} size={1} color='black' />
-                </IconButton>
+                <Link href='/user/messages'>
+                  <IconButton size='small'>
+                    <Icon path={mdiEmail} size={1} color='black' />
+                  </IconButton>
+                </Link>
               </Badge>
 
               <Button

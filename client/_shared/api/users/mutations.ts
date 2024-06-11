@@ -2,6 +2,7 @@ import axios from 'axios';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useDispatch } from 'react-redux';
 import { setIsLoading } from '../../redux/app';
+import { UserProfilesInterface } from '../../../../_shared/types';
 
 export const useCreateUser = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
   const dispatch = useDispatch();
@@ -169,6 +170,36 @@ export const useResetPassword = (onSuccess?: (data: any) => void, onError?: (err
 
     onSuccess: (data) => {
       dispatch(setIsLoading(false));
+
+      onSuccess?.(data);
+    },
+    onError: (err) => {
+      dispatch(setIsLoading(false));
+
+      onError?.(err);
+    }
+  });
+};
+
+export const useUpdateProfile = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (options: UserProfilesInterface) =>
+      axios({
+        method: 'put',
+        url: '/v1/auth/user/profile',
+        withCredentials: true,
+        data: {
+          profile: options
+        }
+      }),
+
+    onSuccess: (data) => {
+      dispatch(setIsLoading(false));
+
+      queryClient.invalidateQueries({ queryKey: ['user profile'] });
 
       onSuccess?.(data);
     },

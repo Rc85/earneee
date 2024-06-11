@@ -2,6 +2,47 @@ import { NextFunction, Request, Response } from 'express';
 import { database } from '../../../middlewares';
 import dayjs from 'dayjs';
 import { UserBansInterface } from '../../../../../_shared/types';
+import bcrypt from 'bcrypt';
+
+export const activateAccount = async (req: Request, resp: Response, next: NextFunction) => {
+  const { client } = resp.locals;
+  const { key } = req.body;
+
+  await database.update('users', ['status'], {
+    where: 'confirmation_key = $2',
+    params: ['active', key],
+    client
+  });
+
+  return next();
+};
+
+export const changePassword = async (req: Request, resp: Response, next: NextFunction) => {
+  const { client } = resp.locals;
+  const { newPassword } = req.body;
+
+  if (req.session.user?.id) {
+    const hashed = await bcrypt.hash(newPassword, 10);
+
+    await database.update('users', ['password'], {
+      where: 'id = $2',
+      params: [hashed, req.session.user.id],
+      client
+    });
+
+    await database.update('sessions', ['status'], {
+      where: 'id = $2',
+      params: ['terminated', `sess:${req.session.id}`],
+      client
+    });
+
+    req.session.destroy();
+
+    resp.locals.response = { status: 200, data: { statusText: 'Password changed' } };
+  }
+
+  return next();
+};
 
 export const updateUser = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
@@ -47,6 +88,45 @@ export const updateUser = async (req: Request, resp: Response, next: NextFunctio
 
     await database.update('users', columns.join(', '), { where: `id = $${params.length}`, params, client });
   }
+
+  return next();
+};
+
+export const resetPassword = async (req: Request, resp: Response, next: NextFunction) => {
+  const { client } = resp.locals;
+
+  // send email
+
+  return next();
+};
+
+export const updateProfile = async (req: Request, resp: Response, next: NextFunction) => {
+  const { client } = resp.locals;
+  const { firstName, lastName, phoneNumber, address, city, region, country, postalCode } = req.body.profile;
+
+  if (req.session.user?.id) {
+    await database.update(
+      'user_profiles',
+      ['first_name', 'last_name', 'phone_number', 'address', 'city', 'region', 'country', 'postal_code'],
+      {
+        where: 'id = $9',
+        params: [
+          firstName,
+          lastName,
+          phoneNumber,
+          address,
+          city,
+          region,
+          country,
+          postalCode,
+          req.session.user.id
+        ],
+        client
+      }
+    );
+  }
+
+  resp.locals.response = { data: { statusText: 'Profile updated' } };
 
   return next();
 };
