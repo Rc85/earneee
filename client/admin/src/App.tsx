@@ -119,6 +119,15 @@ const App = () => {
                       />
 
                       <Route
+                        path='/product/:id/options'
+                        element={
+                          <AuthenticatedRoute>
+                            <Pages.Product.Options />
+                          </AuthenticatedRoute>
+                        }
+                      />
+
+                      <Route
                         path='/product/:id/about'
                         element={
                           <AuthenticatedRoute>

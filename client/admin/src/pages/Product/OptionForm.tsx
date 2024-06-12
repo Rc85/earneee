@@ -1,6 +1,6 @@
 import { mdiPlaylistPlus } from '@mdi/js';
 import { Icon } from '@mdi/react';
-import { Box, FormControlLabel, Checkbox, Button, List } from '@mui/material';
+import { Box, Button, List } from '@mui/material';
 import { OptionSelectionsInterface, ProductOptionsInterface } from '../../../../../_shared/types';
 import SelectionRow from './SelectionRow';
 import {
@@ -21,7 +21,6 @@ import {
 
 interface Props {
   option: ProductOptionsInterface;
-  onRequiredClick: () => void;
   onAddSelectionClick: () => void;
   onSelectionChange: (field: keyof OptionSelectionsInterface, value: any, index: number) => void;
   onSelectionToggle: (index: number) => void;
@@ -31,7 +30,6 @@ interface Props {
 
 const OptionForm = ({
   option,
-  onRequiredClick,
   onAddSelectionClick,
   onSelectionChange,
   onSelectionDelete,
@@ -66,14 +64,7 @@ const OptionForm = ({
 
   return (
     <>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-        <FormControlLabel
-          label='Required'
-          control={<Checkbox color='info' />}
-          onClick={onRequiredClick}
-          checked={option.required}
-        />
-
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
         <Button startIcon={<Icon path={mdiPlaylistPlus} size={1} />} onClick={onAddSelectionClick}>
           Add Selection
         </Button>

@@ -14,6 +14,9 @@ exports.up = (pgm) => {
         type: 'varchar',
         notNull: true
       },
+      description: {
+        type: 'varchar'
+      },
       minimum_selections: {
         type: 'int',
         default: 1,
@@ -21,6 +24,11 @@ exports.up = (pgm) => {
       },
       maximum_selections: {
         type: 'int'
+      },
+      required: {
+        type: 'boolean',
+        notNull: true,
+        default: false
       },
       product_id: {
         type: 'varchar',
@@ -60,6 +68,17 @@ exports.up = (pgm) => {
       name: {
         type: 'varchar',
         notNull: true
+      },
+      description: {
+        type: 'varchar'
+      },
+      price: {
+        type: 'double precision',
+        notNull: true,
+        default: 0
+      },
+      ordinance: {
+        type: 'int'
       },
       option_id: {
         type: 'varchar',

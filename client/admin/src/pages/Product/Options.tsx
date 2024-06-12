@@ -1,4 +1,4 @@
-import { Button } from '@mui/material';
+import { Button, List } from '@mui/material';
 import { Loading, Section } from '../../../../_shared/components';
 import { Icon } from '@mdi/react';
 import { mdiPlusBox } from '@mdi/js';
@@ -11,8 +11,8 @@ import { retrieveProductOptions } from '../../../../_shared/api';
 const VariantOptions = () => {
   const [status, setStatus] = useState('');
   const params = useParams();
-  const { variantId, productId } = params;
-  const { isLoading, data } = retrieveProductOptions({ productId, variantId });
+  const { id, productId } = params;
+  const { isLoading, data } = retrieveProductOptions({ productId: productId || id });
   const { options } = data || {};
 
   return isLoading ? (
@@ -29,9 +29,13 @@ const VariantOptions = () => {
     >
       {status === 'Add' && <AddOption cancel={() => setStatus('')} />}
 
-      {options?.map((option) => (
-        <OptionRow key={option.id} option={option} />
-      ))}
+      {options && options.length > 0 ? (
+        <List disablePadding>
+          {options?.map((option) => (
+            <OptionRow key={option.id} option={option} />
+          ))}
+        </List>
+      ) : null}
     </Section>
   );
 };

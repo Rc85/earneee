@@ -1,8 +1,8 @@
 import { FormEvent, useCallback, useState } from 'react';
 import { Modal } from '../../../../_shared/components';
 import { OptionSelectionsInterface, ProductOptionsInterface } from '../../../../../_shared/types';
-import { generateKey } from '../../../../../_shared/utils';
-import { TextField } from '@mui/material';
+import { deepEqual, generateKey } from '../../../../../_shared/utils';
+import { Checkbox, FormControlLabel, InputAdornment, TextField } from '@mui/material';
 import OptionForm from './OptionForm';
 import { useSnackbar } from 'notistack';
 import { useCreateProductOption } from '../../../../_shared/api';
@@ -16,17 +16,23 @@ interface Props {
 const AddOption = ({ cancel, option }: Props) => {
   const [status, setStatus] = useState('');
   const params = useParams();
-  const { variantId } = params;
-  const [form, setForm] = useState<ProductOptionsInterface>({
-    id: generateKey(1),
-    name: '',
-    required: true,
-    variantId: variantId!,
-    status: 'available',
-    createdAt: '',
-    updatedAt: '',
-    selections: []
-  });
+  const { id, productId } = params;
+  const initialOption = option
+    ? JSON.parse(JSON.stringify(option))
+    : {
+        id: generateKey(1),
+        name: '',
+        description: '',
+        required: true,
+        productId: productId || id!,
+        minimumSelections: 1,
+        maximumSelections: null,
+        status: 'available',
+        createdAt: '',
+        updatedAt: '',
+        selections: []
+      };
+  const [form, setForm] = useState<ProductOptionsInterface>(initialOption);
   const { enqueueSnackbar } = useSnackbar();
 
   const handleSuccess = () => {
@@ -59,6 +65,7 @@ const AddOption = ({ cancel, option }: Props) => {
     const selection: OptionSelectionsInterface = {
       id: generateKey(1),
       name: '',
+      description: '',
       price: 0,
       optionId: form.id,
       ordinance: form.selections ? form.selections.length : 1,
@@ -120,6 +127,7 @@ const AddOption = ({ cancel, option }: Props) => {
       disableBackdropClick
       component='form'
       loading={status === 'Loading'}
+      disableSubmit={deepEqual(initialOption, form)}
     >
       <TextField
         label='Name'
@@ -129,9 +137,43 @@ const AddOption = ({ cancel, option }: Props) => {
         autoFocus
       />
 
+      <TextField
+        label='Description'
+        onChange={(e) => setForm({ ...form, description: e.target.value })}
+        value={form.description}
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position='end'>
+              {form.description ? form.description.length : 0} / 100
+            </InputAdornment>
+          )
+        }}
+      />
+
+      <TextField
+        label='Minimum Selections'
+        type='number'
+        onChange={(e) => setForm({ ...form, minimumSelections: parseInt(e.target.value) })}
+        value={form.minimumSelections}
+        inputProps={{ min: 1 }}
+      />
+
+      <TextField
+        label='Minimum Selections'
+        type='number'
+        onChange={(e) => setForm({ ...form, maximumSelections: parseInt(e.target.value) })}
+        value={form.maximumSelections}
+      />
+
+      <FormControlLabel
+        label='Required'
+        checked={form.required}
+        control={<Checkbox color='info' />}
+        onChange={() => setForm({ ...form, required: !form.required })}
+      />
+
       <OptionForm
         option={form}
-        onRequiredClick={() => setForm({ ...form, required: !form.required })}
         onAddSelectionClick={handleAddSelectionClick}
         onSelectionChange={handleSelectionChange}
         onSelectionToggle={handleToggleSelection}

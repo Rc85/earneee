@@ -20,7 +20,8 @@ import {
   mdiMessageDraw,
   mdiPencil,
   mdiPlusBox,
-  mdiViewGridPlus
+  mdiViewGridPlus,
+  mdiViewList
 } from '@mdi/js';
 import EditProduct from './EditProduct';
 import ProductVariants from './ProductVariants';
@@ -114,6 +115,18 @@ const Product = () => {
               </ListItemIcon>
 
               <ListItemText primary='Specifications' />
+            </ListItemButton>
+          </ListItem>
+
+          <ListItem disablePadding disableGutters>
+            <ListItemButton
+              onClick={() => navigate(`/product/${id}${productId ? `/variant/${productId}` : ''}/options`)}
+            >
+              <ListItemIcon>
+                <Icon path={mdiViewList} size={1} />
+              </ListItemIcon>
+
+              <ListItemText primary='Options' />
             </ListItemButton>
           </ListItem>
 

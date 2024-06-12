@@ -97,9 +97,7 @@ app.use(routers.statusRouter);
 app.use(routers.offerRouter);
 app.use(routers.discountRouter);
 app.use(routers.orderRouter);
-/*
 app.use(routers.productOptionRouter);
- */
 
 app.use(middlewares.errorHandler);
 

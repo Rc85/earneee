@@ -8,7 +8,7 @@ export const retrieveProductOptions = (options?: { productId?: string; variantId
     queryFn: async () => {
       const { data } = await axios({
         method: 'get',
-        url: '/v1/product/option',
+        url: '/v1/auth/admin/product/option',
         params: options,
         withCredentials: true
       });

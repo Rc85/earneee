@@ -42,7 +42,9 @@ export const useCreateProductOption = (onSuccess?: (data: any) => void, onError?
         method: 'post',
         url: '/v1/auth/admin/product/option',
         withCredentials: true,
-        data: options
+        data: {
+          option: options
+        }
       }),
 
     onSuccess: (data) => {
