@@ -26,19 +26,21 @@ const ProductVariants = () => {
   );
   const params = useParams();
   const { id } = params;
-  const { isLoading, data } = retrieveProducts({ parentId: id });
+  const { isLoading, data } = retrieveProducts({ id });
   const { products } = data || {};
   const sortProducts = useSortProducts();
   const navigate = useNavigate();
+  const product = products?.[0];
 
   const handleDragEnd = (e: DragEndEvent) => {
     const { active, over } = e;
 
-    if (active.id !== over?.id && products) {
-      const oldIndex = products.findIndex((product) => product.id === active.id);
-      const newIndex = products.findIndex((product) => product.id === over?.id);
+    if (active.id !== over?.id && product) {
+      const variants = product.variants || [];
+      const oldIndex = variants.findIndex((product) => product.id === active.id);
+      const newIndex = variants.findIndex((product) => product.id === over?.id);
 
-      const sortedProducts = arrayMove(products, oldIndex, newIndex);
+      const sortedProducts = arrayMove(variants, oldIndex, newIndex);
 
       for (const i in sortedProducts) {
         const index = parseInt(i);
@@ -56,9 +58,9 @@ const ProductVariants = () => {
   ) : (
     <Section title='VARIANTS' titleVariant='h3'>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={products || []} strategy={verticalListSortingStrategy}>
+        <SortableContext items={product?.variants || []} strategy={verticalListSortingStrategy}>
           <List disablePadding>
-            {products?.map((product) => (
+            {product?.variants?.map((product) => (
               <ProductRow
                 key={product.id}
                 product={product}

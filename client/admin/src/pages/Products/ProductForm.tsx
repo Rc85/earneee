@@ -187,6 +187,8 @@ const ProductForm = ({ product, variant }: Props) => {
     setForm({ ...form, urls });
   };
 
+  console.log(variant, form.urls);
+
   return (
     <>
       {status === 'Create Brand' && (
@@ -257,35 +259,40 @@ const ProductForm = ({ product, variant }: Props) => {
                 ))}
               </TextField>
             )}
+          </>
+        )}
 
+        {Boolean(form.urls && form.urls.length > 0) && (
+          <>
             <Box sx={{ mb: 1 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <FormControlLabel
-                  label='Featured'
-                  control={<Checkbox color='info' />}
-                  checked={form.featured}
-                  onChange={() => setForm({ ...form, featured: !form.featured })}
-                />
+                {!variant ? (
+                  <FormControlLabel
+                    label='Featured'
+                    control={<Checkbox color='info' />}
+                    checked={form.featured}
+                    onChange={() => setForm({ ...form, featured: !form.featured })}
+                  />
+                ) : (
+                  <Box></Box>
+                )}
 
                 <Button startIcon={<Icon path={mdiPlusBox} size={1} />} onClick={() => setStatus('Add URL')}>
                   Add URL
                 </Button>
               </Box>
-
-              {Boolean(form.urls && form.urls.length > 0) && (
-                <List disablePadding>
-                  {form.urls?.map((url, i) => (
-                    <UrlRow
-                      key={url.id}
-                      url={url}
-                      onDelete={() => handleDeleteUrl(i)}
-                      submit={handleAddUrl}
-                    />
-                  ))}
-                </List>
-              )}
             </Box>
 
+            <List disablePadding>
+              {form.urls?.map((url, i) => (
+                <UrlRow key={url.id} url={url} onDelete={() => handleDeleteUrl(i)} submit={handleAddUrl} />
+              ))}
+            </List>
+          </>
+        )}
+
+        {!variant && (
+          <>
             {brand ? (
               <Paper variant='outlined' sx={{ p: 2, mb: 1, display: 'flex', alignItems: 'flex-start' }}>
                 {brand.logoUrl && (

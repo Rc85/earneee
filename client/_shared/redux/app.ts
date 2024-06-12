@@ -1,17 +1,19 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import { UsersInterface } from '../../../_shared/types';
+import { OrdersInterface, UsersInterface } from '../../../_shared/types';
 
-interface AppState {
+export interface AppState {
   user: UsersInterface | null;
   isLoading: boolean;
   country: string;
+  cart: OrdersInterface | null;
 }
 
 const initialState: AppState = {
   user: null,
   isLoading: false,
-  country: 'CA'
+  country: 'CA',
+  cart: null
 };
 
 const appSlice = createSlice({
@@ -28,10 +30,13 @@ const appSlice = createSlice({
       localStorage.setItem('earneee.country', country.payload);
 
       state.country = country.payload;
+    },
+    setCart(state, cart: PayloadAction<OrdersInterface>) {
+      state.cart = cart.payload;
     }
   }
 });
 
-export const { setUser, setIsLoading, setCountry } = appSlice.actions;
+export const { setUser, setIsLoading, setCountry, setCart } = appSlice.actions;
 
 export default appSlice.reducer;

@@ -36,7 +36,7 @@ const Product = () => {
   const navigate = useNavigate();
   const params = useParams();
   const { id, productId } = params;
-  const { isLoading, data } = retrieveProducts({ parentId: productId ? id : undefined, id, productId });
+  const { isLoading, data } = retrieveProducts({ parentId: productId ? id : undefined, id: productId || id });
   const { products } = data || {};
   const product = products?.[0];
 

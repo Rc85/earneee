@@ -8,6 +8,7 @@ import Offer from './Offer/Offer';
 import Footer from './Footer/Footer';
 import Subscribe from './Subscribe/Subscribe';
 import PriceFilter from './PriceFilter/PriceFilter';
+import ProductConfigurator from './ProductConfigurator/ProductConfigurator';
 
 export { ThemeRegistry } from './ThemeRegistry/ThemeRegistry';
 export {
@@ -20,5 +21,6 @@ export {
   Offer,
   Search,
   Subscribe,
-  TopBar
+  TopBar,
+  ProductConfigurator
 };

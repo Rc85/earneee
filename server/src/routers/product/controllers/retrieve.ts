@@ -9,7 +9,7 @@ import {
 export const retrieveProducts = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
   const offset = req.query.offset?.toString() || '0';
-  const { id, parentId, productId } = req.query;
+  const { id, parentId } = req.query;
   const params = [];
   const where = [];
 
@@ -25,25 +25,13 @@ export const retrieveProducts = async (req: Request, resp: Response, next: NextF
     params.push(parentId);
 
     where.push(`p.parent_id = $${params.length}`);
-
-    if (productId) {
-      params.push(productId);
-
-      where.push(`p.id = $${params.length}`);
-    }
   }
 
   const products = await database.retrieve<ProductsInterface[]>(
     `WITH
-    c AS (
-      SELECT * FROM categories AS c
-    ),
     pd AS (
       SELECT * FROM product_discounts AS pd
-      WHERE  pd.starts_at <= NOW()
-    ),
-    a AS (
-      SELECT * FROM affiliates AS a
+      WHERE pd.starts_at <= NOW()
     ),
     pu AS (
       SELECT
@@ -53,7 +41,7 @@ export const retrieveProducts = async (req: Request, resp: Response, next: NextF
       FROM product_urls AS pu
       LEFT JOIN LATERAL (
         SELECT TO_JSONB(a.*) AS affiliate
-        FROM a
+        FROM affiliates AS a
         WHERE a.id = pu.affiliate_id
       ) AS a ON true
       LEFT JOIN LATERAL (
@@ -61,29 +49,23 @@ export const retrieveProducts = async (req: Request, resp: Response, next: NextF
         FROM pd
         WHERE pd.product_url_id = pu.id
       ) AS pd ON true
-    ),
-    pb AS (
-      SELECT * FROM product_brands AS pb
-    ),
-    pr AS (
-      SELECT *FROM products AS p
     )
     
     SELECT
       p.*,
-      pr.product,
       pb.brand,
       c.category,
+      COALESCE(pr.variants, '[]'::JSONB) AS variants,
       COALESCE(pu.urls, '[]'::JSONB) AS urls
     FROM products AS p
     LEFT JOIN LATERAL (
       SELECT TO_JSONB(pb.*) AS brand
-      FROM pb
+      FROM product_brands AS pb
       WHERE pb.id = p.brand_id
     ) AS pb ON true
     LEFT JOIN LATERAL (
       SELECT TO_JSONB(c.*) AS category
-      FROM c
+      FROM categories AS c
       WHERE c.id = p.category_id
     ) AS c ON true
     LEFT JOIN LATERAL (
@@ -92,9 +74,9 @@ export const retrieveProducts = async (req: Request, resp: Response, next: NextF
       WHERE pu.product_id = p.id
     ) AS pu ON true
     LEFT JOIN LATERAL (
-      SELECT TO_JSONB(pr.*) AS product
-      FROM pr
-      WHERE pr.id = p.parent_id
+      SELECT JSONB_AGG(pr.*) AS variants
+      FROM products AS pr
+      WHERE pr.parent_id = p.id
     ) AS pr ON true`,
     {
       where: where.join(' AND '),
@@ -597,6 +579,7 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
         pr.details,
         pr.about,
         pr.status,
+        pu.url,
         COALESCE(ps.specifications, '[]'::JSONB) AS specifications,
         COALESCE(pm.media, '[]'::JSONB) AS media
       FROM products AS pr
@@ -610,6 +593,11 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
         FROM ps
         WHERE ps.product_id = pr.id
       ) AS ps ON true
+      LEFT JOIN LATERAL (
+        SELECT TO_JSONB(pu.*) AS url
+        FROM pu
+        WHERE pu.product_id = pr.id
+      ) AS pu ON true
       ORDER BY pr.ordinance
     )
     

@@ -12,7 +12,7 @@ const EditProduct = () => {
 
   return (
     <Section title='EDIT PRODUCT' titleVariant='h3'>
-      <ProductForm product={product} />
+      <ProductForm product={product} variant={Boolean(productId)} />
     </Section>
   );
 };

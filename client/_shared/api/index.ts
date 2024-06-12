@@ -71,3 +71,5 @@ export * from './products/brands/queries';
 export * from './products/media/queries';
 export * from './products/specifications/queries';
 export * from './products/options/queries';
+export * from './orders/mutations';
+export * from './orders/queries';

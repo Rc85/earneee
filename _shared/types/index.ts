@@ -16,3 +16,5 @@ export type { UserBansInterface } from './user_bans';
 export type { SessionsInterface } from './sessions';
 export type { ProductDiscountsInterface } from './product_discounts';
 export type { UserMessagesInterface } from './user_messages';
+export type { OrdersInterface } from './orders';
+export type { OrderItemsInterface } from './order_items';

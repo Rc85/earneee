@@ -6,24 +6,51 @@ import {
   Box,
   IconButton,
   Drawer,
-  Button,
   CircularProgress,
   useTheme,
-  Badge
+  Badge,
+  Popover,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemButton,
+  Button
 } from '@mui/material';
 import Search from '../Search/Search';
 import { SnackbarProvider } from 'notistack';
 import Icon from '@mdi/react';
-import { mdiAccountCircle, mdiEmail, mdiLogoutVariant, mdiMenu } from '@mdi/js';
+import {
+  mdiAccountCircle,
+  mdiCart,
+  mdiCartArrowRight,
+  mdiCartOff,
+  mdiCartRemove,
+  mdiEmail,
+  mdiLogoutVariant,
+  mdiMenu,
+  mdiTrashCan
+} from '@mdi/js';
 import { useEffect, useState } from 'react';
 import Categories from '../Categories/Categories';
 import { brandName } from '../../../_shared/constants';
 import { usePathname } from 'next/navigation';
-import { authenticate, retrieveMessageCount, useLogout } from '../../../_shared/api';
+import {
+  authenticate,
+  retrieveCart,
+  retrieveMessageCount,
+  retrieveUserProfile,
+  useAddProduct,
+  useLogout,
+  useRemoveProduct
+} from '../../../_shared/api';
 import { retrieveStatuses } from '../../../_shared/api/statuses/queries';
 import Link from 'next/link';
 import { useDispatch } from 'react-redux';
 import { setCountry } from '../../../_shared/redux/app';
+import { grey } from '@mui/material/colors';
+import { OrderItemsInterface, ProductsInterface } from '../../../../_shared/types';
+import ProductConfigurator from '../ProductConfigurator/ProductConfigurator';
+import { useAppSelector } from '../../../_shared/redux/store';
 
 const TopBar = () => {
   const [openDrawer, setOpenDrawer] = useState(false);
@@ -31,6 +58,8 @@ const TopBar = () => {
   const theme = useTheme();
   const { isLoading, data, refetch } = authenticate('marketplace');
   const { user } = data || {};
+  const profile = retrieveUserProfile();
+  const { userProfile } = profile.data || {};
   const logout = useLogout();
   const s = retrieveStatuses();
   const { statuses } = s.data || {};
@@ -42,8 +71,8 @@ const TopBar = () => {
   const { count = 0 } = userMessages.data || {};
 
   useEffect(() => {
-    if (user) {
-      dispatch(setCountry(user.country));
+    if (userProfile) {
+      dispatch(setCountry(userProfile.country));
     } else {
       setTimeout(() => {
         const country = localStorage.getItem('earneee.country');
@@ -133,25 +162,23 @@ const TopBar = () => {
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <Link href='/user/profile'>
                 <IconButton size='small' sx={{ mr: 2 }}>
-                  <Icon path={mdiAccountCircle} size={1} color='black' />
+                  <Icon path={mdiAccountCircle} size={1} color='black' title='Account' />
                 </IconButton>
               </Link>
 
               <Badge badgeContent={count} color='info' overlap='circular' sx={{ mr: 2 }}>
                 <Link href='/user/messages'>
                   <IconButton size='small'>
-                    <Icon path={mdiEmail} size={1} color='black' />
+                    <Icon path={mdiEmail} size={1} color='black' title='Messages' />
                   </IconButton>
                 </Link>
               </Badge>
 
-              <Button
-                color='inherit'
-                startIcon={<Icon path={mdiLogoutVariant} size={1} />}
-                onClick={handleLogout}
-              >
-                Logout
-              </Button>
+              <Cart />
+
+              <IconButton size='small' onClick={handleLogout}>
+                <Icon path={mdiLogoutVariant} size={1} color='black' title='Logout' />
+              </IconButton>
             </Box>
           ) : (
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -179,6 +206,167 @@ const TopBar = () => {
         </Container>
       </SnackbarProvider>
     </Box>
+  );
+};
+
+const Cart = () => {
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const auth = authenticate('marketplace');
+  const { user } = auth.data || {};
+  const { data, refetch } = retrieveCart({ userId: user?.id });
+  const { order } = data || {};
+  const count = order?.items.length || 0;
+  const pathname = usePathname();
+  const { country } = useAppSelector((state) => state.App);
+  const subtotal = (order?.items || []).reduce((acc, item) => acc + item.price * item.quantity, 0);
+
+  const removeProduct = useRemoveProduct();
+  const updateProduct = useAddProduct();
+
+  useEffect(() => {
+    if (user) {
+      refetch();
+    }
+  }, [pathname]);
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleRemoveProduct = (orderItemId: string) => {
+    removeProduct.mutate({ orderItemId, orderId: order?.id });
+  };
+
+  const handleUpdateProduct = (product: ProductsInterface, quantity: string, orderItemId: string) => {
+    if (order) {
+      updateProduct.mutate({
+        orderItemId,
+        product,
+        quantity: parseInt(quantity),
+        orderId: order.id,
+        country
+      });
+    }
+  };
+
+  const handleClearCartClick = () => {
+    removeProduct.mutate({ orderId: order?.id });
+  };
+
+  return (
+    <>
+      <Badge badgeContent={count} color='info' overlap='circular' sx={{ mr: 2 }}>
+        <IconButton size='small' onClick={handleClick}>
+          <Icon path={mdiCart} size={1} color='black' title='Cart' />
+        </IconButton>
+      </Badge>
+
+      <Popover
+        open={Boolean(anchorEl)}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right'
+        }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        slotProps={{ paper: { sx: { p: 2, width: '400px' } } }}
+      >
+        {count === 0 ? (
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <Icon path={mdiCartOff} size={3} color={grey[300]} />
+
+            <Typography sx={{ mt: 3 }}>Your cart is empty</Typography>
+          </Box>
+        ) : (
+          <>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Typography variant='h6' sx={{ mb: 0 }}>
+                {order?.items.length} item{order?.items && order.items.length > 1 ? 's' : ''}
+              </Typography>
+
+              <IconButton size='small' color='error' onClick={handleClearCartClick}>
+                <Icon path={mdiCartRemove} size={1} />
+              </IconButton>
+            </Box>
+
+            <List disablePadding>
+              {order?.items.map((item) => (
+                <CartItem
+                  key={item.id}
+                  item={item}
+                  onRemove={handleRemoveProduct}
+                  onUpdate={handleUpdateProduct}
+                />
+              ))}
+            </List>
+
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Typography variant='h6' sx={{ mb: 0 }}>
+                SUBTOTAL
+              </Typography>
+
+              <Typography variant='h6' sx={{ mb: 0 }}>
+                ${subtotal.toFixed(2)}
+              </Typography>
+            </Box>
+
+            <Button variant='contained' fullWidth startIcon={<Icon path={mdiCartArrowRight} size={1} />}>
+              Checkout
+            </Button>
+          </>
+        )}
+      </Popover>
+    </>
+  );
+};
+
+const CartItem = ({
+  item,
+  onRemove,
+  onUpdate
+}: {
+  item: OrderItemsInterface;
+  onRemove: (orderItemId: string) => void;
+  onUpdate: (product: ProductsInterface, quantity: string, orderItemId: string) => void;
+}) => {
+  const [status, setStatus] = useState('');
+
+  const handleUpdate = (product: ProductsInterface, quantity: string) => {
+    onUpdate(product, quantity, item.id);
+
+    setStatus('');
+  };
+
+  return (
+    <ListItem disableGutters divider>
+      {status === 'Edit' && (
+        <ProductConfigurator
+          product={{ ...item.product }}
+          variant={item.product.variants?.[0] ? { ...item.product.variants[0] } : undefined}
+          item={item}
+          cancel={() => setStatus('')}
+          submit={handleUpdate}
+        />
+      )}
+
+      <ListItemButton onClick={() => setStatus('Edit')}>
+        <ListItemText
+          primary={`${item.product.brand ? `${item.product.brand.name} ` : ''}${item.product.name}`}
+          secondary={`${item.quantity} x $${item.price.toFixed(2)}${
+            item.product.variants?.[0] ? ` \u2022 ${item.product.variants[0].name}` : ''
+          }`}
+        />
+      </ListItemButton>
+
+      <IconButton size='small' color='error' sx={{ ml: 1 }} onClick={() => onRemove(item.id)}>
+        <Icon path={mdiTrashCan} size={1} />
+      </IconButton>
+    </ListItem>
   );
 };
 

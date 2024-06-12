@@ -3,10 +3,15 @@
 import Section from '../../../../_shared/components/Section/Section';
 import { Box, Breadcrumbs, Button, Chip, Divider, Paper, Typography } from '@mui/material';
 import Link from 'next/link';
-import { retrieveMarketplaceProduct } from '../../../../_shared/api';
+import {
+  authenticate,
+  retrieveCart,
+  retrieveMarketplaceProduct,
+  useAddProduct
+} from '../../../../_shared/api';
 import Grid2 from '@mui/material/Unstable_Grid2';
 import { useState, Fragment, useEffect } from 'react';
-import { Gallery } from '../../../components';
+import { Gallery, ProductConfigurator } from '../../../components';
 import { useAppSelector } from '../../../../_shared/redux/store';
 import { ProductsInterface } from '../../../../../_shared/types';
 import { grey } from '@mui/material/colors';
@@ -15,11 +20,7 @@ import { mdiCartPlus, mdiImageOff, mdiOpenInNew } from '@mdi/js';
 import dayjs from 'dayjs';
 import Loading from './loading';
 
-interface Props {
-  params: { id: string };
-}
-
-const Product = ({ params: { id } }: Props) => {
+const Product = ({ params: { id } }: { params: { id: string } }) => {
   const { country } = useAppSelector((state) => state.App);
   const { isLoading, data } = retrieveMarketplaceProduct({ productId: id, country });
   const product = data?.product;
@@ -35,25 +36,6 @@ const Product = ({ params: { id } }: Props) => {
   const details = selectedVariant?.details || product?.details;
   const description = selectedVariant?.description || product?.description;
   const specifications: { name: string; value: string[] }[] = [];
-  const price = product?.url?.price || 0;
-  const currency = product?.url?.currency || 'CAD';
-  const discount = product?.url?.discount;
-  const unavailableVariants = product?.variants?.filter((variant) => variant.status === 'unavailable') || [];
-  const unavailable =
-    (unavailableVariants.length > 0 && unavailableVariants.length === (product?.variants?.length || 0)) ||
-    product?.status === 'unavailable';
-
-  let discountAmount = 0;
-
-  if (discount) {
-    if (discount.amountType === 'fixed') {
-      discountAmount = discount.amount;
-    } else if (discount.amountType === 'percentage') {
-      discountAmount = price * (discount.amount / 100);
-    }
-  }
-
-  const finalPrice = price - discountAmount;
 
   useEffect(() => {
     if (product?.variants?.[0]) {
@@ -70,14 +52,6 @@ const Product = ({ params: { id } }: Props) => {
       specifications.push({ name: specification.name, value: [specification.value] });
     }
   }
-
-  const handleBuyNowClick = () => {
-    if (product?.url?.type === 'affiliate') {
-      window.open(product?.url.url, '_blank', 'noopener, noreferrer');
-    } else {
-      // ADD TO CART
-    }
-  };
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -201,104 +175,25 @@ const Product = ({ params: { id } }: Props) => {
                       <Box sx={{ flexGrow: 1, p: 1 }}>
                         <Typography>{variant.name}</Typography>
 
-                        {variant.status === 'unavailable' && (
-                          <Chip size='small' color='error' label='Unavailable' />
-                        )}
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          {variant?.url ? (
+                            <Typography variant='body2' color='GrayText'>
+                              +${variant.url?.price.toFixed(2)}
+                            </Typography>
+                          ) : (
+                            <Box />
+                          )}
+
+                          {variant.status === 'unavailable' && (
+                            <Chip size='small' color='error' label='Unavailable' />
+                          )}
+                        </Box>
                       </Box>
                     </Paper>
                   );
                 })}
 
-                {selectedVariant?.status === 'available' && (
-                  <>
-                    {/* options.map((option) => (
-                        <Box key={option.id}>
-                          <Typography variant='h6'>
-                            {option.name} {option.required && <Typography color='red'>Required</Typography>}
-                          </Typography>
-  
-                          {option.selections?.map((selection) => (
-                            <FormControlLabel
-                              key={selection.id}
-                              label={
-                                <ListItemText
-                                  primary={selection.name}
-                                  secondary={`+$${selection.price?.toFixed(
-                                    2
-                                  )} ${selectedVariant.currency?.toUpperCase()}`}
-                                />
-                              }
-                              control={<Checkbox color='info' />}
-                              onChange={(e) => {
-                                
-                              }}
-                            />
-                          ))}
-                        </Box>
-                      )) */}
-                  </>
-                )}
-
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      {price !== finalPrice && (
-                        <Typography sx={{ mr: 1, fontWeight: 'bold', textDecoration: 'line-through' }}>
-                          ${price.toFixed(2)}
-                        </Typography>
-                      )}
-
-                      <Typography variant='h6' sx={{ mb: 0 }}>
-                        ${finalPrice.toFixed(2)} {currency.toUpperCase()}
-                      </Typography>
-                    </Box>
-
-                    <Box sx={{ display: 'flex' }}>
-                      {discount && (
-                        <Typography variant='body2' sx={{ color: 'success.main', fontWeight: 500 }}>
-                          {discount.amountType === 'fixed'
-                            ? `$${discount.amount.toFixed(2)} off`
-                            : `${discount.amount}% off`}
-                        </Typography>
-                      )}
-
-                      {discount?.limitedTimeOnly ? (
-                        <Typography variant='body2' sx={{ ml: 1, fontWeight: 500, color: 'error.main' }}>
-                          Limited Time Only
-                        </Typography>
-                      ) : (
-                        discount?.startsAt &&
-                        discount?.endsAt && (
-                          <Typography variant='body2' sx={{ ml: 1, fontWeight: 500, color: 'error.main' }}>
-                            {dayjs(discount?.startsAt).format('MMM DD')} -{' '}
-                            {dayjs(discount?.endsAt).format('MMM DD')}
-                          </Typography>
-                        )
-                      )}
-                    </Box>
-
-                    {product?.url?.affiliate && (
-                      <Typography variant='body2'>Sold on {product.url.affiliate.name}</Typography>
-                    )}
-                  </Box>
-
-                  {unavailable ? (
-                    <Chip size='small' color='error' label='Unavailable' />
-                  ) : (
-                    <Button
-                      variant='contained'
-                      onClick={handleBuyNowClick}
-                      startIcon={
-                        <Icon
-                          path={product?.url?.type === 'affiliate' ? mdiOpenInNew : mdiCartPlus}
-                          size={1}
-                        />
-                      }
-                    >
-                      {product?.url?.type === 'affiliate' ? 'Buy Now' : 'Add to Cart'}
-                    </Button>
-                  )}
-                </Box>
+                {product && <ProductActions product={product} selectedVariant={selectedVariant} />}
 
                 {Boolean(
                   selectedVariant && (product?.about || selectedVariant?.excerpt || selectedVariant?.about)
@@ -363,6 +258,166 @@ const Product = ({ params: { id } }: Props) => {
         </>
       )}
     </Box>
+  );
+};
+
+interface Props {
+  product: ProductsInterface;
+  selectedVariant: ProductsInterface | undefined;
+}
+
+const ProductActions = ({ product, selectedVariant }: Props) => {
+  const [status, setStatus] = useState('');
+  const auth = authenticate('marketplace');
+  const { user } = auth.data || {};
+  const price = product.url?.price || 0;
+  const currency = product.url?.currency || 'CAD';
+  const discount = product.url?.discount;
+  const unavailableVariants = product.variants?.filter((variant) => variant.status === 'unavailable') || [];
+  const unavailable =
+    (unavailableVariants.length > 0 && unavailableVariants.length === (product.variants?.length || 0)) ||
+    product.status === 'unavailable';
+  const { data } = retrieveCart({ userId: user?.id });
+  const { order } = data || {};
+  const { country } = useAppSelector((state) => state.App);
+
+  const addProduct = useAddProduct();
+
+  let discountAmount = 0;
+
+  if (discount) {
+    if (discount.amountType === 'fixed') {
+      discountAmount = discount.amount;
+    } else if (discount.amountType === 'percentage') {
+      discountAmount = price * (discount.amount / 100);
+    }
+  }
+
+  const finalPrice = price - discountAmount;
+
+  const handleBuyNowClick = () => {
+    if (product?.url?.url) {
+      window.open(product.url.url, '_blank', 'noopener, noreferrer');
+    }
+  };
+
+  const handleAddToCartClick = () => {
+    setStatus('Add Item');
+  };
+
+  const handleAddProduct = (product: ProductsInterface, quantity: string) => {
+    if (product && order) {
+      addProduct.mutate({ product, quantity: parseInt(quantity), orderId: order.id, country });
+    }
+
+    setStatus('');
+  };
+
+  return (
+    <>
+      {status === 'Add Item' && product && (
+        <ProductConfigurator
+          product={product}
+          variant={selectedVariant}
+          cancel={() => setStatus('')}
+          submit={handleAddProduct}
+        />
+      )}
+
+      {selectedVariant?.status === 'available' && (
+        <>
+          {/* options.map((option) => (
+            <Box key={option.id}>
+              <Typography variant='h6'>
+                {option.name} {option.required && <Typography color='red'>Required</Typography>}
+              </Typography>
+
+              {option.selections?.map((selection) => (
+                <FormControlLabel
+                  key={selection.id}
+                  label={
+                    <ListItemText
+                      primary={selection.name}
+                      secondary={`+$${selection.price?.toFixed(
+                        2
+                      )} ${selectedVariant.currency?.toUpperCase()}`}
+                    />
+                  }
+                  control={<Checkbox color='info' />}
+                  onChange={(e) => {
+                    
+                  }}
+                />
+              ))}
+            </Box>
+          )) */}
+        </>
+      )}
+
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Box>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            {price !== finalPrice && (
+              <Typography sx={{ mr: 1, fontWeight: 'bold', textDecoration: 'line-through' }}>
+                ${price.toFixed(2)}
+              </Typography>
+            )}
+
+            <Typography variant='h6' sx={{ mb: 0 }}>
+              ${finalPrice.toFixed(2)} {currency.toUpperCase()}
+            </Typography>
+          </Box>
+
+          <Box sx={{ display: 'flex' }}>
+            {discount && (
+              <Typography variant='body2' sx={{ color: 'success.main', fontWeight: 500 }}>
+                {discount.amountType === 'fixed'
+                  ? `$${discount.amount.toFixed(2)} off`
+                  : `${discount.amount}% off`}
+              </Typography>
+            )}
+
+            {discount?.limitedTimeOnly ? (
+              <Typography variant='body2' sx={{ ml: 1, fontWeight: 500, color: 'error.main' }}>
+                Limited Time Only
+              </Typography>
+            ) : (
+              discount?.startsAt &&
+              discount?.endsAt && (
+                <Typography variant='body2' sx={{ ml: 1, fontWeight: 500, color: 'error.main' }}>
+                  {dayjs(discount?.startsAt).format('MMM DD')} - {dayjs(discount?.endsAt).format('MMM DD')}
+                </Typography>
+              )
+            )}
+          </Box>
+
+          {product?.url?.affiliate && (
+            <Typography variant='body2'>Sold on {product.url.affiliate.name}</Typography>
+          )}
+        </Box>
+
+        {unavailable ? (
+          <Chip size='small' color='error' label='Unavailable' />
+        ) : product?.url?.type === 'affiliate' ? (
+          <Button
+            variant='contained'
+            onClick={handleBuyNowClick}
+            startIcon={<Icon path={mdiOpenInNew} size={1} />}
+          >
+            Buy Now
+          </Button>
+        ) : (
+          <Button
+            variant='contained'
+            onClick={handleAddToCartClick}
+            startIcon={<Icon path={mdiCartPlus} size={1} />}
+            disabled={!Boolean(user)}
+          >
+            Add to Cart
+          </Button>
+        )}
+      </Box>
+    </>
   );
 };
 

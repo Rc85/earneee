@@ -95,14 +95,9 @@ export const retrieveMarketplaceProducts = (options?: {
   });
 };
 
-export const retrieveProducts = (options?: {
-  id?: string;
-  parentId?: string;
-  productId?: string;
-  offset?: number;
-}) => {
+export const retrieveProducts = (options?: { id?: string; parentId?: string; offset?: number }) => {
   return useQuery<{ products: ProductsInterface[]; count: number }>({
-    queryKey: ['products', options?.id, options?.parentId, options?.productId, options?.offset],
+    queryKey: ['products', options?.id, options?.parentId, options?.offset],
     queryFn: async () => {
       const { data } = await axios({
         method: 'get',
