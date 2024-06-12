@@ -31,8 +31,8 @@ export const changePassword = async (req: Request, resp: Response, next: NextFun
     });
 
     await database.update('sessions', ['status'], {
-      where: 'id = $2',
-      params: ['terminated', `sess:${req.session.id}`],
+      where: 'id = $2 AND status = $3',
+      params: ['terminated', `sess:${req.session.id}`, 'active'],
       client
     });
 

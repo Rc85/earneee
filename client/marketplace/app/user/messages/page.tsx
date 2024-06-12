@@ -99,7 +99,13 @@ const MessageRow = ({ message }: { message: UserMessagesInterface }) => {
 
   return (
     <ListItem disableGutters disablePadding divider>
-      <Modal open={status === 'Open'} title='Message' cancel={() => setStatus('')} cancelText='Close'>
+      <Modal
+        open={status === 'Open'}
+        title='Message'
+        subtitle={dayjs(message.createdAt).format('YYYY-MM-DD')}
+        cancel={() => setStatus('')}
+        cancelText='Close'
+      >
         <Typography>{message.message}</Typography>
       </Modal>
 

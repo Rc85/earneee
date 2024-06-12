@@ -168,6 +168,7 @@ export const retrieveMessages = async (req: Request, resp: Response, next: NextF
       where: 'user_id = $1 AND status = ANY($2)',
       offset,
       limit,
+      orderBy: 'created_at DESC',
       params: [req.session.user.id, ['new', 'read']],
       client
     });

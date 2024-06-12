@@ -267,3 +267,31 @@ export const useDeleteMessage = (onSuccess?: (data: any) => void, onError?: (err
     }
   });
 };
+
+export const useDeleteAccount = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (password: string) =>
+      axios({
+        method: 'delete',
+        url: '/v1/auth/user',
+        withCredentials: true,
+        params: { password }
+      }),
+
+    onSuccess: (data) => {
+      dispatch(setIsLoading(false));
+
+      queryClient.invalidateQueries({ queryKey: ['authenticate'] });
+
+      onSuccess?.(data);
+    },
+    onError: (err) => {
+      dispatch(setIsLoading(false));
+
+      onError?.(err);
+    }
+  });
+};

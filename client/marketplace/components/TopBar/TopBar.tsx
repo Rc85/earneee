@@ -29,7 +29,7 @@ const TopBar = () => {
   const [openDrawer, setOpenDrawer] = useState(false);
   const pathname = usePathname();
   const theme = useTheme();
-  const { isLoading, data } = authenticate('marketplace');
+  const { isLoading, data, refetch } = authenticate('marketplace');
   const { user } = data || {};
   const logout = useLogout();
   const s = retrieveStatuses();
@@ -54,7 +54,11 @@ const TopBar = () => {
   }, [user]);
 
   useEffect(() => {
-    userMessages.refetch();
+    if (user) {
+      userMessages.refetch();
+    }
+
+    refetch();
   }, [pathname]);
 
   const handleLogout = () => {

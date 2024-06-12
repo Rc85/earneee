@@ -104,4 +104,12 @@ router.delete(
 
 router.get('/v1/auth/user/orders', dbConnect, middleware(controllers.retrieveOrders), response);
 
+router.delete(
+  '/v1/auth/user',
+  dbConnect,
+  middleware(controllers.validateDeleteAccount),
+  middleware(controllers.deleteAccount),
+  response
+);
+
 export default router;

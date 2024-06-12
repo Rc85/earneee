@@ -42,6 +42,8 @@ export const validateLogin = async (req: Request, resp: Response, next: NextFunc
 
   if (user.length === 0) {
     return next(new HttpException(400, `Incorrect password`));
+  } else if (user[0].status === 'deleted') {
+    return next(new HttpException(400, `Incorrect password`));
   }
 
   const match = await bcrypt.compare(password, user[0].password);
@@ -218,6 +220,31 @@ export const validateDeleteMessages = async (req: Request, resp: Response, next:
     if (typeof messageId !== 'string') {
       return next(new HttpException(400, `Invalid message`));
     }
+  }
+
+  return next();
+};
+
+export const validateDeleteAccount = async (req: Request, resp: Response, next: NextFunction) => {
+  const { client } = resp.locals;
+  const { password } = req.query;
+
+  const user = await database.retrieve<UsersInterface[]>('SELECT password FROM users', {
+    where: 'id = $1',
+    params: [req.session.user?.id],
+    client
+  });
+
+  if (!user.length) {
+    return next(new HttpException(400, `Incorrect password`));
+  } else if (!password || typeof password !== 'string' || validations.blankCheck.test(password)) {
+    return next(new HttpException(400, `Password required`));
+  }
+
+  const match = await bcrypt.compare(password, user[0].password);
+
+  if (!match) {
+    return next(new HttpException(400, `Incorrect password`));
   }
 
   return next();

@@ -6,7 +6,9 @@ import { Box, Button, CircularProgress, TextField, Typography } from '@mui/mater
 import Icon from '@mdi/react';
 import { FormEvent, useState } from 'react';
 import { useSnackbar } from 'notistack';
-import { useChangePassword } from '../../../../_shared/api';
+import { useChangePassword, useDeleteAccount } from '../../../../_shared/api';
+import { Modal } from '../../../../_shared/components';
+import { redirect } from 'next/navigation';
 
 const page = () => {
   const [status, setStatus] = useState('');
@@ -43,6 +45,8 @@ const page = () => {
 
   return (
     <>
+      {status === 'Confirm Delete' && <DeleteAccount cancel={() => setStatus('')} />}
+
       <Box sx={{ px: 2, pb: 2, flexGrow: 1, height: '100%' }}>
         <Typography variant='h6'>Change Password</Typography>
 
@@ -86,10 +90,66 @@ const page = () => {
         color='error'
         startIcon={<Icon path={mdiAccountRemove} size={1} />}
         sx={{ justifySelf: 'flex-end' }}
+        onClick={() => setStatus('Confirm Delete')}
       >
         Delete Account
       </Button>
     </>
+  );
+};
+
+const DeleteAccount = ({ cancel }: { cancel: () => void }) => {
+  const [status, setStatus] = useState('');
+  const [password, setPassword] = useState('');
+  const { enqueueSnackbar } = useSnackbar();
+
+  const handleSuccess = (response: any) => {
+    if (response.data.statusText) {
+      enqueueSnackbar(response.data.statusText, { variant: 'success' });
+    }
+
+    redirect('/');
+  };
+
+  const handleError = (err: any) => {
+    if (err.response.data.statusText) {
+      enqueueSnackbar(err.response.data.statusText, { variant: 'error' });
+    }
+
+    setStatus('');
+  };
+
+  const deleteAccount = useDeleteAccount(handleSuccess, handleError);
+
+  const handleSubmit = (e?: FormEvent) => {
+    e?.preventDefault();
+
+    if (password) {
+      setStatus('Loading');
+
+      deleteAccount.mutate(password);
+    }
+  };
+
+  return (
+    <Modal
+      open
+      title='Delete Account'
+      submit={handleSubmit}
+      cancel={cancel}
+      disableBackdropClick
+      component='form'
+      loading={status === 'Loading'}
+    >
+      <Typography sx={{ mb: 2 }}>Please allow up to 30 days to complete erase all of your data.</Typography>
+
+      <TextField
+        label='Password'
+        type='password'
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+    </Modal>
   );
 };
 

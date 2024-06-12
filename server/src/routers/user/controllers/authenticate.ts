@@ -5,6 +5,8 @@ import { sendEmail } from '../../../services';
 import { v4 as uuidv4 } from 'uuid';
 
 export const authenticate = async (req: Request, resp: Response, next: NextFunction) => {
+  resp.locals.response = { status: 204 };
+
   if (req.session.user?.id) {
     resp.locals.response = { status: 200, data: { user: req.session.user } };
   }
