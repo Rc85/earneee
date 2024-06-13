@@ -13,11 +13,10 @@ import {
   List,
   ListItem,
   ListItemText,
-  ListItemButton,
-  Button
+  ListItemButton
 } from '@mui/material';
 import Search from '../Search/Search';
-import { SnackbarProvider } from 'notistack';
+import { SnackbarProvider, useSnackbar } from 'notistack';
 import Icon from '@mdi/react';
 import {
   mdiAccountCircle,
@@ -40,6 +39,7 @@ import {
   retrieveMessageCount,
   retrieveUserProfile,
   useAddProduct,
+  useCheckout,
   useLogout,
   useRemoveProduct
 } from '../../../_shared/api';
@@ -51,6 +51,7 @@ import { grey } from '@mui/material/colors';
 import { OrderItemsInterface, ProductsInterface } from '../../../../_shared/types';
 import ProductConfigurator from '../ProductConfigurator/ProductConfigurator';
 import { useAppSelector } from '../../../_shared/redux/store';
+import { LoadingButton } from '@mui/lab';
 
 const TopBar = () => {
   const [openDrawer, setOpenDrawer] = useState(false);
@@ -210,6 +211,7 @@ const TopBar = () => {
 };
 
 const Cart = () => {
+  const [status, setStatus] = useState('');
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const auth = authenticate('marketplace');
   const { user } = auth.data || {};
@@ -219,9 +221,23 @@ const Cart = () => {
   const pathname = usePathname();
   const { country } = useAppSelector((state) => state.App);
   const subtotal = (order?.items || []).reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const { enqueueSnackbar } = useSnackbar();
+
+  const handleSuccess = (response: any) => {
+    if (response.data.url) {
+      window.location.href = response.data.url;
+    }
+  };
+
+  const handleError = (err: any) => {
+    if (err.response.data.statusText) {
+      enqueueSnackbar(err.response.data.statusText, { variant: 'error' });
+    }
+  };
 
   const removeProduct = useRemoveProduct();
   const updateProduct = useAddProduct();
+  const checkout = useCheckout(handleSuccess, handleError);
 
   useEffect(() => {
     if (user) {
@@ -255,6 +271,14 @@ const Cart = () => {
 
   const handleClearCartClick = () => {
     removeProduct.mutate({ orderId: order?.id });
+  };
+
+  const handleCheckoutClick = () => {
+    if (order) {
+      setStatus('Loading');
+
+      checkout.mutate({ orderId: order.id, cancelUrl: pathname });
+    }
   };
 
   return (
@@ -315,9 +339,17 @@ const Cart = () => {
               </Typography>
             </Box>
 
-            <Button variant='contained' fullWidth startIcon={<Icon path={mdiCartArrowRight} size={1} />}>
+            <LoadingButton
+              variant='contained'
+              fullWidth
+              loading={status === 'Loading'}
+              loadingIndicator={<CircularProgress size={20} />}
+              loadingPosition='start'
+              startIcon={<Icon path={mdiCartArrowRight} size={1} />}
+              onClick={handleCheckoutClick}
+            >
               Checkout
-            </Button>
+            </LoadingButton>
           </>
         )}
       </Popover>
@@ -356,7 +388,7 @@ const CartItem = ({
 
       <ListItemButton onClick={() => setStatus('Edit')}>
         <ListItemText
-          primary={`${item.product.brand ? `${item.product.brand.name} ` : ''}${item.product.name}`}
+          primary={item.name}
           secondary={`${item.quantity} x $${item.price.toFixed(2)}${
             item.product.variants?.[0] ? ` \u2022 ${item.product.variants[0].name}` : ''
           }`}

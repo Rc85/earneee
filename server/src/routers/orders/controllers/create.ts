@@ -12,10 +12,27 @@ export const addProduct = async (req: Request, resp: Response, next: NextFunctio
   const name = `${product?.brand ? `${product.brand.name} ` : ''}${product.name}`;
   const price = (product.url?.price || 0) + (product.variants?.[0]?.url?.price || 0);
 
+  const orderProduct = {
+    id: product.id,
+    url: {
+      price: product.url?.price,
+      currency: product.url?.currency,
+      refundTime: product.url?.refundTime,
+      shippingTime: product.url?.shippingTime
+    },
+    variants: [
+      {
+        id: product.variants?.[0]?.id,
+        name: product.variants?.[0]?.name,
+        url: { price: product.variants?.[0]?.url?.price, currency: product.variants?.[0]?.url?.currency }
+      }
+    ]
+  };
+
   await database.create(
     'order_items',
     ['id', 'name', 'price', 'order_id', 'product', 'quantity'],
-    [id, name, price, orderId, product, quantity],
+    [id, name, price, orderId, orderProduct, quantity],
     {
       conflict: {
         columns: 'id',
@@ -24,6 +41,12 @@ export const addProduct = async (req: Request, resp: Response, next: NextFunctio
       client
     }
   );
+
+  await database.update('orders', '', {
+    where: 'id = $1',
+    params: [orderId],
+    client
+  });
 
   resp.locals.response = { data: { statusText: orderItemId ? 'Item updated' : 'Item added' } };
 

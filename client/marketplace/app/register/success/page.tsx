@@ -1,6 +1,6 @@
 'use client';
 
-import { mdiCheckCircle, mdiCloseCircle } from '@mdi/js';
+import { mdiCheckCircleOutline, mdiCloseCircleOutline } from '@mdi/js';
 import Icon from '@mdi/react';
 import { Box, Container, Paper, Typography, useTheme } from '@mui/material';
 import Link from 'next/link';
@@ -17,17 +17,17 @@ const Register = () => {
       <Paper variant='outlined' sx={{ p: 2 }}>
         {error ? (
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <Typography variant='h3'>Unauthorized</Typography>
+            <Icon path={mdiCloseCircleOutline} size={3} color={theme.palette.error.main} />
 
-            <Icon path={mdiCloseCircle} size={5} color={theme.palette.error.main} />
+            <Typography variant='h3'>Unauthorized</Typography>
 
             <Typography sx={{ textAlign: 'center' }}>{errorDescription}</Typography>
           </Box>
         ) : (
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <Typography variant='h3'>Email confirmed!</Typography>
+            <Icon path={mdiCheckCircleOutline} size={3} color={theme.palette.success.main} />
 
-            <Icon path={mdiCheckCircle} size={5} color={theme.palette.success.main} />
+            <Typography variant='h3'>Email confirmed!</Typography>
 
             <Typography sx={{ textAlign: 'center' }}>
               You can now <Link href='/login'>login</Link> to your account.

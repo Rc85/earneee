@@ -17,6 +17,9 @@ exports.up = (pgm) => {
         onUpdate: 'cascade',
         onDelete: 'cascade'
       },
+      session_id: {
+        type: 'varchar'
+      },
       status: {
         type: 'varchar',
         notNull: true,
@@ -81,7 +84,11 @@ exports.up = (pgm) => {
     {
       id: {
         type: 'varchar',
-        primaryKey: true,
+        primaryKey: true
+      },
+      order_id: {
+        type: 'varchar',
+        notNull: true,
         references: 'orders (id)',
         onUpdate: 'cascade',
         onDelete: 'cascade'
@@ -92,10 +99,10 @@ exports.up = (pgm) => {
       tracking_number: {
         type: 'varchar'
       },
-      suite: {
+      address: {
         type: 'varchar'
       },
-      address: {
+      address_line_2: {
         type: 'varchar'
       },
       city: {
@@ -108,9 +115,6 @@ exports.up = (pgm) => {
         type: 'varchar'
       },
       postal_code: {
-        type: 'varchar'
-      },
-      phone_number: {
         type: 'varchar'
       },
       eta: {

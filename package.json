@@ -60,6 +60,7 @@
     "redis": "^4.6.12",
     "redux-persist": "^6.0.0",
     "sharp": "^0.33.2",
+    "stripe": "^15.10.0",
     "uuid": "^10.0.0"
   },
   "devDependencies": {

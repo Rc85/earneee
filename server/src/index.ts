@@ -2,26 +2,27 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-import express from 'express';
+import express, { Request } from 'express';
 import { createServer } from 'http';
 import * as routers from './routers';
 import cors from 'cors';
 import * as middlewares from './middlewares';
 import path from 'path';
+import stripeWebhookRouter from './webhooks/stripe';
 
 const app = express();
 const server = createServer(app);
 
 app.use(
   express.json({
-    limit: '96mb'
-    /* verify: function (req: Request, resp: Response, buffer: Buffer) {
+    limit: '96mb',
+    verify: function (req: Request, _, buffer: Buffer) {
       let url = req.originalUrl;
 
       if (url.startsWith('/webhooks/stripe')) {
         req.rawBody = buffer.toString();
       }
-    } */
+    }
   })
 );
 
@@ -98,6 +99,7 @@ app.use(routers.offerRouter);
 app.use(routers.discountRouter);
 app.use(routers.orderRouter);
 app.use(routers.productOptionRouter);
+app.use(stripeWebhookRouter);
 
 app.use(middlewares.errorHandler);
 

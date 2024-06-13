@@ -3,13 +3,17 @@ import { HttpException, validations } from '../../../utils';
 import dayjs from 'dayjs';
 
 export const validateCreateOffer = async (req: Request, _: Response, next: NextFunction) => {
-  const { name, url, logoUrl, startDate, endDate, details, status } = req.body;
+  const { name, url, logoUrl, startDate, endDate, status } = req.body;
+
+  if (req.body.details === '<p></p>') {
+    req.body.details = null;
+  }
 
   if (name && typeof name !== 'string') {
     return next(new HttpException(400, `Invalid name`));
   } else if (!url || validations.blankCheck.test(url)) {
     return next(new HttpException(400, `URL is required`));
-  } else if (details && typeof details !== 'string') {
+  } else if (req.body.details && typeof req.body.details !== 'string') {
     return next(new HttpException(400, `Invalid details`));
   } else if (!/^https:\/\//.test(url) || typeof url !== 'string') {
     return next(new HttpException(400, `Invalid URL`));

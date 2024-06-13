@@ -19,6 +19,12 @@ export const removeProduct = async (req: Request, resp: Response, next: NextFunc
     client
   });
 
+  await database.update('orders', '', {
+    where: 'id = $1',
+    params: [orderId],
+    client
+  });
+
   resp.locals.response = { data: { statusText: 'Item(s) removed' } };
 
   return next();

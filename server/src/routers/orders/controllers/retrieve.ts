@@ -2,10 +2,11 @@ import { NextFunction, Request, Response } from 'express';
 import { database } from '../../../middlewares';
 import { OrdersInterface } from '../../../../../_shared/types';
 import { generateKey } from '../../../../../_shared/utils';
+import dayjs from 'dayjs';
+import { stripe } from '../../../services';
 
 export const retrieveCart = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
-  const { orderId } = req.query;
 
   if (req.session.user?.id) {
     let order = await database.retrieve<OrdersInterface[]>(
@@ -19,13 +20,21 @@ export const retrieveCart = async (req: Request, resp: Response, next: NextFunct
         WHERE oi.order_id = o.id
       ) AS oi ON true`,
       {
-        where: `o.user_id = $1 AND o.status = $2 AND (o.updated_at IS NULL OR o.updated_at > NOW() - INTERVAL '1 hour')`,
+        where: `o.user_id = $1 AND o.status = $2`,
         params: [req.session.user.id, 'draft'],
         client
       }
     );
 
-    if (!order.length) {
+    if (
+      !order.length ||
+      (order[0].updatedAt && dayjs().diff(dayjs(order[0].updatedAt), 'hour') > 1) ||
+      dayjs().diff(dayjs(order[0].createdAt), 'hour') > 1
+    ) {
+      if (order.length && order[0].sessionId) {
+        await stripe.checkout.sessions.expire(order[0].sessionId);
+      }
+
       const id = generateKey(1);
 
       order = await database.create('orders', ['id', 'user_id'], [id, req.session.user.id], { client });

@@ -22,4 +22,12 @@ router.delete(
   response
 );
 
+router.post(
+  '/v1/auth/user/cart/checkout',
+  dbConnect,
+  middleware(controllers.validateCheckout),
+  middleware(controllers.checkout),
+  response
+);
+
 export default router;
