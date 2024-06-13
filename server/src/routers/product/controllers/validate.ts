@@ -123,6 +123,10 @@ export const validateCreateProduct = async (req: Request, resp: Response, next: 
         return next(new HttpException(400, `Type required`));
       } else if (!['affiliate', 'dropship', 'direct'].includes(url.type)) {
         return next(new HttpException(400, `Invalidate type`));
+      } else if (url.refundTime && typeof url.refundTime !== 'string') {
+        return next(new HttpException(400, `Invalid return time`));
+      } else if (url.shippingTime && typeof url.shippingTime !== 'string') {
+        return next(new HttpException(400, `Invalid shipping time`));
       }
 
       if (url.discounts) {

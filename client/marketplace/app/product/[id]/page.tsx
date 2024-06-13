@@ -280,6 +280,11 @@ const ProductActions = ({ product, selectedVariant }: Props) => {
   const { data } = retrieveCart({ userId: user?.id });
   const { order } = data || {};
   const { country } = useAppSelector((state) => state.App);
+  const refundTimeChunks = product.url?.refundTime ? product.url.refundTime.split(' ') : [];
+
+  if (refundTimeChunks.length && parseInt(refundTimeChunks[0]) > 1) {
+    refundTimeChunks[1] = refundTimeChunks[1] + 's';
+  }
 
   const addProduct = useAddProduct();
 
@@ -417,6 +422,30 @@ const ProductActions = ({ product, selectedVariant }: Props) => {
           </Button>
         )}
       </Box>
+
+      {product.url?.type !== 'affiliate' && (
+        <>
+          <Divider sx={{ my: 2 }} />
+
+          <Typography variant='h6'>Shipping and Refund</Typography>
+
+          <Box>
+            <Typography variant='caption' color='GrayText'>
+              {product.url?.shippingTime
+                ? `\u2022 Please allow ${product.url.shippingTime} for shipping.`
+                : `\u2022 Product will be shipped as soon as payment is received. Shipping time is currently unknown.`}
+            </Typography>
+          </Box>
+
+          <Box>
+            <Typography variant='caption' color='GrayText'>
+              {product.url?.refundTime
+                ? `\u2022 Eligible for refund within ${refundTimeChunks.join(' ')} of receipt.`
+                : `\u2022 This product is not eligible for refund.`}
+            </Typography>
+          </Box>
+        </>
+      )}
     </>
   );
 };

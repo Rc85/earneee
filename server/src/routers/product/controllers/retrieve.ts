@@ -532,6 +532,8 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
         pu.currency,
         pu.product_id,
         pu.type,
+        pu.shipping_time,
+        pu.refund_time,
         a.affiliate,
         pd.discount
       FROM product_urls AS pu

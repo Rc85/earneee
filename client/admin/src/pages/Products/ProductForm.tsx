@@ -187,8 +187,6 @@ const ProductForm = ({ product, variant }: Props) => {
     setForm({ ...form, urls });
   };
 
-  console.log(variant, form.urls);
-
   return (
     <>
       {status === 'Create Brand' && (
@@ -292,7 +290,7 @@ const ProductForm = ({ product, variant }: Props) => {
         )}
 
         {!variant && (
-          <>
+          <Box sx={{ mt: 2 }}>
             {brand ? (
               <Paper variant='outlined' sx={{ p: 2, mb: 1, display: 'flex', alignItems: 'flex-start' }}>
                 {brand.logoUrl && (
@@ -350,7 +348,7 @@ const ProductForm = ({ product, variant }: Props) => {
                 </Button>
               </Box>
             )}
-          </>
+          </Box>
         )}
 
         <LoadingButton
@@ -362,6 +360,7 @@ const ProductForm = ({ product, variant }: Props) => {
           loadingIndicator={<CircularProgress size={20} />}
           loadingPosition='start'
           startIcon={<Icon path={mdiArrowUpDropCircle} size={1} />}
+          sx={{ mt: 1 }}
         >
           Submit
         </LoadingButton>

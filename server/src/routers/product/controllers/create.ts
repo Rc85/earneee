@@ -125,7 +125,18 @@ export const createProduct = async (req: Request, resp: Response, next: NextFunc
     for (const url of urls) {
       await database.create(
         'product_urls',
-        ['id', 'url', 'country', 'product_id', 'price', 'currency', 'affiliate_id', 'type'],
+        [
+          'id',
+          'url',
+          'country',
+          'product_id',
+          'price',
+          'currency',
+          'affiliate_id',
+          'type',
+          'refund_time',
+          'shipping_time'
+        ],
         [
           url.id,
           url.url,
@@ -134,7 +145,9 @@ export const createProduct = async (req: Request, resp: Response, next: NextFunc
           url.price || 0,
           url.currency || 'cad',
           url.affiliateId || null,
-          url.type || 'affiliate'
+          url.type || 'affiliate',
+          url.refundTime || null,
+          url.shippingTime || null
         ],
         {
           conflict: {
@@ -145,6 +158,8 @@ export const createProduct = async (req: Request, resp: Response, next: NextFunc
               currency = EXCLUDED.currency,
               affiliate_id = EXCLUDED.affiliate_id,
               type = EXCLUDED.type,
+              refund_time = EXCLUDED.refund_time,
+              shipping_time = EXCLUDED.shipping_time,
               updated_at = NOW()`
           },
           client

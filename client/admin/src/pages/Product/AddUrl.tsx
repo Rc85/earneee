@@ -28,6 +28,8 @@ const AddUrl = ({ cancel, url, submit }: Props) => {
       currency: 'cad',
       country: 'CA',
       type: 'affiliate',
+      shippingTime: null,
+      refundTime: null,
       affiliateId: null,
       productId: '',
       variantId: null,
@@ -73,6 +75,15 @@ const AddUrl = ({ cancel, url, submit }: Props) => {
     discounts.splice(index, 1);
 
     setForm({ ...form, discounts });
+  };
+
+  const handleReturnTimeChange = (value: string, index: number) => {
+    const refundTime = form.refundTime;
+    const returnTimeChunks = refundTime ? refundTime.split(' ') : [];
+
+    returnTimeChunks[index] = value;
+
+    setForm({ ...form, refundTime: returnTimeChunks.join(' ') });
   };
 
   return (
@@ -157,7 +168,7 @@ const AddUrl = ({ cancel, url, submit }: Props) => {
           required
           select
           SelectProps={{ native: true }}
-          onChange={(e) => setForm({ ...form, type: e.target.value })}
+          onChange={(e) => setForm({ ...form, type: e.target.value, affiliateId: null })}
           value={form.type}
         >
           <option value='affiliate'>Affiliate</option>
@@ -165,21 +176,53 @@ const AddUrl = ({ cancel, url, submit }: Props) => {
           <option value='direct'>Direct Sale</option>
         </TextField>
 
-        <TextField
-          label='Affiliate'
-          select
-          SelectProps={{ native: true }}
-          onChange={handleAffiliateChange}
-          value={form.affiliateId || ''}
-        >
-          <option value=''></option>
+        {form.type === 'affiliate' ? (
+          <TextField
+            label='Affiliate'
+            select
+            SelectProps={{ native: true }}
+            onChange={handleAffiliateChange}
+            value={form.affiliateId || ''}
+          >
+            <option value=''></option>
 
-          {affiliates?.map((affiliate) => (
-            <option key={affiliate.id} value={affiliate.id}>
-              {affiliate.name}
-            </option>
-          ))}
-        </TextField>
+            {affiliates?.map((affiliate) => (
+              <option key={affiliate.id} value={affiliate.id}>
+                {affiliate.name}
+              </option>
+            ))}
+          </TextField>
+        ) : (
+          <>
+            <TextField
+              label='Shipping Time'
+              value={form.shippingTime || ''}
+              onChange={(e) => setForm({ ...form, shippingTime: e.target.value })}
+            />
+
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <TextField
+                label='Return Time'
+                value={form.refundTime ? form.refundTime.split(' ')[0] : ''}
+                onChange={(e) => handleReturnTimeChange(e.target.value, 0)}
+                sx={{ mb: '0 !important', mr: 1 }}
+              />
+
+              <TextField
+                select
+                SelectProps={{ native: true }}
+                value={form.refundTime ? form.refundTime.split(' ')[1] : ''}
+                onChange={(e) => handleReturnTimeChange(e.target.value, 1)}
+                sx={{ mb: '0 !important', width: '35%' }}
+              >
+                <option value=''></option>
+                <option value='day'>Day</option>
+                <option value='week'>Week</option>
+                <option value='month'>Month</option>
+              </TextField>
+            </Box>
+          </>
+        )}
       </Modal>
     </>
   );

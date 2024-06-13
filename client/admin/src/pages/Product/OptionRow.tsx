@@ -1,7 +1,7 @@
 import { IconButton, ListItem, ListItemButton, ListItemText, Switch } from '@mui/material';
 import { ProductOptionsInterface } from '../../../../../_shared/types';
 import { Icon } from '@mdi/react';
-import { mdiPencil, mdiTrashCan } from '@mdi/js';
+import { mdiTrashCan } from '@mdi/js';
 import { useState } from 'react';
 import { Modal } from '../../../../_shared/components';
 import { useSnackbar } from 'notistack';
@@ -78,10 +78,6 @@ const OptionRow = ({ option }: Props) => {
             }`}
           />
         </ListItemButton>
-
-        <IconButton size='small' color='info' sx={{ ml: 1 }}>
-          <Icon path={mdiPencil} size={1} />
-        </IconButton>
 
         <IconButton size='small' color='error' onClick={handleDeleteClick}>
           <Icon path={mdiTrashCan} size={1} />

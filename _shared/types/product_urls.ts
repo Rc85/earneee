@@ -10,6 +10,8 @@ export interface ProductUrlsInterface {
   price: number;
   type: string;
   affiliateId: string | null;
+  shippingTime: string | null;
+  refundTime: string | null;
   currency: string;
   createdAt: string;
   updatedAt: string | null;
