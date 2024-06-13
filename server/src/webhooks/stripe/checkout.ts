@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { stripe } from '../../services';
 import { HttpException } from '../../utils';
 import { database } from '../../middlewares';
-import util from 'util';
+import Stripe from 'stripe';
 
 export const checkoutWebhook = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
@@ -16,22 +16,27 @@ export const checkoutWebhook = async (req: Request, resp: Response, next: NextFu
     throw new HttpException(400, `Webhook error: ${err.message}`);
   }
 
-  console.log(util.inspect(event, { showHidden: false, depth: null, colors: true }));
-
   if (event.type === 'checkout.session.completed') {
     const orderId = event.data.object.metadata?.order_id;
 
     if (orderId) {
-      await database.update('orders', ['status'], {
-        where: 'id = $2',
+      const paymentIntent = await stripe.paymentIntents.retrieve(event.data.object.payment_intent as string, {
+        expand: ['latest_charge']
+      });
+      const latestCharge = paymentIntent.latest_charge as Stripe.Charge;
+
+      await database.update('orders', ['status', 'receipt_url'], {
+        where: 'id = $3',
+        params: ['processed', latestCharge.receipt_url, orderId],
+        client
+      });
+
+      await database.update('order_items', ['status'], {
+        where: 'order_id = $2',
         params: ['processed', orderId],
         client
       });
     }
-  } else if (event.type === 'checkout.session.expired') {
-    const orderId = event.data.object.metadata?.order_id;
-
-    await database.update('orders', ['session_id'], { where: 'id = $2', params: [null, orderId], client });
   }
 
   return next();

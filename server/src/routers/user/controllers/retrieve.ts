@@ -1,6 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
 import { database } from '../../../middlewares';
-import { UserMessagesInterface, UserProfilesInterface, UsersInterface } from '../../../../../_shared/types';
+import {
+  OrdersInterface,
+  UserMessagesInterface,
+  UserProfilesInterface,
+  UsersInterface
+} from '../../../../../_shared/types';
+import { stripe } from '../../../services';
 
 export const retrieveUserProfiles = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
@@ -186,7 +192,41 @@ export const retrieveMessages = async (req: Request, resp: Response, next: NextF
 };
 
 export const retrieveOrders = async (req: Request, resp: Response, next: NextFunction) => {
-  resp.locals.response = { data: { orders: [] } };
+  const { client } = resp.locals;
+
+  if (req.session.user?.id) {
+    const orders = await database.retrieve<OrdersInterface[]>(
+      `WITH
+      oi AS (
+        SELECT
+          oi.*,
+          os.shipment
+        FROM order_items AS oi
+        LEFT JOIN LATERAL (
+          SELECT TO_JSONB(os.*) AS shipment
+          FROM order_shipments AS os
+          WHERE os.id = oi.order_shipment_id
+        ) AS os ON true
+      )
+      
+      SELECT
+        o.*,
+        COALESCE(oi.items, '[]'::JSONB) AS items
+      FROM orders AS o
+      LEFT JOIN LATERAL (
+        SELECT JSONB_AGG(oi.*) AS items
+        FROM oi
+        WHERE oi.order_id = o.id
+      ) AS oi ON true`,
+      {
+        where: 'o.user_id = $1 AND o.status != $2',
+        params: [req.session.user.id, 'draft'],
+        client
+      }
+    );
+
+    resp.locals.response = { data: { orders } };
+  }
 
   return next();
 };

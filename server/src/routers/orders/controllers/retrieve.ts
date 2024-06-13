@@ -4,6 +4,7 @@ import { OrdersInterface } from '../../../../../_shared/types';
 import { generateKey } from '../../../../../_shared/utils';
 import dayjs from 'dayjs';
 import { stripe } from '../../../services';
+import { generateOrderNumber } from '../../../utils';
 
 export const retrieveCart = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
@@ -12,6 +13,7 @@ export const retrieveCart = async (req: Request, resp: Response, next: NextFunct
     let order = await database.retrieve<OrdersInterface[]>(
       `SELECT
         o.id,
+        o.number,
         COALESCE(oi.items, '[]'::JSONB) AS items
       FROM orders AS o
       LEFT JOIN LATERAL (
@@ -36,8 +38,14 @@ export const retrieveCart = async (req: Request, resp: Response, next: NextFunct
       }
 
       const id = generateKey(1);
+      const orderNumber = await generateOrderNumber(req.session.user.id, client);
 
-      order = await database.create('orders', ['id', 'user_id'], [id, req.session.user.id], { client });
+      order = await database.create(
+        'orders',
+        ['id', 'user_id', 'number'],
+        [id, req.session.user.id, orderNumber],
+        { client }
+      );
     } else {
       await database.update('orders', '', {
         where: 'id = $1',
@@ -49,6 +57,7 @@ export const retrieveCart = async (req: Request, resp: Response, next: NextFunct
     order = await database.retrieve<OrdersInterface[]>(
       `SELECT
         o.id,
+        o.number,
         COALESCE(oi.items, '[]'::JSONB) AS items
       FROM orders AS o
       LEFT JOIN LATERAL (

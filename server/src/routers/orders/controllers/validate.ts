@@ -7,15 +7,17 @@ export const validateAddProduct = async (req: Request, resp: Response, next: Nex
   const { product, quantity, orderId, country } = req.body;
   const { client } = resp.locals;
 
-  if (!product) {
+  if (!req.session.user?.id) {
+    return next(new HttpException(401, `Please log in to add products`));
+  } else if (!product) {
     return next(new HttpException(400, `Product required`));
   } else if (!quantity || typeof quantity !== 'number' || isNaN(quantity)) {
     return next(new HttpException(400, `Invalid quantity`));
   }
 
   const order = await database.retrieve<OrdersInterface[]>(`SELECT * FROM orders`, {
-    where: `id = $1`,
-    params: [orderId]
+    where: `id = $1 AND user_id = $2 AND status = $3`,
+    params: [orderId, req.session.user.id, 'draft']
   });
 
   if (!order.length) {
@@ -82,12 +84,12 @@ export const validateRemoveProduct = async (req: Request, resp: Response, next: 
   const { client } = resp.locals;
 
   if (!req.session.user?.id) {
-    return next(new HttpException(401, `Unauthorized`));
+    return next(new HttpException(401, `Please log in`));
   }
 
   const order = await database.retrieve<OrdersInterface[]>(`SELECT * FROM orders`, {
-    where: 'id = $1 AND user_id = $2',
-    params: [orderId, req.session.user.id],
+    where: 'id = $1 AND user_id = $2 AND status = $3',
+    params: [orderId, req.session.user.id, 'draft'],
     client
   });
 
@@ -124,7 +126,11 @@ export const validateCheckout = async (req: Request, resp: Response, next: NextF
       FROM order_items AS oi
       WHERE oi.order_id = o.id
     ) AS oi ON true`,
-    { where: 'o.id = $1 AND o.user_id = $2', params: [orderId, req.session.user.id], client }
+    {
+      where: 'o.id = $1 AND o.user_id = $2 AND o.status = $3',
+      params: [orderId, req.session.user.id, 'draft'],
+      client
+    }
   );
 
   if (!order.length) {

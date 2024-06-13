@@ -233,6 +233,8 @@ const Cart = () => {
     if (err.response.data.statusText) {
       enqueueSnackbar(err.response.data.statusText, { variant: 'error' });
     }
+
+    setStatus('');
   };
 
   const removeProduct = useRemoveProduct();

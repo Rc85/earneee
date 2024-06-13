@@ -1,6 +1,11 @@
 import axios from 'axios';
 import { useQuery } from '@tanstack/react-query';
-import { UserMessagesInterface, UserProfilesInterface, UsersInterface } from '../../../../_shared/types';
+import {
+  OrdersInterface,
+  UserMessagesInterface,
+  UserProfilesInterface,
+  UsersInterface
+} from '../../../../_shared/types';
 
 export const retrieveUserProfiles = (options?: { userId?: string; offset?: number; limit?: number }) => {
   return useQuery<{ userProfiles: UserProfilesInterface[]; count: number }>({
@@ -81,15 +86,15 @@ export const retrieveMessageCount = (enabled: boolean) => {
   });
 };
 
-export const retrieveOrders = (offset: number) => {
-  return useQuery<{ orders: any[]; count: number }>({
-    queryKey: ['user orders', offset],
+export const retrieveOrders = (options: { offset: number; limit: number }) => {
+  return useQuery<{ orders: OrdersInterface[]; count: number }>({
+    queryKey: ['user orders', options.offset, options.limit],
     queryFn: async () => {
       const { data } = await axios({
         method: 'get',
         url: `/v1/auth/user/orders`,
         withCredentials: true,
-        params: { offset }
+        params: options
       });
 
       return data;

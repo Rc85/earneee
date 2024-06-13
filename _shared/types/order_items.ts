@@ -7,6 +7,8 @@ export interface OrderItemsInterface {
   product: ProductsInterface;
   price: number;
   quantity: number;
+  orderShipmentId: string | null;
+  status: string;
   createdAt: string;
   updatedAt: string | null;
 }
