@@ -16,7 +16,7 @@ const page = () => {
   const [status, setStatus] = useState('');
   const auth = authenticate('marketplace');
   const { user } = auth?.data || {};
-  const { isLoading, data } = retrieveUserProfile();
+  const { isLoading, data } = retrieveUserProfile(Boolean(user));
   const { userProfile } = data || {};
   const profile = {
     id: user?.id || '',

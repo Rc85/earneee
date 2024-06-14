@@ -1,7 +1,7 @@
 'use client';
 
-import { Box, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { Box, IconButton, List, ListItem, ListItemButton, ListItemIcon } from '@mui/material';
+import React, { useState } from 'react';
 import { CategoriesInterface } from '../../../../_shared/types';
 import { mdiChevronRight, mdiChevronLeft } from '@mdi/js';
 import Icon from '@mdi/react';
@@ -15,65 +15,113 @@ interface Props {
 const Categories = ({ onClick }: Props) => {
   const { data } = listCategories();
   const { categories } = data || {};
-  const topCategories = categories?.[0];
-  const [prevCategories, setPrevCategories] = useState<CategoriesInterface[][]>([]);
-  const [selectedCategories, setSelectedCategories] = useState<CategoriesInterface[]>([]);
-
-  useEffect(() => {
-    setSelectedCategories(topCategories || []);
-  }, [topCategories]);
-
-  const handleCategoryClick = (category: CategoriesInterface, prev: CategoriesInterface[]) => {
-    const cat = categories?.find((c) => c[0]?.parentId === category.id) || [];
-
-    setPrevCategories([...prevCategories, prev]);
-    setSelectedCategories([...cat]);
-  };
-
-  const handleBackClick = () => {
-    const prev = [...prevCategories];
-    const prevCategory = prev.pop();
-
-    setSelectedCategories(!prevCategory || !prevCategory[0].parentId ? [] : prevCategory);
-    setPrevCategories(prev);
-  };
+  const [prevCategories, setPrevCategories] = useState<CategoriesInterface[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<CategoriesInterface>();
 
   const handleOnClick = () => {
     onClick();
 
     setPrevCategories([]);
-    setSelectedCategories(topCategories || []);
+    setSelectedCategory(undefined);
+  };
+
+  const handleNextClick = (category: CategoriesInterface) => {
+    if (selectedCategory) {
+      const prev = { ...selectedCategory };
+
+      setPrevCategories([...prevCategories, prev]);
+    }
+
+    setSelectedCategory(category);
+  };
+
+  const handleBackClick = () => {
+    const previous = [...prevCategories];
+    const prev = previous.pop();
+
+    setSelectedCategory(prev);
+    setPrevCategories(previous);
   };
 
   return (
-    <Box
-      sx={{
-        width: '25%',
-        maxWidth: '300px',
-        minWidth: '300px',
-        mr: 2,
-        display: 'flex',
-        justifyContent: 'center',
-        overflow: 'hidden',
-        flexShrink: 0
-      }}
-    >
-      {/* <List
+    <>
+      <ListItem disableGutters divider sx={{ width: '100%' }} className='product'>
+        <Link href='/' style={{ flexGrow: 1, flexShrink: 1 }}>
+          <ListItemButton onClick={handleOnClick}>Main</ListItemButton>
+        </Link>
+      </ListItem>
+
+      <Box
+        sx={{
+          width: '25%',
+          maxWidth: '300px',
+          minWidth: '300px',
+          mr: 2,
+          display: 'flex',
+          justifyContent: 'center',
+          flexShrink: 0
+        }}
+      >
+        <Category
+          categories={categories || []}
+          onNextClick={handleNextClick}
+          selectedCategory={selectedCategory}
+          onBackClick={handleBackClick}
+          prevCategories={prevCategories}
+          onClick={handleOnClick}
+        />
+      </Box>
+    </>
+  );
+};
+
+const Category = ({
+  categories,
+  onNextClick,
+  selectedCategory,
+  onBackClick,
+  prevCategories,
+  onClick
+}: {
+  categories: CategoriesInterface[];
+  prevCategories: CategoriesInterface[];
+  onNextClick: (category: CategoriesInterface) => void;
+  selectedCategory: CategoriesInterface | undefined;
+  onBackClick: () => void;
+  onClick: () => void;
+}) => {
+  const hideLeft =
+    (selectedCategory && !categories[0]?.parentId) ||
+    (prevCategories.length > 0 &&
+      categories[0]?.parentId &&
+      prevCategories.find((category) => category.id === categories[0]?.parentId));
+  const show =
+    (!selectedCategory && !categories[0]?.parentId) ||
+    (selectedCategory && selectedCategory.id === categories[0]?.parentId);
+
+  return (
+    <>
+      <List
         disablePadding
         sx={{
           width: '100%',
           position: 'absolute',
-          left: selectedCategories.length > 0 ? '-100%' : 0,
+          left: hideLeft ? '-100%' : show ? 0 : '100%',
           transition: '0.15s ease-in-out'
         }}
       >
-        <ListItem disableGutters divider sx={{ width: '100%' }} className='product'>
-          <Link href='/' style={{ flexGrow: 1, flexShrink: 1 }}>
-            <ListItemButton onClick={handleOnClick}>Main</ListItemButton>
-          </Link>
-        </ListItem>
+        {selectedCategory && (
+          <ListItem disableGutters divider sx={{ width: '100%' }} className='product'>
+            <ListItemButton onClick={onBackClick}>
+              <ListItemIcon>
+                <Icon path={mdiChevronLeft} size={1} />
+              </ListItemIcon>
+              Back
+            </ListItemButton>
+          </ListItem>
+        )}
 
-        {topCategories.map((category) => (
+        {categories.map((category) => (
           <ListItem
             key={category.id}
             disableGutters
@@ -82,119 +130,11 @@ const Categories = ({ onClick }: Props) => {
             className='product'
           >
             <Link href={`/products/${category.id}`} style={{ flexGrow: 1, flexShrink: 1 }}>
-              <ListItemButton onClick={handleOnClick}>{category.name}</ListItemButton>
-            </Link>
-
-            {categories?.find((c) => c[0]?.parentId === category.id) && (
-              <IconButton
-                size='small'
-                sx={{ flexShrink: 1 }}
-                onClick={() => handleCategoryClick(category, topCategories)}
-              >
-                <Icon path={mdiChevronRight} size={1} />
-              </IconButton>
-            )}
-          </ListItem>
-        ))}
-      </List> */}
-
-      {categories?.map((subcategory) => (
-        <List
-          key={subcategory[0].id}
-          disablePadding
-          sx={{
-            width: '100%',
-            position: 'absolute',
-            left: prevCategories.find((categories) => categories[0]?.parentId === subcategory[0]?.parentId)
-              ? '-100%'
-              : selectedCategories[0] &&
-                (!selectedCategories[0].parentId ||
-                  selectedCategories[0]?.parentId === subcategory[0]?.parentId)
-              ? 0
-              : '100%',
-            transition: '0.15s ease-in-out'
-          }}
-        >
-          {topCategories?.[0]?.parentId !== subcategory[0].parentId ? (
-            <ListItem disableGutters divider sx={{ width: '100%' }}>
-              <ListItemButton onClick={handleBackClick}>
-                <ListItemIcon>
-                  <Icon path={mdiChevronLeft} size={1} />
-                </ListItemIcon>
-
-                <ListItemText primary='Back' />
-              </ListItemButton>
-            </ListItem>
-          ) : (
-            <ListItem disableGutters divider sx={{ width: '100%' }} className='product'>
-              <Link href='/' style={{ flexGrow: 1, flexShrink: 1 }}>
-                <ListItemButton onClick={handleOnClick}>Main</ListItemButton>
-              </Link>
-            </ListItem>
-          )}
-
-          {subcategory.map((category) => (
-            <ListItem
-              key={category.id}
-              disableGutters
-              divider
-              sx={{ width: '100%', pr: 1 }}
-              className='product'
-            >
-              <Link href={`/products/${category.id}`} style={{ flexGrow: 1, flexShrink: 1 }}>
-                <ListItemButton onClick={handleOnClick}>{category.name}</ListItemButton>
-              </Link>
-
-              {categories?.find((c) => c[0]?.parentId === category.id) && (
-                <IconButton
-                  size='small'
-                  sx={{ flexShrink: 1 }}
-                  onClick={() => handleCategoryClick(category, subcategory)}
-                >
-                  <Icon path={mdiChevronRight} size={1} />
-                </IconButton>
-              )}
-            </ListItem>
-          ))}
-        </List>
-      ))}
-
-      {/* <List
-        disablePadding
-        sx={{
-          width: '100%',
-          position: 'absolute',
-          left: selectedCategories.length > 1 ? '-100%' : selectedCategories.length === 1 ? 0 : '100%',
-          transition: '0.15s ease-in-out'
-        }}
-      >
-        <ListItem disableGutters divider sx={{ width: '100%' }}>
-          <ListItemButton onClick={handleBackClick}>
-            <ListItemIcon>
-              <Icon path={mdiChevronLeft} size={1} />
-            </ListItemIcon>
-
-            <ListItemText primary='Back' />
-          </ListItemButton>
-        </ListItem>
-
-        {selectedCategories[0]?.subcategories?.map((category) => (
-          <ListItem
-            key={category.id}
-            disableGutters
-            divider
-            sx={{ width: '100%', pr: 1 }}
-            className='product'
-          >
-            <Link
-              href={`/products/${selectedCategories[0]?.id}/${category.id}`}
-              style={{ flexShrink: 1, flexGrow: 1 }}
-            >
-              <ListItemButton onClick={handleOnClick}>{category.name}</ListItemButton>
+              <ListItemButton onClick={onClick}>{category.name}</ListItemButton>
             </Link>
 
             {category.subcategories && category.subcategories.length > 0 && (
-              <IconButton size='small' sx={{ flexShrink: 1 }} onClick={() => handleCategoryClick(category)}>
+              <IconButton size='small' sx={{ flexShrink: 1 }} onClick={() => onNextClick(category)}>
                 <Icon path={mdiChevronRight} size={1} />
               </IconButton>
             )}
@@ -202,37 +142,19 @@ const Categories = ({ onClick }: Props) => {
         ))}
       </List>
 
-      <List
-        disablePadding
-        sx={{
-          width: '100%',
-          position: 'absolute',
-          left: selectedCategories.length === 2 ? 0 : '100%',
-          transition: '0.15s ease-in-out'
-        }}
-      >
-        <ListItem disableGutters divider sx={{ width: '100%' }}>
-          <ListItemButton onClick={handleBackClick}>
-            <ListItemIcon>
-              <Icon path={mdiChevronLeft} size={1} />
-            </ListItemIcon>
-
-            <ListItemText primary='Back' />
-          </ListItemButton>
-        </ListItem>
-
-        {selectedCategories[0]?.subcategories?.[0]?.subcategories?.map((category) => (
-          <ListItem key={category.id} disableGutters divider sx={{ width: '100%' }} className='product'>
-            <Link
-              href={`/products/${selectedCategories[0]?.id}/${selectedCategories[1]?.id}/${category.id}`}
-              style={{ flexShrink: 1, flexGrow: 1 }}
-            >
-              <ListItemButton onClick={handleOnClick}>{category.name}</ListItemButton>
-            </Link>
-          </ListItem>
-        ))}
-      </List> */}
-    </Box>
+      {categories.map((category) =>
+        category.subcategories && category.subcategories.length > 0 ? (
+          <Category
+            categories={category.subcategories}
+            onNextClick={onNextClick}
+            selectedCategory={selectedCategory}
+            onBackClick={onBackClick}
+            prevCategories={prevCategories}
+            onClick={onClick}
+          />
+        ) : null
+      )}
+    </>
   );
 };
 

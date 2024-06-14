@@ -59,7 +59,7 @@ const TopBar = () => {
   const theme = useTheme();
   const { isLoading, data, refetch } = authenticate('marketplace');
   const { user } = data || {};
-  const profile = retrieveUserProfile();
+  const profile = retrieveUserProfile(Boolean(user));
   const { userProfile } = profile.data || {};
   const logout = useLogout();
   const s = retrieveStatuses();

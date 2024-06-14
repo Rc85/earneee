@@ -4,7 +4,8 @@
   "scripts": {
     "server:start": "nodemon -r source-map-support/register -w server/dist server/dist/index.js",
     "migrate": "node-pg-migrate --migrations-dir ./server/migrations --envPath ./.env",
-    "webpack": "webpack --config ./webpack.server.config.js --mode development"
+    "webpack": "webpack --config ./webpack.server.config.js --mode development",
+    "test": "vitest"
   },
   "license": "ISC",
   "dependencies": {
@@ -87,6 +88,7 @@
     "source-map-support": "^0.5.21",
     "ts-loader": "^9.5.1",
     "typescript": "^5.2.2",
+    "vitest": "^1.6.0",
     "webpack": "^5.90.1",
     "webpack-cli": "^5.1.4",
     "webpack-node-externals": "^3.0.0"

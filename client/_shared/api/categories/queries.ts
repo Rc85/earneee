@@ -30,7 +30,7 @@ export const retrieveCategories = (options?: {
 };
 
 export const listCategories = () => {
-  return useQuery<{ categories: CategoriesInterface[][] }>({
+  return useQuery<{ categories: CategoriesInterface[] }>({
     queryKey: ['categories list'],
     queryFn: async () => {
       const { data } = await axios({

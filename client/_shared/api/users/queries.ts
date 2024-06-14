@@ -39,7 +39,7 @@ export const retrieveUsers = (options?: { offset?: number; limit?: number }) => 
   });
 };
 
-export const retrieveUserProfile = () => {
+export const retrieveUserProfile = (enabled: boolean) => {
   return useQuery<{ userProfile: UserProfilesInterface }>({
     queryKey: ['user profile'],
     queryFn: async () => {
@@ -50,7 +50,8 @@ export const retrieveUserProfile = () => {
       });
 
       return data;
-    }
+    },
+    enabled
   });
 };
 
