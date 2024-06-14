@@ -24,10 +24,9 @@ const ProductShowcase = ({ type }: Props) => {
     >
       <Grid2 container spacing={1}>
         {products?.map((product) => {
-          const media = product.media?.[0];
+          const media = product.media?.[0] || product?.variants?.[0]?.media?.[0];
           const mediaUrl = media?.url;
           const mediaWidth = media?.width || 0;
-          const mediaHeight = media?.height || 0;
           const excerpt = product.excerpt;
           const price = product.url?.price || 0;
           const currency = product.url?.currency || 'CAD';
@@ -63,9 +62,9 @@ const ProductShowcase = ({ type }: Props) => {
                         borderTopRightRadius: 4,
                         borderTopLeftRadius: 4,
                         backgroundImage: mediaUrl ? `url('${mediaUrl}')` : undefined,
-                        backgroundSize: mediaWidth / mediaHeight > 1.5 ? 'cover' : 'contain',
+                        backgroundSize: mediaWidth / 200 > 1.5 ? 'cover' : 'contain',
                         backgroundRepeat: 'no-repeat',
-                        backgroundPosition: 'center top',
+                        backgroundPosition: mediaWidth / 200 > 1.5 ? 'center' : 'center top',
                         height: '200px'
                       }}
                     />

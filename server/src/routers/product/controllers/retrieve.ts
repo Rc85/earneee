@@ -13,18 +13,18 @@ export const retrieveProducts = async (req: Request, resp: Response, next: NextF
   const params = [];
   const where = [];
 
-  if (!parentId) {
-    where.push(`p.parent_id IS NULL`);
-  }
-
-  if (id && !parentId) {
+  if (id) {
     params.push(id);
 
     where.push(`p.id = $${params.length}`);
-  } else if (parentId) {
+  }
+
+  if (parentId) {
     params.push(parentId);
 
     where.push(`p.parent_id = $${params.length}`);
+  } else {
+    where.push(`p.parent_id IS NULL`);
   }
 
   const products = await database.retrieve<ProductsInterface[]>(
@@ -55,7 +55,8 @@ export const retrieveProducts = async (req: Request, resp: Response, next: NextF
       p.*,
       pb.brand,
       c.category,
-      COALESCE(pr.variants, '[]'::JSONB) AS variants,
+      pr.product,
+      COALESCE(v.variants, '[]'::JSONB) AS variants,
       COALESCE(pu.urls, '[]'::JSONB) AS urls
     FROM products AS p
     LEFT JOIN LATERAL (
@@ -77,6 +78,11 @@ export const retrieveProducts = async (req: Request, resp: Response, next: NextF
       SELECT JSONB_AGG(pr.*) AS variants
       FROM products AS pr
       WHERE pr.parent_id = p.id
+    ) AS v ON true
+    LEFT JOIN LATERAL (
+      SELECT TO_JSONB(pr.*) AS product
+      FROM products AS pr
+      WHERE pr.id = p.parent_id
     ) AS pr ON true`,
     {
       where: where.join(' AND '),
@@ -106,7 +112,11 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
   const offset = req.query.offset?.toString() || '0';
   const limit = req.query.limit?.toString() || '20';
   const params: any = [country];
-  const where = [`(pr.category_id)::INT IN (SELECT id FROM p)`, `pr.parent_id IS NULL`];
+  const where = [
+    `(pr.category_id)::INT IN (SELECT id FROM p)`,
+    `pr.parent_id IS NULL`,
+    `pr.published IS true`
+  ];
   const sort = req.query.orderBy?.toString() || 'newest';
 
   if (featured) {
@@ -220,30 +230,18 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
     LEFT JOIN product_specifications AS ps
     ON ps.specification_id = s.id
   ),
-  pr AS (
+  v AS (
     SELECT
       pr.id,
       pr.name,
-      pr.excerpt,
-      pr.category_id,
-      pr.created_at,
-      COALESCE(pm.media, '[]'::JSONB) AS media,
-      COALESCE(s.specifications, '[]'::JSONB) AS specifications
+      pr.parent_id,
+      COALESCE(pm.media, '[]'::JSONB) AS media
     FROM products AS pr
     LEFT JOIN LATERAL (
       SELECT JSONB_AGG(pm.*) AS media
       FROM pm
       WHERE pm.product_id = pr.id
     ) AS pm ON true
-    LEFT JOIN LATERAL (
-      SELECT JSONB_AGG(JSONB_BUILD_OBJECT(
-        'id', s.id,
-        'name', s.name,
-        'value', s.value
-      )) AS specifications
-      FROM s
-      WHERE s.product_id = pr.id
-    ) AS s ON true
   ),
   pb AS (
     SELECT
@@ -260,6 +258,7 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
     pr.status,
     pb.brand,
     pu.url,
+    COALESCE(v.variants, '[]'::JSONB) AS variants,
     COALESCE(pm.media, '[]'::JSONB) AS media,
     COALESCE(s.specifications, '[]'::JSONB) AS specifications
   FROM products AS pr
@@ -286,7 +285,12 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
     )) AS specifications
     FROM s
     WHERE s.product_id = pr.id
-  ) AS s ON true`;
+  ) AS s ON true
+  LEFT JOIN LATERAL (
+    SELECT JSONB_AGG(v.*) AS variants
+    FROM v
+    WHERE v.parent_id = pr.id
+  ) AS v ON true`;
 
   const products = await database.retrieve<ProductsInterface[]>(statement, {
     where: where.join(' AND '),
@@ -368,7 +372,7 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
 export const retrieveProductShowcase = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
   const { type, country } = req.query;
-  const where = [`p.parent_id IS NULL`];
+  const where = [`p.parent_id IS NULL`, `p.published IS true`];
 
   if (type === 'new') {
     where.push(`p.created_at > NOW() - INTERVAL '30 days'`);
@@ -433,6 +437,19 @@ export const retrieveProductShowcase = async (req: Request, resp: Response, next
         pb.id,
         pb.name
       FROM product_brands AS pb
+    ),
+    v AS (
+      SELECT
+        pr.id,
+        pr.name,
+        pr.parent_id,
+        COALESCE(pm.media, '[]'::JSONB) AS media
+      FROM products AS pr
+      LEFT JOIN LATERAL (
+        SELECT JSONB_AGG(pm.*) AS media
+        FROM pm
+        WHERE pm.product_id = pr.id
+      ) AS pm ON true
     )
     
     SELECT
@@ -442,6 +459,7 @@ export const retrieveProductShowcase = async (req: Request, resp: Response, next
       p.excerpt,
       pb.brand,
       pu.url,
+      COALESCE(v.variants, '[]'::JSONB) AS variants,
       COALESCE(pm.media, '[]'::JSONB) AS media
     FROM products AS p
     LEFT JOIN LATERAL (
@@ -458,7 +476,12 @@ export const retrieveProductShowcase = async (req: Request, resp: Response, next
       SELECT TO_JSONB(pu.*) AS url
       FROM pu
       WHERE pu.product_id = p.id
-    ) AS pu ON true`,
+    ) AS pu ON true
+    LEFT JOIN LATERAL (
+      SELECT JSONB_AGG(v.*) AS variants
+      FROM v
+      WHERE v.parent_id = p.id
+    ) AS v ON true`,
     {
       where: where.join(' AND '),
       params: [country],
@@ -651,7 +674,7 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
       WHERE pu.product_id = p.id
     ) AS pu ON true`,
     {
-      where: `p.id = $2`,
+      where: `p.id = $2 AND p.published IS true`,
       params: [country, productId],
       client
     }

@@ -33,6 +33,7 @@ export const retrieveCategories = async (req: Request, resp: Response, next: Nex
           SELECT
             c.id,
             c.name,
+            c.status,
             1::int AS depth,
             (ARRAY[]::JSONB[] || JSONB_BUILD_OBJECT('id', c.id, 'name', c.name)) AS ancestors
           FROM categories AS c
@@ -40,6 +41,7 @@ export const retrieveCategories = async (req: Request, resp: Response, next: Nex
           SELECT
             c.id,
             c.name,
+            c.status,
             ac.depth + 1 AS depth,
             ac.ancestors || JSONB_BUILD_OBJECT('id', c.id, 'name', c.name)
           FROM categories AS c, ac
@@ -50,7 +52,8 @@ export const retrieveCategories = async (req: Request, resp: Response, next: Nex
     
     SELECT
       c.id,
-      c.name
+      c.name,
+      c.status
       ${withAncestors ? ', ac.ancestors' : ''}
     FROM categories AS c
     LEFT JOIN LATERAL (

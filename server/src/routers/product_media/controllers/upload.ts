@@ -8,10 +8,11 @@ import { database } from '../../../middlewares';
 export const uploadProductMedia = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
   const file = req.files?.[0];
-  const { image, variantId, productId } = req.body;
+  const { image, productId } = req.body;
 
   if (image) {
     const base64 = image.split(',')[1];
+    const extension = image.split(',')[0].split('/')[1].split(';')[0];
     const id = generateKey(1);
     const buffer = Buffer.from(base64, 'base64');
     const { info, data } = await sharp(buffer)
@@ -19,7 +20,7 @@ export const uploadProductMedia = async (req: Request, resp: Response, next: Nex
       .resize(500)
       .toBuffer({ resolveWithObject: true });
 
-    const key = `product_media/${variantId}/${id}.png`;
+    const key = `product_media/${productId}/${id}.${extension}`;
     const params = {
       Body: data,
       Bucket: process.env.S3_BUCKET_NAME || '',
@@ -35,15 +36,15 @@ export const uploadProductMedia = async (req: Request, resp: Response, next: Nex
 
     await database.create(
       'product_media',
-      ['id', 'url', 'path', 'width', 'height', 'variant_id', 'type', 'product_id'],
-      [id, url, key, info.width, info.height, variantId || null, 'image', productId],
+      ['id', 'url', 'path', 'width', 'height', 'product_id', 'type'],
+      [id, url, key, info.width, info.height, productId, 'image'],
       { client }
     );
   } else if (file) {
     const fileChunks = file.originalname.split('./retrieve');
     const extension = fileChunks[fileChunks.length - 1];
     const id = generateKey(1);
-    const key = `product_media/${variantId}/${id}.${extension}`;
+    const key = `product_media/${productId}/${id}.${extension}`;
     const params = {
       Body: file.buffer,
       Bucket: process.env.S3_BUCKET_NAME || '',
@@ -59,8 +60,8 @@ export const uploadProductMedia = async (req: Request, resp: Response, next: Nex
 
     await database.create(
       'product_media',
-      ['id', 'url', 'path', 'width', 'height', 'variant_id', 'type', 'product_id'],
-      [id, url, key, 0, 0, variantId || null, 'video', productId],
+      ['id', 'url', 'path', 'width', 'height', 'product_id', 'type'],
+      [id, url, key, 0, 0, productId, 'video'],
       { client }
     );
   }

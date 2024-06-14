@@ -22,7 +22,8 @@ export const createProduct = async (req: Request, resp: Response, next: NextFunc
     urls,
     parentId,
     featured,
-    review
+    review,
+    published
   } = product;
 
   let { brandId } = product;
@@ -76,7 +77,8 @@ export const createProduct = async (req: Request, resp: Response, next: NextFunc
       'details',
       'parent_id',
       'featured',
-      'review'
+      'review',
+      'published'
     ],
     [
       id || generateKey(1),
@@ -85,12 +87,13 @@ export const createProduct = async (req: Request, resp: Response, next: NextFunc
       categoryId,
       brandId || null,
       description || null,
-      status,
+      status || 'unpublished',
       about || null,
       details || null,
       parentId || null,
       Boolean(featured),
-      review || null
+      review || null,
+      Boolean(published)
     ],
     {
       conflict: {
@@ -107,6 +110,7 @@ export const createProduct = async (req: Request, resp: Response, next: NextFunc
           parent_id = EXCLUDED.parent_id,
           featured = EXCLUDED.featured,
           review = EXCLUDED.review,
+          published = EXCLUDED.published,
           updated_at = NOW()`
       },
       client

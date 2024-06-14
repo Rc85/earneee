@@ -79,7 +79,8 @@ export const validateCreateProduct = async (req: Request, resp: Response, next: 
     req.body.product.description = null;
   }
 
-  const { name, excerpt, categoryId, brandId, description, about, details, urls, review } = product;
+  const { name, excerpt, categoryId, brandId, description, about, details, urls, review, status, published } =
+    product;
 
   if (!name || validations.blankCheck.test(name)) {
     return next(new HttpException(400, `Name required`));
@@ -105,6 +106,10 @@ export const validateCreateProduct = async (req: Request, resp: Response, next: 
     return next(new HttpException(400, `Invalid details`));
   } else if (review && typeof review !== 'string') {
     return next(new HttpException(400, `Invalid review`));
+  } else if (status && !['available', 'unavailable'].includes(status)) {
+    return next(new HttpException(400, `Invalid status`));
+  } else if (published && typeof published !== 'boolean') {
+    return next(new HttpException(400, `Invalid published`));
   }
 
   if (urls) {

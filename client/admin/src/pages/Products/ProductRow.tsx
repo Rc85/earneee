@@ -93,6 +93,7 @@ const ProductRow = ({ product, onClick, sortable }: Props) => {
           primary={`${!product.parentId && product.brand?.name ? `${product.brand.name} ` : ''}${
             product.name
           }`}
+          secondary={!product.parentId ? (product.published ? `Published` : `Unpublished`) : undefined}
         />
       </ListItemButton>
 

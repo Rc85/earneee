@@ -1,6 +1,8 @@
 import {
   Box,
   Breadcrumbs,
+  Chip,
+  CircularProgress,
   Link,
   List,
   ListItem,
@@ -20,26 +22,58 @@ import {
   mdiMessageDraw,
   mdiPencil,
   mdiPlusBox,
+  mdiPublish,
+  mdiPublishOff,
   mdiViewGridPlus,
   mdiViewList
 } from '@mdi/js';
 import EditProduct from './EditProduct';
 import ProductVariants from './ProductVariants';
 import AddVariant from './AddVariant';
-import { retrieveProducts } from '../../../../_shared/api';
+import { retrieveProducts, useCreateProduct } from '../../../../_shared/api';
 import { Loading } from '../../../../_shared/components';
 import Media from './Media';
 import Specifications from './Specifications';
 import Options from './Options';
 import RichFormPage from './RichFormPage';
+import { useState } from 'react';
+import { useSnackbar } from 'notistack';
+import { LoadingButton } from '@mui/lab';
 
 const Product = () => {
+  const [status, setStatus] = useState('');
+  const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
   const params = useParams();
   const { id, productId } = params;
   const { isLoading, data } = retrieveProducts({ parentId: productId ? id : undefined, id: productId || id });
   const { products } = data || {};
   const product = products?.[0];
+  const published = product?.product ? product.product.published : product?.published;
+
+  const handleSuccess = () => {
+    enqueueSnackbar('Product is live', { variant: 'success' });
+
+    setStatus('');
+  };
+
+  const handleError = (err: any) => {
+    if (err.response.data.statusText) {
+      enqueueSnackbar(err.response.data.statusText, { variant: 'error' });
+    }
+
+    setStatus('');
+  };
+
+  const publishProduct = useCreateProduct(handleSuccess, handleError);
+
+  const handlePublishClick = () => {
+    if (product) {
+      publishProduct.mutate({
+        product: { ...product, id: product.parentId || product.id, published: !product.published }
+      });
+    }
+  };
 
   return isLoading ? (
     <Loading />
@@ -53,6 +87,21 @@ const Product = () => {
           borderRightStyle: 'solid'
         }}
       >
+        <Box sx={{ p: 1 }}>
+          <LoadingButton
+            fullWidth
+            variant='contained'
+            color={!published ? 'success' : 'inherit'}
+            startIcon={<Icon path={!published ? mdiPublish : mdiPublishOff} size={1} />}
+            loading={status === 'Loading'}
+            loadingPosition='start'
+            loadingIndicator={<CircularProgress size={20} />}
+            onClick={handlePublishClick}
+          >
+            {!published ? 'Publish' : 'Unpublish'}
+          </LoadingButton>
+        </Box>
+
         <List disablePadding>
           <ListItem disablePadding disableGutters>
             <ListItemButton
@@ -169,17 +218,27 @@ const Product = () => {
       </Box>
 
       <Box sx={{ p: 2, flexGrow: 1, minWidth: 0 }}>
-        <Breadcrumbs>
-          <Link onClick={() => navigate('/products')}>Products</Link>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Breadcrumbs>
+            <Link onClick={() => navigate('/products')}>Products</Link>
 
-          {product?.product ? (
-            <Link onClick={() => navigate(`/product/${product.product?.id}`)}>{product.product?.name}</Link>
-          ) : (
-            <Typography>{product?.name}</Typography>
+            {product?.product ? (
+              <Link onClick={() => navigate(`/product/${product.product?.id}`)}>{product.product?.name}</Link>
+            ) : (
+              <Typography>{product?.name}</Typography>
+            )}
+
+            {product?.product && <Typography>{product.name}</Typography>}
+          </Breadcrumbs>
+
+          {Boolean(product?.status && ['available', 'unavailable'].includes(product.status)) && (
+            <Chip
+              size='small'
+              label={product?.status}
+              color={product?.status === 'available' ? 'success' : 'error'}
+            />
           )}
-
-          {product?.product && <Typography>{product.name}</Typography>}
-        </Breadcrumbs>
+        </Box>
 
         <Outlet context={{ product }} />
       </Box>

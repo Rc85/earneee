@@ -55,6 +55,7 @@ const ProductForm = ({ product, variant }: Props) => {
     categoryId: 0,
     brandId: '',
     excerpt: '',
+    published: false,
     status: 'available',
     createdAt: '',
     updatedAt: '',

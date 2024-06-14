@@ -118,11 +118,13 @@ const FeaturedProducts = () => {
           ) : (
             <>
               {products.map((product, i) => {
-                const media = product?.media?.[0];
+                const media = product?.media?.[0] || product?.variants?.[0]?.media?.[0];
                 const mediaUrl = media?.url;
                 const price = product.url?.price || 0;
                 const currency = product.url?.currency || 'CAD';
                 const discount = product.url?.discount;
+                const mediaWidth = media?.width || 0;
+                const mediaHeight = media?.height || 0;
 
                 let discountAmount = 0;
 
@@ -152,8 +154,7 @@ const FeaturedProducts = () => {
                         backgroundImage: mediaUrl ? `url("${mediaUrl}")` : undefined,
                         backgroundRepeat: 'no-repeat',
                         backgroundPosition: 'center',
-                        backgroundSize:
-                          (media?.width || 0) / (media?.height || 0) > 1.5 ? 'cover' : 'contain',
+                        backgroundSize: mediaWidth / mediaHeight > 1.5 ? 'cover' : 'contain',
                         width: '100%',
                         height: '500px',
                         position: 'absolute',

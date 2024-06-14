@@ -17,6 +17,7 @@ export interface ProductsInterface {
   featured: boolean;
   review: string | null;
   details: string | null;
+  published: boolean;
   status: string;
   createdAt: string;
   updatedAt: string | null;

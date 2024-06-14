@@ -133,14 +133,14 @@ const AddOption = ({ cancel, option }: Props) => {
         label='Name'
         required
         onChange={(e) => setForm({ ...form, name: e.target.value })}
-        value={form.name}
+        value={form.name || ''}
         autoFocus
       />
 
       <TextField
         label='Description'
         onChange={(e) => setForm({ ...form, description: e.target.value })}
-        value={form.description}
+        value={form.description || ''}
         InputProps={{
           endAdornment: (
             <InputAdornment position='end'>
@@ -154,15 +154,15 @@ const AddOption = ({ cancel, option }: Props) => {
         label='Minimum Selections'
         type='number'
         onChange={(e) => setForm({ ...form, minimumSelections: parseInt(e.target.value) })}
-        value={form.minimumSelections}
+        value={form.minimumSelections || ''}
         inputProps={{ min: 1 }}
       />
 
       <TextField
-        label='Minimum Selections'
+        label='Maximum Selections'
         type='number'
         onChange={(e) => setForm({ ...form, maximumSelections: parseInt(e.target.value) })}
-        value={form.maximumSelections}
+        value={form.maximumSelections || ''}
       />
 
       <FormControlLabel
