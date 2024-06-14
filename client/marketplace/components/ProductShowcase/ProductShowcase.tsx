@@ -27,6 +27,7 @@ const ProductShowcase = ({ type }: Props) => {
           const media = product.media?.[0] || product?.variants?.[0]?.media?.[0];
           const mediaUrl = media?.url;
           const mediaWidth = media?.width || 0;
+          const mediaHeight = media?.height || 0;
           const excerpt = product.excerpt;
           const price = product.url?.price || 0;
           const currency = product.url?.currency || 'CAD';
@@ -43,6 +44,8 @@ const ProductShowcase = ({ type }: Props) => {
           }
 
           const finalPrice = price - discountAmount;
+
+          console.log(product.name, mediaWidth, mediaHeight, mediaWidth / mediaHeight);
 
           return (
             <Grid2 key={product.id} xs={12} sm={4}>
@@ -62,9 +65,9 @@ const ProductShowcase = ({ type }: Props) => {
                         borderTopRightRadius: 4,
                         borderTopLeftRadius: 4,
                         backgroundImage: mediaUrl ? `url('${mediaUrl}')` : undefined,
-                        backgroundSize: mediaWidth / 200 > 1.5 ? 'cover' : 'contain',
+                        backgroundSize: mediaWidth / mediaHeight < 0.77 ? 'contain' : 'cover',
                         backgroundRepeat: 'no-repeat',
-                        backgroundPosition: mediaWidth / 200 > 1.5 ? 'center' : 'center top',
+                        backgroundPosition: mediaWidth / mediaHeight < 0.77 ? 'center top' : 'center',
                         height: '200px'
                       }}
                     />
