@@ -2,7 +2,7 @@ import { ProductSpecificationsInterface } from './product_specifications';
 import { CategoriesInterface } from './categories';
 import { ProductMediaInterface } from './product_media';
 import { ProductBrandsInterface } from './product_brands';
-import { ProductUrlsInterface } from '.';
+import { OptionSelectionsInterface, ProductOptionsInterface, ProductUrlsInterface } from '.';
 
 export interface ProductsInterface {
   id: string;
@@ -30,4 +30,6 @@ export interface ProductsInterface {
   url?: ProductUrlsInterface;
   product?: ProductsInterface;
   variants?: ProductsInterface[];
+  options?: ProductOptionsInterface[];
+  selections?: OptionSelectionsInterface[];
 }

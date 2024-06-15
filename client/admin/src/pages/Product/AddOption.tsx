@@ -65,7 +65,6 @@ const AddOption = ({ cancel, option }: Props) => {
     const selection: OptionSelectionsInterface = {
       id: generateKey(1),
       name: '',
-      description: '',
       price: 0,
       optionId: form.id,
       ordinance: form.selections ? form.selections.length : 1,

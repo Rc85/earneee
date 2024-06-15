@@ -52,7 +52,7 @@ const Product = () => {
   const published = product?.product ? product.product.published : product?.published;
 
   const handleSuccess = () => {
-    enqueueSnackbar('Product is live', { variant: 'success' });
+    enqueueSnackbar(published ? 'Product published' : 'Product unpublished', { variant: 'success' });
 
     setStatus('');
   };

@@ -37,6 +37,7 @@ const RichForm = ({ field }: Props) => {
     categoryId: 0,
     brandId: '',
     excerpt: '',
+    published: false,
     status: 'available',
     createdAt: '',
     updatedAt: ''
@@ -58,13 +59,13 @@ const RichForm = ({ field }: Props) => {
 
   const editor = useEditor(
     {
-      content: (product?.[field] as string) || undefined,
+      content: (products?.[0]?.[field] as string) || undefined,
       extensions: editorExtensions,
       onUpdate: ({ editor }) => {
         setForm({ ...form, [field]: editor.getHTML() });
       }
     },
-    [product]
+    [products?.[0]?.[field]]
   );
 
   const handleSuccess = () => {

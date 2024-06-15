@@ -12,17 +12,36 @@ export const checkout = async (req: Request, resp: Response, next: NextFunction)
     }
 
     const session = await stripe.checkout.sessions.create({
-      line_items: order.items.map((item) => ({
-        price_data: {
-          currency: 'cad',
-          product_data: {
-            name: item.name
+      line_items: order.items.map((item) => {
+        let descriptions = [];
+
+        if (item.product.variants?.[0]) {
+          descriptions.push(item.product.variants[0].name);
+        }
+
+        if (item.product.options) {
+          for (const option of item.product.options) {
+            if (option.selections) {
+              for (const selection of option.selections) {
+                descriptions.push(selection.name);
+              }
+            }
+          }
+        }
+
+        return {
+          price_data: {
+            currency: 'cad',
+            product_data: {
+              name: item.name,
+              description: descriptions.join(' \u2022 ')
+            },
+            tax_behavior: 'exclusive',
+            unit_amount: Math.round(item.price * 100)
           },
-          tax_behavior: 'exclusive',
-          unit_amount: Math.round(item.price * 100)
-        },
-        quantity: item.quantity
-      })),
+          quantity: item.quantity
+        };
+      }),
       automatic_tax: {
         enabled: true
       },

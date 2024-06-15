@@ -285,33 +285,31 @@ const ProductForm = ({ product, variant }: Props) => {
           </>
         )}
 
+        <Box sx={{ mb: 1 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            {!variant ? (
+              <FormControlLabel
+                label='Featured'
+                control={<Checkbox color='info' />}
+                checked={form.featured}
+                onChange={() => setForm({ ...form, featured: !form.featured })}
+              />
+            ) : (
+              <Box></Box>
+            )}
+
+            <Button startIcon={<Icon path={mdiPlusBox} size={1} />} onClick={() => setStatus('Add URL')}>
+              Add URL
+            </Button>
+          </Box>
+        </Box>
+
         {Boolean(form.urls && form.urls.length > 0) && (
-          <>
-            <Box sx={{ mb: 1 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                {!variant ? (
-                  <FormControlLabel
-                    label='Featured'
-                    control={<Checkbox color='info' />}
-                    checked={form.featured}
-                    onChange={() => setForm({ ...form, featured: !form.featured })}
-                  />
-                ) : (
-                  <Box></Box>
-                )}
-
-                <Button startIcon={<Icon path={mdiPlusBox} size={1} />} onClick={() => setStatus('Add URL')}>
-                  Add URL
-                </Button>
-              </Box>
-            </Box>
-
-            <List disablePadding>
-              {form.urls?.map((url, i) => (
-                <UrlRow key={url.id} url={url} onDelete={() => handleDeleteUrl(i)} submit={handleAddUrl} />
-              ))}
-            </List>
-          </>
+          <List disablePadding>
+            {form.urls?.map((url, i) => (
+              <UrlRow key={url.id} url={url} onDelete={() => handleDeleteUrl(i)} submit={handleAddUrl} />
+            ))}
+          </List>
         )}
 
         {!variant && (

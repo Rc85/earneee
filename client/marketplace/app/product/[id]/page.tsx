@@ -19,6 +19,7 @@ import Icon from '@mdi/react';
 import { mdiCartPlus, mdiImageOff, mdiOpenInNew } from '@mdi/js';
 import dayjs from 'dayjs';
 import Loading from './loading';
+import { useSnackbar } from 'notistack';
 
 const Product = ({ params: { id } }: { params: { id: string } }) => {
   const { country } = useAppSelector((state) => state.App);
@@ -195,9 +196,7 @@ const Product = ({ params: { id } }: { params: { id: string } }) => {
 
                 {product && <ProductActions product={product} selectedVariant={selectedVariant} />}
 
-                {Boolean(
-                  selectedVariant && (product?.about || selectedVariant?.excerpt || selectedVariant?.about)
-                ) && (
+                {Boolean(product?.about || selectedVariant?.excerpt || selectedVariant?.about) && (
                   <Box>
                     <Divider sx={{ my: 2 }} />
 
@@ -281,12 +280,23 @@ const ProductActions = ({ product, selectedVariant }: Props) => {
   const { order } = data || {};
   const { country } = useAppSelector((state) => state.App);
   const refundTimeChunks = product.url?.refundTime ? product.url.refundTime.split(' ') : [];
+  const { enqueueSnackbar } = useSnackbar();
 
   if (refundTimeChunks.length && parseInt(refundTimeChunks[0]) > 1) {
     refundTimeChunks[1] = refundTimeChunks[1] + 's';
   }
 
-  const addProduct = useAddProduct();
+  const handleSuccess = () => {
+    setStatus('');
+  };
+
+  const handleError = (err: any) => {
+    if (err.response.data.statusText) {
+      enqueueSnackbar(err.response.data.statusText, { variant: 'error' });
+    }
+  };
+
+  const addProduct = useAddProduct(handleSuccess, handleError);
 
   let discountAmount = 0;
 
@@ -314,8 +324,6 @@ const ProductActions = ({ product, selectedVariant }: Props) => {
     if (product && order) {
       addProduct.mutate({ product, quantity: parseInt(quantity), orderId: order.id, country });
     }
-
-    setStatus('');
   };
 
   return (
@@ -327,36 +335,6 @@ const ProductActions = ({ product, selectedVariant }: Props) => {
           cancel={() => setStatus('')}
           submit={handleAddProduct}
         />
-      )}
-
-      {selectedVariant?.status === 'available' && (
-        <>
-          {/* options.map((option) => (
-            <Box key={option.id}>
-              <Typography variant='h6'>
-                {option.name} {option.required && <Typography color='red'>Required</Typography>}
-              </Typography>
-
-              {option.selections?.map((selection) => (
-                <FormControlLabel
-                  key={selection.id}
-                  label={
-                    <ListItemText
-                      primary={selection.name}
-                      secondary={`+$${selection.price?.toFixed(
-                        2
-                      )} ${selectedVariant.currency?.toUpperCase()}`}
-                    />
-                  }
-                  control={<Checkbox color='info' />}
-                  onChange={(e) => {
-                    
-                  }}
-                />
-              ))}
-            </Box>
-          )) */}
-        </>
       )}
 
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

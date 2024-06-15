@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { database } from '../../../middlewares';
-import { OrdersInterface, ProductsInterface } from '../../../../../_shared/types';
+import { OrdersInterface, ProductOptionsInterface, ProductsInterface } from '../../../../../_shared/types';
 import { HttpException, validations } from '../../../utils';
 
 export const validateAddProduct = async (req: Request, resp: Response, next: NextFunction) => {
@@ -72,6 +72,50 @@ export const validateAddProduct = async (req: Request, resp: Response, next: Nex
     }
 
     p[0].variants = [variant[0]];
+  }
+
+  if (product.options) {
+    const productOptions = [];
+
+    for (const option of product.options) {
+      if (!option.selections || !option.selections.length) {
+        return next(new HttpException(400, `${option.name} must have at least 1 selection`));
+      }
+
+      const productOption = await database.retrieve<ProductOptionsInterface[]>(
+        `SELECT
+          po.*,
+          COALESCE(os.selections, '[]'::JSONB) AS selections
+        FROM product_options AS po
+        LEFT JOIN LATERAL (
+          SELECT JSONB_AGG(os.*) AS selections
+          FROM option_selections AS os
+          WHERE os.option_id = po.id
+        ) AS os ON true`,
+        {
+          where: `po.id = $1`,
+          params: [option.id],
+          client
+        }
+      );
+
+      for (const selection of option.selections) {
+        const optionSelection = productOption[0].selections?.find((s) => s.id === selection.id);
+
+        if (
+          !productOption.length ||
+          productOption[0].status !== 'available' ||
+          !optionSelection ||
+          optionSelection.status !== 'available'
+        ) {
+          return next(new HttpException(400, `${selection.name} is no longer available`));
+        }
+      }
+
+      productOptions.push(option);
+    }
+
+    p[0].options = productOptions;
   }
 
   req.body.product = p[0];
@@ -163,6 +207,42 @@ export const validateCheckout = async (req: Request, resp: Response, next: NextF
         return next(
           new HttpException(400, `Variant ${item.product.variants[0].name} is no longer available`)
         );
+      }
+    }
+
+    if (item.product.options) {
+      for (const option of item.product.options) {
+        const productOption = await database.retrieve<ProductOptionsInterface[]>(
+          `SELECT
+            po.*,
+            COALESCE(os.selections, '[]'::JSONB) AS selections
+          FROM product_options AS po
+          LEFT JOIN LATERAL (
+            SELECT JSONB_AGG(os.*) AS selections
+            FROM option_selections AS os
+            WHERE os.option_id = po.id
+          ) AS os ON true`,
+          {
+            where: `po.id = $1`,
+            params: [option.id],
+            client
+          }
+        );
+
+        if (option.selections) {
+          for (const selection of option.selections) {
+            const optionSelection = productOption[0].selections?.find((s) => s.id === selection.id);
+
+            if (
+              !productOption.length ||
+              productOption[0].status !== 'available' ||
+              !optionSelection ||
+              optionSelection.status !== 'available'
+            ) {
+              return next(new HttpException(400, `${selection.name} is no longer available`));
+            }
+          }
+        }
       }
     }
   }

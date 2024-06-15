@@ -69,9 +69,6 @@ exports.up = (pgm) => {
         type: 'varchar',
         notNull: true
       },
-      description: {
-        type: 'varchar'
-      },
       price: {
         type: 'double precision',
         notNull: true,

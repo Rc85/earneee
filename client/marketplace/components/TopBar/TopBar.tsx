@@ -12,8 +12,8 @@ import {
   Popover,
   List,
   ListItem,
-  ListItemText,
-  ListItemButton
+  ListItemButton,
+  Button
 } from '@mui/material';
 import Search from '../Search/Search';
 import { SnackbarProvider, useSnackbar } from 'notistack';
@@ -377,7 +377,7 @@ const CartItem = ({
   };
 
   return (
-    <ListItem disableGutters divider>
+    <ListItem disableGutters divider sx={{ alignItems: 'stretch' }}>
       {status === 'Edit' && (
         <ProductConfigurator
           product={{ ...item.product }}
@@ -388,18 +388,57 @@ const CartItem = ({
         />
       )}
 
-      <ListItemButton onClick={() => setStatus('Edit')}>
-        <ListItemText
-          primary={item.name}
-          secondary={`${item.quantity} x $${item.price.toFixed(2)}${
-            item.product.variants?.[0] ? ` \u2022 ${item.product.variants[0].name}` : ''
-          }`}
-        />
+      <ListItemButton onClick={() => setStatus('Edit')} disableGutters sx={{ py: 0 }}>
+        <Box>
+          <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+            <Box
+              sx={{ px: 0.5, py: 0.2, borderRadius: '4px', backgroundColor: 'primary.main', mr: 1, mt: 0.25 }}
+            >
+              <Typography sx={{ fontSize: 12, fontWeight: 500 }}>{item.quantity}</Typography>
+            </Box>
+
+            <Box>
+              <Typography sx={{ fontWeight: 500 }}>{item.name}</Typography>
+
+              {item.product.variants?.[0] && (
+                <Typography variant='body2' color='GrayText'>
+                  {item.product.variants[0].name}
+                </Typography>
+              )}
+
+              {item.product.options &&
+                item.product.options.length > 0 &&
+                item.product.options.map((option) => (
+                  <Box key={option.id} sx={{ ml: 2 }}>
+                    <Typography variant='body2' color='GrayText'>
+                      {option.name}
+                    </Typography>
+
+                    {option.selections?.map((selection) => (
+                      <Typography key={selection.id} variant='body2' color='GrayText'>
+                        &bull; {selection.name}
+                      </Typography>
+                    ))}
+                  </Box>
+                ))}
+            </Box>
+          </Box>
+        </Box>
       </ListItemButton>
 
-      <IconButton size='small' color='error' sx={{ ml: 1 }} onClick={() => onRemove(item.id)}>
-        <Icon path={mdiTrashCan} size={1} />
-      </IconButton>
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
+        <Typography>
+          ${item.price.toFixed(2)} {item.product.url?.currency.toUpperCase()}
+        </Typography>
+
+        <Button
+          color='error'
+          startIcon={<Icon path={mdiTrashCan} size={1} />}
+          onClick={() => onRemove(item.id)}
+        >
+          Remove
+        </Button>
+      </Box>
     </ListItem>
   );
 };

@@ -59,18 +59,17 @@ export const createOption = async (req: Request, resp: Response, next: NextFunct
     for (const index in selections) {
       const ordinance = parseInt(index) + 1;
       const selection = selections[index];
-      const { id, name, description, price, status } = selection;
+      const { id, name, price, status } = selection;
 
       await database.create(
         'option_selections',
-        ['id', 'name', 'description', 'price', 'option_id', 'status', 'ordinance'],
-        [id || generateKey(1), name, description, price, option[0].id, status, ordinance],
+        ['id', 'name', 'price', 'option_id', 'status', 'ordinance'],
+        [id || generateKey(1), name, price, option[0].id, status, ordinance],
         {
           conflict: {
             columns: 'id',
             do: `UPDATE SET
               name = EXCLUDED.name,
-              description = EXCLUDED.description,
               price = EXCLUDED.price,
               status = EXCLUDED.status,
               ordinance = EXCLUDED.ordinance,

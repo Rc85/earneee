@@ -594,6 +594,33 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
         pb.logo_url
       FROM product_brands AS pb
     ),
+    os AS (
+      SELECT
+        os.id,
+        os.name,
+        os.price,
+        os.option_id
+      FROM option_selections AS os
+      WHERE os.status = 'available'
+    ),
+    po AS (
+      SELECT
+        po.id,
+        po.name,
+        po.description,
+        po.product_id,
+        po.minimum_selections,
+        po.maximum_selections,
+        po.required,
+        COALESCE(os.selections, '[]'::JSONB) AS selections
+      FROM product_options AS po
+      LEFT JOIN LATERAL (
+        SELECT JSONB_AGG(os.*) AS selections
+        FROM os
+        WHERE os.option_id = po.id
+      ) AS os ON true
+      WHERE po.status = 'available'
+    ),
     pr AS (
       SELECT
         pr.id,
@@ -605,6 +632,7 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
         pr.about,
         pr.status,
         pu.url,
+        COALESCE(po.options, '[]'::JSONB) AS options,
         COALESCE(ps.specifications, '[]'::JSONB) AS specifications,
         COALESCE(pm.media, '[]'::JSONB) AS media
       FROM products AS pr
@@ -623,6 +651,11 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
         FROM pu
         WHERE pu.product_id = pr.id
       ) AS pu ON true
+      LEFT JOIN LATERAL (
+        SELECT JSONB_AGG(po.*) AS options
+        FROM po
+        WHERE po.product_id = pr.id
+      ) AS po ON true
       ORDER BY pr.ordinance
     )
     
@@ -639,6 +672,7 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
       pb.brand,
       pu.url,
       ac.ancestors,
+      COALESCE(po.options, '[]'::JSONB) AS options,
       COALESCE(pr.variants, '[]'::JSONB) AS variants,
       COALESCE(ps.specifications, '[]'::JSONB) AS specifications,
       COALESCE(pm.media, '[]'::JSONB) AS media
@@ -672,7 +706,12 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
       SELECT TO_JSONB(pu.*) AS url
       FROM pu
       WHERE pu.product_id = p.id
-    ) AS pu ON true`,
+    ) AS pu ON true
+    LEFT JOIN LATERAL (
+      SELECT JSONB_AGG(po.*) AS options
+      FROM po
+      WHERE po.product_id = p.id
+    ) AS po ON true`,
     {
       where: `p.id = $2 AND p.published IS true`,
       params: [country, productId],

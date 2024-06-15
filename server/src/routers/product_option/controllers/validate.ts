@@ -18,6 +18,8 @@ export const validateCreateOption = async (req: Request, resp: Response, next: N
     return next(new HttpException(400, `Invalid maximum selections`));
   } else if (minimumSelections && typeof minimumSelections !== 'number') {
     return next(new HttpException(400, `Invalid minimum selections`));
+  } else if (minimumSelections && maximumSelections && minimumSelections > maximumSelections) {
+    return next(new HttpException(400, `Minimum selections cannot be greater than maximum selections`));
   } else if (required && typeof required !== 'boolean') {
     return next(new HttpException(400, `Invalid required`));
   } else if (status && !['available', 'unavailable'].includes(status)) {
@@ -47,8 +49,6 @@ export const validateCreateOption = async (req: Request, resp: Response, next: N
 
     if (!name || validations.blankCheck.test(name)) {
       return next(new HttpException(400, `Selection name is required`));
-    } else if (description && typeof description !== 'string') {
-      return next(new HttpException(400, `Invalid selection description`));
     } else if (selection.price && typeof selection.price !== 'number') {
       return next(new HttpException(400, `Invalid selection price`));
     } else if (status && !['available', 'unavailable'].includes(status)) {

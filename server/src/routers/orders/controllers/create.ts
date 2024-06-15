@@ -10,24 +10,38 @@ export const addProduct = async (req: Request, resp: Response, next: NextFunctio
 
   const id = orderItemId || generateKey(1);
   const name = `${product?.brand ? `${product.brand.name} ` : ''}${product.name}`;
-  const price = (product.url?.price || 0) + (product.variants?.[0]?.url?.price || 0);
+  const price =
+    (product.url?.price || 0) +
+    (product.variants?.[0]?.url?.price || 0) +
+    (product.options?.reduce(
+      (acc, option) =>
+        acc + (option.selections?.reduce((acc, selection) => acc + (selection.price || 0), 0) || 0),
+      0
+    ) || 0);
 
-  const orderProduct = {
+  const orderProduct: any = {
     id: product.id,
     url: {
       price: product.url?.price,
       currency: product.url?.currency,
       refundTime: product.url?.refundTime,
       shippingTime: product.url?.shippingTime
-    },
-    variants: [
+    }
+  };
+
+  if (product.variants && product.variants.length) {
+    orderProduct.variants = [
       {
         id: product.variants?.[0]?.id,
         name: product.variants?.[0]?.name,
         url: { price: product.variants?.[0]?.url?.price, currency: product.variants?.[0]?.url?.currency }
       }
-    ]
-  };
+    ];
+  }
+
+  if (product.options && product.options.length) {
+    orderProduct.options = product.options;
+  }
 
   await database.create(
     'order_items',
