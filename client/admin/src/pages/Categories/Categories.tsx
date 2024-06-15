@@ -39,7 +39,7 @@ const Categories = () => {
       ]}
       sx={{ p: 2 }}
     >
-      {status === 'Create' && <CreateCategory cancel={handleCancelClick} />}
+      {status === 'Create' && <CreateCategory cancel={handleCancelClick} parentId={parentId!} />}
 
       <List disablePadding>
         {categories?.map((category) => (

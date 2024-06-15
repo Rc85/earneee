@@ -2,19 +2,18 @@ import { TextField } from '@mui/material';
 import { FormEvent, useRef, useState } from 'react';
 import { useSnackbar } from 'notistack';
 import { Modal } from '../../../../_shared/components';
-import { useParams } from 'react-router-dom';
 import { CategoriesInterface } from '../../../../../_shared/types';
 import { useCreateCategory } from '../../../../_shared/api';
 
 interface Props {
   cancel: () => void;
+  parentId: string;
   category?: CategoriesInterface;
+  onSuccess?: () => void;
 }
 
-const CreateCategory = ({ cancel, category }: Props) => {
+const CreateCategory = ({ cancel, category, parentId, onSuccess }: Props) => {
   const [status, setStatus] = useState('');
-  const params = useParams();
-  const { parentId } = params;
   const [form, setForm] = useState<CategoriesInterface>(
     category || {
       id: 0,
@@ -33,6 +32,8 @@ const CreateCategory = ({ cancel, category }: Props) => {
     if (category) {
       enqueueSnackbar('Category updated', { variant: 'success' });
     }
+
+    onSuccess?.();
 
     setStatus('');
   };

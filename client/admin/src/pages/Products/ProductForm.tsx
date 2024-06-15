@@ -30,6 +30,7 @@ import { useEditor } from '@tiptap/react';
 import CreateBrand from './CreateBrand';
 import UrlRow from '../Product/UrlRow';
 import AddUrl from '../Product/AddUrl';
+import CreateCategory from '../Categories/CreateCategory';
 
 interface Props {
   product?: ProductsInterface;
@@ -85,8 +86,6 @@ const ProductForm = ({ product, variant }: Props) => {
   useEffect(() => {
     if (product) {
       setForm({ ...product });
-
-      console.log(product.category);
 
       if (product.category) {
         const exists = selectedCategories.find((category) => category.id === product.category?.id);
@@ -188,10 +187,24 @@ const ProductForm = ({ product, variant }: Props) => {
     setForm({ ...form, urls });
   };
 
+  const handleOnSuccess = () => {
+    enqueueSnackbar('Category cancelled', { variant: 'success' });
+
+    setStatus('');
+  };
+
   return (
     <>
       {status === 'Create Brand' && (
         <CreateBrand submit={handleCreateBrand} cancel={handleCancelCreateBrand} brand={brand} />
+      )}
+
+      {status === 'Create Category' && (
+        <CreateCategory
+          cancel={() => setStatus('')}
+          parentId={selectedCategories[selectedCategories.length - 1]?.id.toString()}
+          onSuccess={handleOnSuccess}
+        />
       )}
 
       {status === 'Add URL' && <AddUrl cancel={() => setStatus('')} submit={handleAddUrl} />}
@@ -219,26 +232,37 @@ const ProductForm = ({ product, variant }: Props) => {
         {!variant && (
           <>
             {selectedCategories.length > 0 && (
-              <Box sx={{ mb: 2 }}>
-                <Typography variant='body2' color='GrayText'>
-                  Selected category
-                </Typography>
+              <Box sx={{ mb: 2, display: 'flex', alignItems: 'flex-end' }}>
+                <Box sx={{ flexGrow: 1, mr: 1 }}>
+                  <Typography variant='body2' color='GrayText'>
+                    Selected category
+                  </Typography>
 
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  {selectedCategories.map((category, i) => (
-                    <Box key={category.id} sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Chip
-                        label={category.name}
-                        color={i === selectedCategories.length - 1 ? 'success' : undefined}
-                        sx={{ mr: 1 }}
-                        deleteIcon={<Icon path={mdiTrashCan} size={1} />}
-                        onDelete={() => handleDeleteSelectedCategory(i)}
-                      />
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    {selectedCategories.map((category, i) => (
+                      <Box key={category.id} sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Chip
+                          label={category.name}
+                          color={i === selectedCategories.length - 1 ? 'success' : undefined}
+                          sx={{ mr: 1 }}
+                          deleteIcon={<Icon path={mdiTrashCan} size={1} />}
+                          onDelete={() => handleDeleteSelectedCategory(i)}
+                        />
 
-                      {i !== selectedCategories.length - 1 ? <Typography sx={{ mr: 1 }}>/</Typography> : null}
-                    </Box>
-                  ))}
+                        {i !== selectedCategories.length - 1 ? (
+                          <Typography sx={{ mr: 1 }}>/</Typography>
+                        ) : null}
+                      </Box>
+                    ))}
+                  </Box>
                 </Box>
+
+                <Button
+                  startIcon={<Icon path={mdiPlusBox} size={1} />}
+                  onClick={() => setStatus('Create Category')}
+                >
+                  Create
+                </Button>
               </Box>
             )}
 
