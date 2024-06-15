@@ -140,7 +140,13 @@ const Product = ({ params: { id } }: { params: { id: string } }) => {
 
               <Box sx={{ width: '35%', minWidth: '400px', maxWidth: '400px', ml: 2 }}>
                 {product?.variants?.map((variant) => {
-                  const media = variant.media?.[0];
+                  const productMedia = product?.media || [];
+                  const variantMedia = variant.media?.find((media) => media.useAsThumbnail);
+                  const media =
+                    variantMedia ||
+                    variant?.media?.[0] ||
+                    productMedia.find((media) => media.useAsThumbnail) ||
+                    productMedia[0];
                   const mediaUrl = media?.url;
 
                   return (
@@ -173,22 +179,20 @@ const Product = ({ params: { id } }: { params: { id: string } }) => {
                         {!mediaUrl && <Icon path={mdiImageOff} size={1} color={grey[600]} />}
                       </Box>
 
-                      <Box sx={{ flexGrow: 1, p: 1 }}>
+                      <Box
+                        sx={{
+                          flexGrow: 1,
+                          p: 1,
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center'
+                        }}
+                      >
                         <Typography>{variant.name}</Typography>
 
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          {variant?.url ? (
-                            <Typography variant='body2' color='GrayText'>
-                              +${variant.url?.price.toFixed(2)}
-                            </Typography>
-                          ) : (
-                            <Box />
-                          )}
-
-                          {variant.status === 'unavailable' && (
-                            <Chip size='small' color='error' label='Unavailable' />
-                          )}
-                        </Box>
+                        {variant.status === 'unavailable' && (
+                          <Chip size='small' color='error' label='Unavailable' />
+                        )}
                       </Box>
                     </Paper>
                   );
@@ -275,7 +279,9 @@ const ProductActions = ({ product, selectedVariant }: Props) => {
   const [status, setStatus] = useState('');
   const auth = authenticate('marketplace');
   const { user } = auth.data || {};
-  const price = product.url?.price || 0;
+  const productPrice = product.url?.price || 0;
+  const variantPrice = selectedVariant?.url?.price || 0;
+  const price = productPrice + variantPrice;
   const currency = product.url?.currency || 'CAD';
   const discount = product.url?.discount;
   const unavailableVariants = product.variants?.filter((variant) => variant.status === 'unavailable') || [];
