@@ -17,7 +17,7 @@ router.post(
 
 router.get('/v1/product/media', dbConnect, middleware(controllers.retrieveProductMedia), response);
 
-router.put(
+router.patch(
   '/v1/auth/admin/product/media',
   dbConnect,
   middleware(controllers.validateSortProductMedia),

@@ -1,4 +1,14 @@
-import { Box, CircularProgress, IconButton, ListItem, Switch, useTheme } from '@mui/material';
+import {
+  Box,
+  Checkbox,
+  CircularProgress,
+  FormControlLabel,
+  IconButton,
+  ListItem,
+  Switch,
+  TextField,
+  useTheme
+} from '@mui/material';
 import { ProductMediaInterface } from '../../../../../_shared/types';
 import { Icon } from '@mdi/react';
 import { mdiImage, mdiOpenInNew, mdiTrashCan, mdiVideo } from '@mdi/js';
@@ -40,6 +50,14 @@ const MediaRow = ({ media }: Props) => {
 
   const handleToggle = () => {
     updateProductMedia.mutate({ ...media, status: media.status === 'enabled' ? 'disabled' : 'enabled' });
+  };
+
+  const handleUseAsThumbnailChange = () => {
+    updateProductMedia.mutate({ ...media, useAsThumbnail: !media.useAsThumbnail });
+  };
+
+  const handleSizingChange = (sizing: string) => {
+    updateProductMedia.mutate({ ...media, sizing });
   };
 
   return (
@@ -104,9 +122,24 @@ const MediaRow = ({ media }: Props) => {
         </Box>
       </Box>
 
-      <IconButton size='small' onClick={() => window.open(media.url, '_blank')} sx={{ mr: 1 }}>
-        <Icon path={mdiOpenInNew} size={1} />
-      </IconButton>
+      <FormControlLabel
+        label='Use As Thumbnail'
+        control={<Checkbox color='info' />}
+        onChange={handleUseAsThumbnailChange}
+        checked={media.useAsThumbnail}
+      />
+
+      <TextField
+        label='Sizing'
+        select
+        SelectProps={{ native: true }}
+        sx={{ width: '150px', mb: '0 !important' }}
+        onChange={(e) => handleSizingChange(e.target.value)}
+        value={media.sizing}
+      >
+        <option value='contain'>Contain</option>
+        <option value='cover'>Cover</option>
+      </TextField>
 
       <Switch color='success' checked={media.status === 'enabled'} onChange={handleToggle} sx={{ mr: 1 }} />
 
@@ -117,6 +150,10 @@ const MediaRow = ({ media }: Props) => {
           <Icon path={mdiTrashCan} size={1} color={theme.palette.error.main} />
         </IconButton>
       )}
+
+      <IconButton size='small' onClick={() => window.open(media.url, '_blank')} sx={{ ml: 1 }}>
+        <Icon path={mdiOpenInNew} size={1} />
+      </IconButton>
     </ListItem>
   );
 };

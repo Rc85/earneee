@@ -118,7 +118,16 @@ const FeaturedProducts = () => {
           ) : (
             <>
               {products.map((product, i) => {
-                const media = product?.media?.[0] || product?.variants?.[0]?.media?.[0];
+                const productMedia = product?.media || [];
+                const variants = product?.variants || [];
+                const variant = variants.find((variant) =>
+                  variant.media?.find((media) => media.useAsThumbnail)
+                );
+                const media =
+                  productMedia.find((media) => media.useAsThumbnail) ||
+                  variant?.media?.[0] ||
+                  productMedia[0] ||
+                  variants?.[0]?.media?.[0];
                 const mediaUrl = media?.url;
                 const price = product.url?.price || 0;
                 const currency = product.url?.currency || 'CAD';

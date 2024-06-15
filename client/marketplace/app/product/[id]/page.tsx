@@ -244,7 +244,13 @@ const Product = ({ params: { id } }: { params: { id: string } }) => {
                           </Grid2>
 
                           <Grid2 xs={8}>
-                            <Typography sx={{ margin: 2 }}>{specification.value.join(', ')}</Typography>
+                            <Typography sx={{ margin: 2 }}>
+                              {specification.value.length > 1
+                                ? specification.value.map((value) => (
+                                    <Typography key={value}>&bull; {value}</Typography>
+                                  ))
+                                : specification.value.join('')}
+                            </Typography>
                           </Grid2>
                         </Fragment>
                       ))}

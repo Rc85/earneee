@@ -5,6 +5,8 @@ export interface ProductMediaInterface {
   productId: string | null;
   width: number;
   height: number;
+  sizing: string;
+  useAsThumbnail: boolean;
   type: string;
   ordinance: number;
   createdAt: string;

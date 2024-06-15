@@ -186,7 +186,9 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
       pm.width,
       pm.height,
       pm.product_id,
-      pm.type
+      pm.type,
+      pm.sizing,
+      pm.use_as_thumbnail
     FROM product_media AS pm
     WHERE pm.status = 'enabled'
     ORDER BY pm.created_at
@@ -398,7 +400,9 @@ export const retrieveProductShowcase = async (req: Request, resp: Response, next
         pm.url,
         pm.width,
         pm.height,
-        pm.product_id
+        pm.product_id,
+        pm.sizing,
+        pm.use_as_thumbnail
       FROM product_media AS pm
       WHERE pm.status = 'enabled'
       ORDER BY pm.created_at
@@ -582,7 +586,9 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
         pm.path,
         pm.width,
         pm.height,
-        pm.type
+        pm.type,
+        pm.sizing,
+        pm.use_as_thumbnail
       FROM product_media AS pm
       WHERE pm.status = 'enabled'
       ORDER BY pm.ordinance, pm.created_at

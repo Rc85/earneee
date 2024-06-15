@@ -103,8 +103,6 @@ export const retrieveCategories = async (req: Request, resp: Response, next: Nex
     }
   }
 
-  console.log(filteredCategories);
-
   resp.locals.response = { data: { categories: filteredCategories } };
 
   return next();

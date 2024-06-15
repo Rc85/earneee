@@ -67,7 +67,7 @@ export const useSortProductMedia = (onSuccess?: (data: any) => void, onError?: (
   return useMutation({
     mutationFn: (options: { media: ProductMediaInterface[] }) =>
       axios({
-        method: 'put',
+        method: 'patch',
         url: '/v1/auth/admin/product/media',
         withCredentials: true,
         data: options

@@ -24,10 +24,15 @@ const ProductShowcase = ({ type }: Props) => {
     >
       <Grid2 container spacing={1}>
         {products?.map((product) => {
-          const media = product.media?.[0] || product?.variants?.[0]?.media?.[0];
+          const productMedia = product?.media || [];
+          const variants = product?.variants || [];
+          const variant = variants.find((variant) => variant.media?.find((media) => media.useAsThumbnail));
+          const media =
+            productMedia.find((media) => media.useAsThumbnail) ||
+            variant?.media?.[0] ||
+            productMedia[0] ||
+            variants?.[0]?.media?.[0];
           const mediaUrl = media?.url;
-          const mediaWidth = media?.width || 0;
-          const mediaHeight = media?.height || 0;
           const excerpt = product.excerpt;
           const price = product.url?.price || 0;
           const currency = product.url?.currency || 'CAD';
@@ -44,8 +49,6 @@ const ProductShowcase = ({ type }: Props) => {
           }
 
           const finalPrice = price - discountAmount;
-
-          console.log(product.name, mediaWidth, mediaHeight, mediaWidth / mediaHeight);
 
           return (
             <Grid2 key={product.id} xs={12} sm={4}>
@@ -65,9 +68,9 @@ const ProductShowcase = ({ type }: Props) => {
                         borderTopRightRadius: 4,
                         borderTopLeftRadius: 4,
                         backgroundImage: mediaUrl ? `url('${mediaUrl}')` : undefined,
-                        backgroundSize: mediaWidth / mediaHeight < 0.77 ? 'contain' : 'cover',
+                        backgroundSize: media?.sizing || 'cover',
                         backgroundRepeat: 'no-repeat',
-                        backgroundPosition: mediaWidth / mediaHeight < 0.77 ? 'center top' : 'center',
+                        backgroundPosition: media?.sizing === 'contain' ? 'center top' : 'center',
                         height: '200px'
                       }}
                     />
