@@ -1,4 +1,5 @@
 import { ProductsInterface } from './products';
+import { OrderShipmentsInterface } from './order_shipments';
 
 export interface OrderItemsInterface {
   id: string;
@@ -11,4 +12,5 @@ export interface OrderItemsInterface {
   status: string;
   createdAt: string;
   updatedAt: string | null;
+  shipment?: OrderShipmentsInterface;
 }

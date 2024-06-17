@@ -39,16 +39,13 @@ import { Section } from '../../../../_shared/components';
 
 interface Props {
   name: string | undefined;
-  categoryId: number | undefined;
-  subcategoryId: number | undefined;
-  groupId: number | undefined;
+  categoryId: string;
 }
 
-const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
+const Main = ({ name, categoryId }: Props) => {
   const [page, setPage] = useState(0);
-  const id = groupId || subcategoryId || categoryId;
   const { data } = retrieveCategories({
-    parentId: id,
+    parentId: categoryId,
     hasProducts: true
   });
   const [orderBy, setOrderBy] = useState('newest');
@@ -67,7 +64,7 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
   });
   const { country } = useAppSelector((state) => state.App);
   const p = retrieveMarketplaceProducts({
-    categoryId: id,
+    categoryId,
     offset: page * 20,
     filters,
     orderBy,
@@ -75,7 +72,7 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
   });
   const { isLoading } = p;
   const { products, count = 0 } = p.data || {};
-  const s = retrieveMarketplaceProductSpecifications({ categoryId: groupId, enabled: Boolean(groupId) });
+  const s = retrieveMarketplaceProductSpecifications({ categoryId, enabled: Boolean(categoryId) });
   const { specifications = [] } = s.data || {};
   const specificationLabels = [
     ...new Set(specifications.map((specification) => specification.name.toUpperCase()))
@@ -92,20 +89,22 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
   const handleSpecificationChange = (specification: ProductSpecificationsInterface) => {
     const specifications = { ...filters.specifications };
 
-    if (specifications[specification.name]) {
-      const index = specifications[specification.name].findIndex((s) => s.id === specification.id);
+    if (specifications[specification.name.toUpperCase()]) {
+      const index = specifications[specification.name.toUpperCase()].findIndex(
+        (s) => s.id === specification.id
+      );
 
       if (index >= 0) {
-        specifications[specification.name].splice(index, 1);
+        specifications[specification.name.toUpperCase()].splice(index, 1);
 
-        if (specifications[specification.name].length === 0) {
-          delete specifications[specification.name];
+        if (specifications[specification.name.toUpperCase()].length === 0) {
+          delete specifications[specification.name.toUpperCase()];
         }
       } else {
-        specifications[specification.name].push(specification);
+        specifications[specification.name.toUpperCase()].push(specification);
       }
     } else {
-      specifications[specification.name] = [specification];
+      specifications[specification.name.toUpperCase()] = [specification];
     }
 
     setFilters({ ...filters, specifications });
@@ -250,46 +249,46 @@ const Main = ({ name, categoryId, subcategoryId, groupId }: Props) => {
         </Box>
 
         <Box sx={{ flexGrow: 1, ml: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mb: 3 }}>
+            <TextField
+              label='Sort'
+              select
+              SelectProps={{ native: true }}
+              fullWidth={false}
+              sx={{ mb: '0 !important', mr: 2 }}
+              onChange={handleSortChange}
+              value={orderBy}
+            >
+              <option value='newest'>Newest</option>
+              <option value='oldest'>Oldest</option>
+              <option value='name_asc'>Name A-Z</option>
+              <option value='name_desc'>Name Z-A</option>
+              <option value='price_asc'>Lowest Price</option>
+              <option value='price_desc'>Highest Price</option>
+            </TextField>
+
+            <ToggleButtonGroup
+              size='small'
+              exclusive
+              value={view}
+              onChange={(_, value) => HandleViewClick(value)}
+            >
+              <ToggleButton value='grid'>
+                <Icon path={mdiViewGrid} size={1} />
+              </ToggleButton>
+
+              <ToggleButton value='list'>
+                <Icon path={mdiViewList} size={1} />
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+
           {isLoading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               <CircularProgress />
             </Box>
           ) : (
             <>
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mb: 3 }}>
-                <TextField
-                  label='Sort'
-                  select
-                  SelectProps={{ native: true }}
-                  fullWidth={false}
-                  sx={{ mb: '0 !important', mr: 2 }}
-                  onChange={handleSortChange}
-                  value={orderBy}
-                >
-                  <option value='newest'>Newest</option>
-                  <option value='oldest'>Oldest</option>
-                  <option value='name_asc'>Name A-Z</option>
-                  <option value='name_desc'>Name Z-A</option>
-                  <option value='price_asc'>Lowest Price</option>
-                  <option value='price_desc'>Highest Price</option>
-                </TextField>
-
-                <ToggleButtonGroup
-                  size='small'
-                  exclusive
-                  value={view}
-                  onChange={(_, value) => HandleViewClick(value)}
-                >
-                  <ToggleButton value='grid'>
-                    <Icon path={mdiViewGrid} size={1} />
-                  </ToggleButton>
-
-                  <ToggleButton value='list'>
-                    <Icon path={mdiViewList} size={1} />
-                  </ToggleButton>
-                </ToggleButtonGroup>
-              </Box>
-
               <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                 <Pagination
                   count={Math.ceil(count / 30)}

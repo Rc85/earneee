@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { database } from '../../../middlewares';
-import { OrdersInterface } from '../../../../../_shared/types';
+import { OrderShipmentsInterface, OrdersInterface } from '../../../../../_shared/types';
 import { generateKey } from '../../../../../_shared/utils';
 import dayjs from 'dayjs';
 import { stripe } from '../../../services';
@@ -14,6 +14,8 @@ export const retrieveCart = async (req: Request, resp: Response, next: NextFunct
       `SELECT
         o.id,
         o.number,
+        o.created_at,
+        o.updated_at,
         COALESCE(oi.items, '[]'::JSONB) AS items
       FROM orders AS o
       LEFT JOIN LATERAL (
@@ -74,6 +76,74 @@ export const retrieveCart = async (req: Request, resp: Response, next: NextFunct
 
     resp.locals.response = { data: { order: order[0] } };
   }
+
+  return next();
+};
+
+export const listOrders = async (req: Request, resp: Response, next: NextFunction) => {
+  const { client } = resp.locals;
+  const offset = req.query.offset?.toString() || '0';
+  const limit = req.query.limit?.toString() || '20';
+
+  const orders = await database.retrieve<OrdersInterface[]>(`SELECT o.* FROM orders AS o`, {
+    where: 'status != $1',
+    params: ['draft'],
+    offset,
+    limit,
+    orderBy: 'created_at DESC',
+    client
+  });
+
+  const count = await database.retrieve<{ count: number }[]>(`SELECT COUNT(o.*)::INT FROM orders AS o`, {
+    where: 'status = $1',
+    params: ['draft'],
+    client
+  });
+
+  resp.locals.response = { data: { orders, count: count[0].count } };
+
+  return next();
+};
+
+export const retrieveOrder = async (req: Request, resp: Response, next: NextFunction) => {
+  const { client } = resp.locals;
+  const { orderId } = req.query;
+
+  const order = await database.retrieve<OrdersInterface[]>(
+    `WITH
+  oi AS (
+    SELECT
+      oi.*,
+      os.shipment
+    FROM order_items AS oi
+    LEFT JOIN LATERAL (
+      SELECT TO_JSONB(os.*) AS shipment
+      FROM order_shipments AS os
+      WHERE os.id = oi.order_shipment_id
+    ) AS os ON true
+  )
+  
+  SELECT
+    o.*,
+    COALESCE(oi.items, '[]'::JSONB) AS items
+  FROM orders AS o
+  LEFT JOIN LATERAL (
+    SELECT JSONB_AGG(oi.*) AS items
+    FROM oi
+    WHERE oi.order_id = o.id
+  ) AS oi ON true`,
+    { where: `o.id = $1`, params: [orderId], client }
+  );
+
+  if (order.length && order[0].sessionId) {
+    const checkoutSession = await stripe.checkout.sessions.retrieve(order[0].sessionId, {
+      expand: ['payment_intent.latest_charge.balance_transaction', 'payment_intent.payment_method']
+    });
+
+    order[0].details = checkoutSession;
+  }
+
+  resp.locals.response = { data: { order: order[0] } };
 
   return next();
 };

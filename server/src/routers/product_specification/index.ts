@@ -19,6 +19,13 @@ router.get(
   response
 );
 
+router.get(
+  '/v1/marketplace/product/specifications',
+  dbConnect,
+  middleware(controllers.retrieveMarketplaceProductSpecifications),
+  response
+);
+
 router.delete(
   '/v1/auth/admin/product/specification',
   dbConnect,

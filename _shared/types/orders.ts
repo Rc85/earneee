@@ -1,5 +1,5 @@
+import Stripe from 'stripe';
 import { OrderItemsInterface } from './order_items';
-import { OrderShipmentsInterface } from './order_shipments';
 
 export interface OrdersInterface {
   id: string;
@@ -11,5 +11,5 @@ export interface OrdersInterface {
   createdAt: string;
   updatedAt: string | null;
   items: OrderItemsInterface[];
-  shipment?: OrderShipmentsInterface;
+  details?: Stripe.Response<Stripe.Checkout.Session>;
 }

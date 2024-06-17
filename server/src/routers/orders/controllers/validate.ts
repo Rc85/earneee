@@ -1,7 +1,13 @@
 import { NextFunction, Request, Response } from 'express';
 import { database } from '../../../middlewares';
-import { OrdersInterface, ProductOptionsInterface, ProductsInterface } from '../../../../../_shared/types';
+import {
+  OrderItemsInterface,
+  OrdersInterface,
+  ProductOptionsInterface,
+  ProductsInterface
+} from '../../../../../_shared/types';
 import { HttpException, validations } from '../../../utils';
+import dayjs from 'dayjs';
 
 export const validateAddProduct = async (req: Request, resp: Response, next: NextFunction) => {
   const { product, quantity, orderId, country } = req.body;
@@ -248,6 +254,45 @@ export const validateCheckout = async (req: Request, resp: Response, next: NextF
   }
 
   resp.locals.order = order[0];
+
+  return next();
+};
+
+export const validateCreateOrderShipment = async (req: Request, resp: Response, next: NextFunction) => {
+  const { client } = resp.locals;
+  const { orderShipment } = req.body;
+
+  if (!orderShipment) {
+    return next(new HttpException(400, `Order shipment required`));
+  } else if (
+    !orderShipment.shippingProvider ||
+    typeof orderShipment.shippingProvider !== 'string' ||
+    validations.blankCheck.test(orderShipment.shippingProvider)
+  ) {
+    return next(new HttpException(400, `Shipping provider required`));
+  } else if (
+    orderShipment.trackingNumber &&
+    (typeof orderShipment.trackingNumber !== 'string' ||
+      validations.blankCheck.test(orderShipment.trackingNumber))
+  ) {
+    return next(new HttpException(400, `Tracking number required`));
+  } else if (orderShipment.eta && !dayjs(orderShipment.eta).isValid()) {
+    return next(new HttpException(400, `Invalid eta`));
+  }
+
+  if (orderShipment.items) {
+    for (const item of orderShipment.items) {
+      const orderItem = await database.retrieve<OrderItemsInterface[]>('SELECT * FROM order_items', {
+        where: 'id = $1 AND status = $2',
+        params: [item.id, 'processed'],
+        client
+      });
+
+      if (!orderItem.length) {
+        return next(new HttpException(400, `Order item ${item.name} does not exist`));
+      }
+    }
+  }
 
   return next();
 };

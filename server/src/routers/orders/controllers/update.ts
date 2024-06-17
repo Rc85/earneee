@@ -67,3 +67,20 @@ export const checkout = async (req: Request, resp: Response, next: NextFunction)
 
   return next();
 };
+
+export const updateOrder = async (req: Request, resp: Response, next: NextFunction) => {
+  const { client } = resp.locals;
+  const { order } = req.body;
+
+  await database.update('orders', ['status'], { where: 'id = $2', params: [order.status, order.id], client });
+
+  await database.update('order_items', ['status'], {
+    where: 'order_id = $2',
+    params: ['delivered', order.id],
+    client
+  });
+
+  resp.locals.response = { data: { statusText: 'Order updated' } };
+
+  next();
+};

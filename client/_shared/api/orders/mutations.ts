@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { useDispatch } from 'react-redux';
 import { setIsLoading } from '../../redux/app';
-import { ProductsInterface } from '../../../../_shared/types';
+import { OrderShipmentsInterface, OrdersInterface, ProductsInterface } from '../../../../_shared/types';
 
 export const useAddProduct = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
   const dispatch = useDispatch();
@@ -83,6 +83,63 @@ export const useCheckout = (onSuccess?: (data: any) => void, onError?: (err: any
       dispatch(setIsLoading(false));
 
       queryClient.invalidateQueries({ queryKey: ['cart'] });
+
+      onSuccess?.(data);
+    },
+    onError: (err) => {
+      dispatch(setIsLoading(false));
+
+      onError?.(err);
+    }
+  });
+};
+
+export const useUpdateOrder = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (options: { order: OrdersInterface }) =>
+      axios({
+        method: 'put',
+        url: '/v1/auth/admin/order',
+        withCredentials: true,
+        data: options
+      }),
+
+    onSuccess: (data) => {
+      dispatch(setIsLoading(false));
+
+      queryClient.invalidateQueries({ queryKey: ['admin orders'] });
+      queryClient.invalidateQueries({ queryKey: ['admin order'] });
+
+      onSuccess?.(data);
+    },
+    onError: (err) => {
+      dispatch(setIsLoading(false));
+
+      onError?.(err);
+    }
+  });
+};
+
+export const useCreateOrderShipment = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (options: { orderShipment: OrderShipmentsInterface }) =>
+      axios({
+        method: 'post',
+        url: '/v1/auth/admin/order/shipment',
+        withCredentials: true,
+        data: options
+      }),
+
+    onSuccess: (data) => {
+      dispatch(setIsLoading(false));
+
+      queryClient.invalidateQueries({ queryKey: ['admin order'] });
 
       onSuccess?.(data);
     },

@@ -30,4 +30,18 @@ router.post(
   response
 );
 
+router.get('/v1/auth/admin/orders', dbConnect, middleware(controllers.listOrders), response);
+
+router.get('/v1/auth/admin/order', dbConnect, middleware(controllers.retrieveOrder), response);
+
+router.put('/v1/auth/admin/order', dbConnect, middleware(controllers.updateOrder), response);
+
+router.post(
+  '/v1/auth/admin/order/shipment',
+  dbConnect,
+  middleware(controllers.validateCreateOrderShipment),
+  middleware(controllers.createShipment),
+  response
+);
+
 export default router;

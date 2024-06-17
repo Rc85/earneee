@@ -24,7 +24,7 @@ export const retrieveProductSpecifications = (options?: {
 };
 
 export const retrieveMarketplaceProductSpecifications = (options?: {
-  categoryId?: number;
+  categoryId?: string;
   enabled: boolean;
 }) => {
   return useQuery<{ specifications: ProductSpecificationsInterface[] }>({
@@ -33,7 +33,7 @@ export const retrieveMarketplaceProductSpecifications = (options?: {
     queryFn: async () => {
       const { data } = await axios({
         method: 'get',
-        url: '/v1/marketplace/product/specification',
+        url: '/v1/marketplace/product/specifications',
         params: options,
         withCredentials: true
       });

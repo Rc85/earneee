@@ -1,7 +1,7 @@
-export { createProductSpecification } from './create';
-export { retrieveProductSpecification } from './retrieve';
-export { deleteProductSpecification } from './delete';
-export { sortProductSpecifications } from './sort';
-export { updateProductSpecification } from './update';
+export * from './create';
+export * from './retrieve';
+export * from './delete';
+export * from './sort';
+export * from './update';
 
 export * from './validate';

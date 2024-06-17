@@ -112,11 +112,7 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
   const offset = req.query.offset?.toString() || '0';
   const limit = req.query.limit?.toString() || '20';
   const params: any = [country];
-  const where = [
-    `(pr.category_id)::INT IN (SELECT id FROM p)`,
-    `pr.parent_id IS NULL`,
-    `pr.published IS true`
-  ];
+  const where = [`(pr.category_id)::INT IN (SELECT id FROM p)`, `pr.published IS true`];
   const sort = req.query.orderBy?.toString() || 'newest';
 
   if (featured) {

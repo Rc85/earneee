@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { database } from '../../../middlewares';
 import { CategoriesInterface } from '../../../../../_shared/types';
-import { PoolClient } from 'pg';
 
 export const listCategories = async (_: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
@@ -18,6 +17,7 @@ export const listCategories = async (_: Request, resp: Response, next: NextFunct
       FROM products AS p
       WHERE p.category_id = c.id
       AND p.parent_id IS null
+      AND p.published IS true
     ) AS p ON true`,
     { where: `c.parent_id IS null`, client }
   );
@@ -34,6 +34,7 @@ export const listCategories = async (_: Request, resp: Response, next: NextFunct
       FROM products AS p
       WHERE p.category_id = c.id
       AND p.parent_id IS null
+      AND p.published IS true
     ) AS p ON true`,
     { where: `c.parent_id IS NOT null`, client }
   );

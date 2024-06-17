@@ -63,24 +63,6 @@ exports.up = (pgm) => {
       tracking_number: {
         type: 'varchar'
       },
-      address: {
-        type: 'varchar'
-      },
-      address_line_2: {
-        type: 'varchar'
-      },
-      city: {
-        type: 'varchar'
-      },
-      region: {
-        type: 'varchar'
-      },
-      country: {
-        type: 'varchar'
-      },
-      postal_code: {
-        type: 'varchar'
-      },
       eta: {
         type: 'timestamptz'
       },

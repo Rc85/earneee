@@ -3,8 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { CategoriesInterface } from '../../../../_shared/types';
 
 export const retrieveCategories = (options?: {
-  categoryId?: number;
-  parentId?: number | null;
+  categoryId?: string;
+  parentId?: string | null;
   hasProducts?: boolean;
   withAncestors?: boolean;
 }) => {

@@ -6,6 +6,7 @@ import {
   mdiHome,
   mdiLogout,
   mdiMenu,
+  mdiPackage,
   mdiShopping,
   mdiStarCircle,
   mdiTag,
@@ -129,10 +130,22 @@ const TopBar = ({ maxWidth }: Props) => {
             <ListItem disableGutters disablePadding>
               <ListItemButton onClick={() => handleNavClick('/products')}>
                 <ListItemIcon>
-                  <Icon path={mdiShopping} size={1} />
+                  <Icon path={mdiPackage} size={1} />
                 </ListItemIcon>
 
                 <ListItemText primary='Products' />
+              </ListItemButton>
+            </ListItem>
+          )}
+
+          {user?.isAdmin && (
+            <ListItem disableGutters disablePadding>
+              <ListItemButton onClick={() => handleNavClick('/orders')}>
+                <ListItemIcon>
+                  <Icon path={mdiShopping} size={1} />
+                </ListItemIcon>
+
+                <ListItemText primary='Orders' />
               </ListItemButton>
             </ListItem>
           )}

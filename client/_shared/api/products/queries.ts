@@ -56,7 +56,7 @@ export const retrieveMarketplaceProduct = (options?: { productId: string; countr
 };
 
 export const retrieveMarketplaceProducts = (options?: {
-  categoryId?: number;
+  categoryId?: string;
   offset?: number;
   featured?: boolean;
   filters?: {

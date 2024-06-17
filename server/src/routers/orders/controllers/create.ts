@@ -66,3 +66,44 @@ export const addProduct = async (req: Request, resp: Response, next: NextFunctio
 
   return next();
 };
+
+export const createShipment = async (req: Request, resp: Response, next: NextFunction) => {
+  const { client } = resp.locals;
+  const { orderShipment } = req.body;
+  const { orderId, trackingNumber, shippingProvider, eta, items } = orderShipment;
+
+  const id = req.body.id || generateKey(1);
+
+  const shipment = await database.create(
+    'order_shipments',
+    ['id', 'order_id', 'tracking_number', 'shipping_provider', 'eta'],
+    [id, orderId, trackingNumber || null, shippingProvider, eta || null],
+    {
+      conflict: {
+        columns: 'id',
+        do: `UPDATE SET
+          tracking_number = EXCLUDED.tracking_number,
+          shipping_provider = EXCLUDED.shipping_provider,
+          eta = EXCLUDED.eta,
+          updated_at = now()`
+      },
+      client
+    }
+  );
+
+  if (items) {
+    for (const item of items) {
+      await database.update('order_items', ['status', 'order_shipment_id'], {
+        where: 'id = $3',
+        params: ['shipped', shipment[0].id, item.id],
+        client
+      });
+    }
+  }
+
+  resp.locals.response = {
+    data: { statusText: shipment[0].updatedAt ? 'Order shipment updated' : 'Order shipment created' }
+  };
+
+  return next();
+};

@@ -256,6 +256,42 @@ const App = () => {
                       />
                     </Route>
 
+                    <Route
+                      path='/orders'
+                      element={
+                        <AuthenticatedRoute>
+                          <Pages.Orders />
+                        </AuthenticatedRoute>
+                      }
+                    />
+
+                    <Route
+                      path='/order/:orderId'
+                      element={
+                        <AuthenticatedRoute>
+                          <Pages.Order />
+                        </AuthenticatedRoute>
+                      }
+                    >
+                      <Route
+                        path='/order/:orderId'
+                        element={
+                          <AuthenticatedRoute>
+                            <Pages.Order.Details />
+                          </AuthenticatedRoute>
+                        }
+                      />
+
+                      <Route
+                        path='/order/:orderId/shipment/:orderShipmentId?'
+                        element={
+                          <AuthenticatedRoute>
+                            <Pages.Order.CreateShipment />
+                          </AuthenticatedRoute>
+                        }
+                      />
+                    </Route>
+
                     <Route path='/offers' element={<Outlet />}>
                       <Route
                         path='/offers'
