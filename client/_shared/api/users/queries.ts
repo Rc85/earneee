@@ -87,13 +87,29 @@ export const retrieveMessageCount = (enabled: boolean) => {
   });
 };
 
-export const retrieveOrders = (options: { offset: number; limit: number }) => {
+export const retrieveUserOrders = (options: { offset: number; limit: number }) => {
   return useQuery<{ orders: OrdersInterface[]; count: number }>({
     queryKey: ['user orders', options.offset, options.limit],
     queryFn: async () => {
       const { data } = await axios({
         method: 'get',
         url: `/v1/auth/user/orders`,
+        withCredentials: true,
+        params: options
+      });
+
+      return data;
+    }
+  });
+};
+
+export const retrieveUserOrder = (options: { orderId: string }) => {
+  return useQuery<{ order: OrdersInterface }>({
+    queryKey: ['user order', options.orderId],
+    queryFn: async () => {
+      const { data } = await axios({
+        method: 'get',
+        url: `/v1/auth/user/order`,
         withCredentials: true,
         params: options
       });

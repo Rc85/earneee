@@ -363,7 +363,7 @@ export const validateRefundOrderItem = async (req: Request, resp: Response, next
     const lineItem = await findLineItem(order[0].sessionId, orderItemId, undefined, 10);
 
     if (!lineItem) {
-      return next(new HttpException(400, `Order item does not exist`));
+      return next(new HttpException(400, `Order item not found`));
     }
 
     resp.locals.lineItem = lineItem;

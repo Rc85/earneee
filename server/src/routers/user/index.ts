@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { dbConnect, middleware, recaptcha, response } from '../../middlewares';
 import * as controllers from './controllers';
+import { validateRefundOrderItem } from '../orders/controllers';
 
 const router = Router();
 
@@ -102,13 +103,23 @@ router.delete(
   response
 );
 
-router.get('/v1/auth/user/orders', dbConnect, middleware(controllers.retrieveOrders), response);
+router.get('/v1/auth/user/orders', dbConnect, middleware(controllers.retrieveUserOrders), response);
+
+router.get('/v1/auth/user/order', dbConnect, middleware(controllers.retrieveUserOrder), response);
 
 router.delete(
   '/v1/auth/user',
   dbConnect,
   middleware(controllers.validateDeleteAccount),
   middleware(controllers.deleteAccount),
+  response
+);
+
+router.post(
+  '/v1/auth/user/order/item/refund',
+  dbConnect,
+  middleware(validateRefundOrderItem),
+  middleware(controllers.createRefund),
   response
 );
 

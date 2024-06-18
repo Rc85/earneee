@@ -28,7 +28,9 @@ a:hover {
 
 .product a,
 .carousel-container a,
-.logo-link {
+.logo-link,
+a.list-item-button-link,
+a.list-item-button-link:hover {
   color: inherit;
   text-decoration: none;
 }

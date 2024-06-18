@@ -211,3 +211,31 @@ export const useRefundOrderItem = (onSuccess?: (data: any) => void, onError?: (e
     }
   });
 };
+
+export const useCreateRefund = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (options: { orderItemId: string; quantity: string; reason: string }) =>
+      axios({
+        method: 'post',
+        url: '/v1/auth/user/order/item/refund',
+        withCredentials: true,
+        data: options
+      }),
+
+    onSuccess: (data) => {
+      dispatch(setIsLoading(false));
+
+      queryClient.invalidateQueries({ queryKey: ['user order'] });
+
+      onSuccess?.(data);
+    },
+    onError: (err) => {
+      dispatch(setIsLoading(false));
+
+      onError?.(err);
+    }
+  });
+};

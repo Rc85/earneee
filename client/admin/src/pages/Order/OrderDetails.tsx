@@ -31,7 +31,7 @@ const OrderDetails = () => {
   const paymentMethod = paymentIntent?.payment_method as Stripe.PaymentMethod;
   const latestCharge = paymentIntent?.latest_charge as Stripe.Charge;
   const balanceTransaction = latestCharge?.balance_transaction as Stripe.BalanceTransaction;
-  const processingFee = balanceTransaction.fee / 100;
+  const processingFee = balanceTransaction?.fee / 100 || 0;
   const subtotal = order?.items.reduce((acc, item) => acc + item.price * item.quantity, 0) || 0;
   const tax = (order?.details?.total_details?.amount_tax || 0) / 100;
   const { enqueueSnackbar } = useSnackbar();

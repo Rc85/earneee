@@ -190,22 +190,74 @@ export const retrieveMessages = async (req: Request, resp: Response, next: NextF
   return next();
 };
 
-export const retrieveOrders = async (req: Request, resp: Response, next: NextFunction) => {
+export const retrieveUserOrders = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
+  const offset = req.query.offset?.toString() || '0';
+  const limit = req.query.limit?.toString() || '20';
 
   if (req.session.user?.id) {
     const orders = await database.retrieve<OrdersInterface[]>(
+      `SELECT
+        o.id,
+        o.number,
+        o.status,
+        o.created_at
+      FROM orders AS o`,
+      {
+        where: `o.user_id = $1 AND o.status != $2`,
+        params: [req.session.user.id, 'draft'],
+        orderBy: 'o.created_at DESC',
+        limit,
+        offset,
+        client
+      }
+    );
+
+    const count = await database.retrieve<{ count: number }[]>(`SELECT COUNT(*)::INT FROM orders`, {
+      where: 'user_id = $1 AND status != $2',
+      params: [req.session.user.id, 'draft'],
+      client
+    });
+
+    resp.locals.response = { data: { orders, count: count[0].count } };
+  }
+
+  return next();
+};
+
+export const retrieveUserOrder = async (req: Request, resp: Response, next: NextFunction) => {
+  const { client } = resp.locals;
+  const { orderId } = req.query;
+
+  if (req.session.user?.id) {
+    const order = await database.retrieve<OrdersInterface[]>(
       `WITH
+      r AS (
+        SELECT
+          r.id,
+          r.amount,
+          r.quantity,
+          r.order_item_id,
+          r.reference,
+          r.status
+        FROM refunds AS r
+      ),
       oi AS (
         SELECT
           oi.*,
-          os.shipment
+          os.shipment,
+          COALESCE(r.refunds, '[]'::JSONB) AS refunds
         FROM order_items AS oi
         LEFT JOIN LATERAL (
           SELECT TO_JSONB(os.*) AS shipment
           FROM order_shipments AS os
           WHERE os.id = oi.order_shipment_id
         ) AS os ON true
+        LEFT JOIN LATERAL (
+          SELECT JSONB_AGG(r.*) AS refunds
+          FROM r
+          WHERE r.order_item_id = oi.id
+        ) AS r ON true
       )
       
       SELECT
@@ -218,14 +270,13 @@ export const retrieveOrders = async (req: Request, resp: Response, next: NextFun
         WHERE oi.order_id = o.id
       ) AS oi ON true`,
       {
-        where: 'o.user_id = $1 AND o.status != $2',
-        params: [req.session.user.id, 'draft'],
-        orderBy: 'o.created_at DESC',
+        where: 'o.user_id = $1 AND o.status != $2 AND o.id = $3',
+        params: [req.session.user.id, 'draft', orderId],
         client
       }
     );
 
-    resp.locals.response = { data: { orders } };
+    resp.locals.response = { data: { order: order[0] } };
   }
 
   return next();

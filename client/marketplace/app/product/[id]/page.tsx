@@ -332,15 +332,18 @@ const ProductActions = ({ product, selectedVariant }: Props) => {
     setStatus('Add Item');
   };
 
-  const handleRefetchCart = async () => {
-    const r = await refetch();
+  const handleRefetchCart = async (product: ProductsInterface, quantity: string) => {
+    const { data } = await refetch();
+    const { order } = data || {};
 
-    console.log(r);
+    if (order) {
+      handleAddProduct(product, quantity, order.id);
+    }
   };
 
-  const handleAddProduct = (product: ProductsInterface, quantity: string) => {
+  const handleAddProduct = (product: ProductsInterface, quantity: string, orderId: string) => {
     if (product && order) {
-      addProduct.mutate({ product, quantity: parseInt(quantity), orderId: order.id, country });
+      addProduct.mutate({ product, quantity: parseInt(quantity), orderId, country });
     }
   };
 
@@ -351,7 +354,7 @@ const ProductActions = ({ product, selectedVariant }: Props) => {
           product={product}
           variant={selectedVariant}
           cancel={() => setStatus('')}
-          submit={handleAddProduct}
+          submit={handleRefetchCart}
         />
       )}
 

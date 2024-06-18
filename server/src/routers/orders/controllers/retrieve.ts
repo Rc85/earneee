@@ -132,6 +132,7 @@ export const retrieveOrder = async (req: Request, resp: Response, next: NextFunc
         SELECT JSONB_AGG(r.*) AS refunds
         FROM refunds AS r
         WHERE r.order_item_id = oi.id
+        AND r.status = 'complete'
       ) AS r ON true
     )
     

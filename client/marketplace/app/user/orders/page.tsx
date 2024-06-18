@@ -5,6 +5,7 @@ import Icon from '@mdi/react';
 import {
   Box,
   Chip,
+  Link,
   List,
   ListItem,
   ListItemButton,
@@ -13,16 +14,17 @@ import {
   Typography
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import { retrieveOrders } from '../../../../_shared/api';
-import { Loading, Modal } from '../../../../_shared/components';
-import { useState } from 'react';
-import { OrdersInterface } from '../../../../../_shared/types';
+import { retrieveUserOrders } from '../../../../_shared/api';
+import { Loading } from '../../../../_shared/components';
 import dayjs from 'dayjs';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 const page = () => {
-  const [page, setPage] = useState(0);
-  const { isLoading, data } = retrieveOrders({ offset: page, limit: 20 });
+  const search = useSearchParams();
+  const page = search.get('page') || '1';
+  const { isLoading, data } = retrieveUserOrders({ offset: parseInt(page) - 1, limit: 10 });
   const { orders, count = 0 } = data || {};
+  const router = useRouter();
 
   return isLoading ? (
     <Loading />
@@ -32,15 +34,30 @@ const page = () => {
         <>
           <List disablePadding>
             {orders.map((order) => (
-              <OrderRow key={order.id} order={order} />
+              <ListItem disableGutters disablePadding divider>
+                <Link href={`/user/order/${order.id}`} sx={{ flexGrow: 1 }} className='list-item-button-link'>
+                  <ListItemButton sx={{ mr: 1 }}>
+                    <ListItemText
+                      primary={`Order ${order.number}`}
+                      secondary={dayjs(order.createdAt).format('YYYY-MM-DD h:mm A')}
+                    />
+                  </ListItemButton>
+                </Link>
+
+                <Chip
+                  size='small'
+                  label={order.status}
+                  color={order.status === 'fulfilled' ? 'success' : undefined}
+                />
+              </ListItem>
             ))}
           </List>
 
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mt: 3 }}>
             <Pagination
               count={Math.ceil(count / 20)}
-              page={page + 1}
-              onChange={(_, page) => setPage(page - 1)}
+              page={parseInt(page)}
+              onChange={(_, page) => router.push(`/user/orders?page=${page}`)}
             />
           </Box>
         </>
@@ -52,83 +69,6 @@ const page = () => {
         </Box>
       )}
     </Box>
-  );
-};
-
-const OrderRow = ({ order }: { order: OrdersInterface }) => {
-  const [status, setStatus] = useState('');
-
-  const handleSubmit = () => {
-    if (order.receiptUrl) {
-      window.open(order.receiptUrl, '_blank');
-    }
-  };
-
-  return (
-    <ListItem disableGutters disablePadding divider>
-      <Modal
-        open={status === 'Show Details'}
-        title={`Order ${order.number}`}
-        submit={order.receiptUrl ? handleSubmit : undefined}
-        subtitle={dayjs(order.updatedAt).format('YYYY-MM-DD h:mm A')}
-        cancel={() => setStatus('')}
-        submitText='View Receipt'
-        cancelText='Close'
-      >
-        <Typography sx={{ mb: 3 }}>
-          Once the products are shipped, you will receive a tracking number for each shipment.
-        </Typography>
-
-        <List disablePadding>
-          {order.items.map((item) => (
-            <ListItem key={item.id} disableGutters disablePadding divider>
-              <Box sx={{ flexGrow: 1 }}>
-                <ListItemText
-                  primary={item.name}
-                  secondary={`${item.quantity}x $${item.price.toFixed(2)}${
-                    item.product.variants?.[0] ? ` \u2022 ${item.product.variants[0].name}` : ''
-                  }`}
-                />
-
-                {item.shipment && (
-                  <Box sx={{ mt: 1 }}>
-                    <Typography variant='body2' color='GrayText'>
-                      Shipping method: {item.shipment.shippingProvider}
-                    </Typography>
-
-                    <Typography variant='body2' color='GrayText'>
-                      Tracking #: {item.shipment.trackingNumber}
-                    </Typography>
-
-                    {item.shipment.eta && (
-                      <Typography variant='body2' color='GrayText'>
-                        ETA ${dayjs(item.shipment.eta).format('YYYY-MM-DD')}
-                      </Typography>
-                    )}
-                  </Box>
-                )}
-              </Box>
-
-              <Chip
-                size='small'
-                label={item.status}
-                color={item.status === 'delivered' ? 'success' : undefined}
-                sx={{ ml: 1 }}
-              />
-            </ListItem>
-          ))}
-        </List>
-      </Modal>
-
-      <ListItemButton sx={{ mr: 1 }} onClick={() => setStatus('Show Details')}>
-        <ListItemText
-          primary={`Order ${order.number}`}
-          secondary={dayjs(order.updatedAt).format('YYYY-MM-DD h:mm A')}
-        />
-      </ListItemButton>
-
-      <Chip size='small' label={order.status} color={order.status === 'fulfilled' ? 'success' : undefined} />
-    </ListItem>
   );
 };
 

@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import { database } from '../../../middlewares';
 import { sendEmail } from '../../../services';
+import { generateKey } from '../../../../../_shared/utils';
 
 export const createUser = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
@@ -46,6 +47,29 @@ export const subscribe = async (req: Request, resp: Response, next: NextFunction
   });
 
   resp.locals.response = { data: { statusText: 'Thank you for subscribing' } };
+
+  return next();
+};
+
+export const createRefund = async (req: Request, resp: Response, next: NextFunction) => {
+  const { client, lineItem } = resp.locals;
+  const { orderItemId, quantity, reason } = req.body;
+  const id = generateKey(1);
+
+  if (lineItem) {
+    const itemPrice = lineItem?.price?.unit_amount || 0;
+    const itemTax = (lineItem?.amount_tax || 0) / (lineItem?.quantity || 1);
+    const amount = (itemPrice + itemTax) / 100;
+
+    await database.create(
+      'refunds',
+      ['id', 'order_item_id', 'amount', 'quantity', 'reason', 'status'],
+      [id, orderItemId, amount, quantity, reason, 'pending'],
+      { client }
+    );
+
+    resp.locals.response = { data: { statusText: 'Refund requested' } };
+  }
 
   return next();
 };
