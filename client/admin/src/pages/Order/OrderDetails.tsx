@@ -31,11 +31,18 @@ const OrderDetails = () => {
   const paymentMethod = paymentIntent?.payment_method as Stripe.PaymentMethod;
   const latestCharge = paymentIntent?.latest_charge as Stripe.Charge;
   const balanceTransaction = latestCharge?.balance_transaction as Stripe.BalanceTransaction;
+  const processingFee = balanceTransaction.fee / 100;
   const subtotal = order?.items.reduce((acc, item) => acc + item.price * item.quantity, 0) || 0;
   const tax = (order?.details?.total_details?.amount_tax || 0) / 100;
   const { enqueueSnackbar } = useSnackbar();
   const pendingOrderItems = order?.items.filter((item) => !item.shipment) || [];
   const disabledFulfill = pendingOrderItems.length > 0;
+  const totalRefund =
+    order?.items.reduce(
+      (acc, item) =>
+        acc + (item.refunds?.reduce((acc, refund) => acc + refund.amount * refund.quantity, 0) || 0),
+      0
+    ) || 0;
 
   const handleSuccess = (response: any) => {
     if (response.data.statusText) {
@@ -208,13 +215,25 @@ const OrderDetails = () => {
               <OrderItemRow key={item.id} item={item} />
             ))}
 
+            {totalRefund > 0 && (
+              <TableRow>
+                <TableCell>
+                  <Typography sx={{ textAlign: 'right' }}>Refund</Typography>
+                </TableCell>
+
+                <TableCell>
+                  <Typography>-${totalRefund.toFixed(2)}</Typography>
+                </TableCell>
+              </TableRow>
+            )}
+
             <TableRow>
               <TableCell>
                 <Typography sx={{ textAlign: 'right' }}>Subtotal</Typography>
               </TableCell>
 
               <TableCell>
-                <Typography>${subtotal.toFixed(2)}</Typography>
+                <Typography>${(subtotal - totalRefund).toFixed(2)}</Typography>
               </TableCell>
             </TableRow>
 
@@ -230,11 +249,21 @@ const OrderDetails = () => {
 
             <TableRow>
               <TableCell>
+                <Typography sx={{ textAlign: 'right' }}>Processing Fee</Typography>
+              </TableCell>
+
+              <TableCell>
+                <Typography>-${processingFee.toFixed(2)}</Typography>
+              </TableCell>
+            </TableRow>
+
+            <TableRow>
+              <TableCell>
                 <Typography sx={{ textAlign: 'right' }}>Total</Typography>
               </TableCell>
 
               <TableCell>
-                <Typography>${(subtotal + tax).toFixed(2)}</Typography>
+                <Typography>${(subtotal + tax - totalRefund - processingFee).toFixed(2)}</Typography>
               </TableCell>
             </TableRow>
           </TableBody>

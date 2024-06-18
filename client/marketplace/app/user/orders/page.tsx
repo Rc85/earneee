@@ -82,12 +82,32 @@ const OrderRow = ({ order }: { order: OrdersInterface }) => {
         <List disablePadding>
           {order.items.map((item) => (
             <ListItem key={item.id} disableGutters disablePadding divider>
-              <ListItemText
-                primary={item.name}
-                secondary={`${item.quantity}x $${item.price.toFixed(2)}${
-                  item.product.variants?.[0] ? ` \u2022 ${item.product.variants[0].name}` : ''
-                }`}
-              />
+              <Box sx={{ flexGrow: 1 }}>
+                <ListItemText
+                  primary={item.name}
+                  secondary={`${item.quantity}x $${item.price.toFixed(2)}${
+                    item.product.variants?.[0] ? ` \u2022 ${item.product.variants[0].name}` : ''
+                  }`}
+                />
+
+                {item.shipment && (
+                  <Box sx={{ mt: 1 }}>
+                    <Typography variant='body2' color='GrayText'>
+                      Shipping method: {item.shipment.shippingProvider}
+                    </Typography>
+
+                    <Typography variant='body2' color='GrayText'>
+                      Tracking #: {item.shipment.trackingNumber}
+                    </Typography>
+
+                    {item.shipment.eta && (
+                      <Typography variant='body2' color='GrayText'>
+                        ETA ${dayjs(item.shipment.eta).format('YYYY-MM-DD')}
+                      </Typography>
+                    )}
+                  </Box>
+                )}
+              </Box>
 
               <Chip
                 size='small'

@@ -248,6 +248,8 @@ const Cart = () => {
   }, [pathname]);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    refetch();
+
     setAnchorEl(event.currentTarget);
   };
 

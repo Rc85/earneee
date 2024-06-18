@@ -68,7 +68,7 @@ const ProductForm = ({ product, variant }: Props) => {
   const navigate = useNavigate();
   const b = retrieveProductBrands();
   const c = retrieveCategories({
-    parentId: selectedCategories[selectedCategories.length - 1]?.id || null
+    parentId: selectedCategories[selectedCategories.length - 1]?.id.toString()
   });
   const { brands } = b.data || {};
   const { categories } = c.data || {};

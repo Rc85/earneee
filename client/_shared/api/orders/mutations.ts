@@ -2,7 +2,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { useDispatch } from 'react-redux';
 import { setIsLoading } from '../../redux/app';
-import { OrderShipmentsInterface, OrdersInterface, ProductsInterface } from '../../../../_shared/types';
+import {
+  OrderItemsInterface,
+  OrderShipmentsInterface,
+  OrdersInterface,
+  ProductsInterface
+} from '../../../../_shared/types';
 
 export const useAddProduct = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
   const dispatch = useDispatch();
@@ -132,6 +137,62 @@ export const useCreateOrderShipment = (onSuccess?: (data: any) => void, onError?
       axios({
         method: 'post',
         url: '/v1/auth/admin/order/shipment',
+        withCredentials: true,
+        data: options
+      }),
+
+    onSuccess: (data) => {
+      dispatch(setIsLoading(false));
+
+      queryClient.invalidateQueries({ queryKey: ['admin order'] });
+
+      onSuccess?.(data);
+    },
+    onError: (err) => {
+      dispatch(setIsLoading(false));
+
+      onError?.(err);
+    }
+  });
+};
+
+export const useUpdateOrderItem = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (options: { orderItem: OrderItemsInterface }) =>
+      axios({
+        method: 'put',
+        url: '/v1/auth/admin/order/item',
+        withCredentials: true,
+        data: options
+      }),
+
+    onSuccess: (data) => {
+      dispatch(setIsLoading(false));
+
+      queryClient.invalidateQueries({ queryKey: ['admin order'] });
+
+      onSuccess?.(data);
+    },
+    onError: (err) => {
+      dispatch(setIsLoading(false));
+
+      onError?.(err);
+    }
+  });
+};
+
+export const useRefundOrderItem = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (options: { orderItemId: string; quantity: string; reason: string }) =>
+      axios({
+        method: 'patch',
+        url: '/v1/auth/admin/order/item',
         withCredentials: true,
         data: options
       }),

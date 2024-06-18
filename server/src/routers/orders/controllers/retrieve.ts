@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { database } from '../../../middlewares';
-import { OrderShipmentsInterface, OrdersInterface } from '../../../../../_shared/types';
+import { OrdersInterface } from '../../../../../_shared/types';
 import { generateKey } from '../../../../../_shared/utils';
 import dayjs from 'dayjs';
 import { stripe } from '../../../services';
@@ -29,6 +29,12 @@ export const retrieveCart = async (req: Request, resp: Response, next: NextFunct
         client
       }
     );
+
+    if (order.length) {
+      console.log(order[0].id);
+      console.log('updated at diff', order[0].updatedAt, dayjs().diff(dayjs(order[0].updatedAt), 'hour'));
+      console.log('created at diff', order[0].createdAt, dayjs().diff(dayjs(order[0].createdAt), 'hour'));
+    }
 
     if (
       !order.length ||
@@ -111,27 +117,33 @@ export const retrieveOrder = async (req: Request, resp: Response, next: NextFunc
 
   const order = await database.retrieve<OrdersInterface[]>(
     `WITH
-  oi AS (
+    oi AS (
+      SELECT
+        oi.*,
+        os.shipment,
+        COALESCE(r.refunds, '[]'::JSONB) AS refunds
+      FROM order_items AS oi
+      LEFT JOIN LATERAL (
+        SELECT TO_JSONB(os.*) AS shipment
+        FROM order_shipments AS os
+        WHERE os.id = oi.order_shipment_id
+      ) AS os ON true
+      LEFT JOIN LATERAL (
+        SELECT JSONB_AGG(r.*) AS refunds
+        FROM refunds AS r
+        WHERE r.order_item_id = oi.id
+      ) AS r ON true
+    )
+    
     SELECT
-      oi.*,
-      os.shipment
-    FROM order_items AS oi
+      o.*,
+      COALESCE(oi.items, '[]'::JSONB) AS items
+    FROM orders AS o
     LEFT JOIN LATERAL (
-      SELECT TO_JSONB(os.*) AS shipment
-      FROM order_shipments AS os
-      WHERE os.id = oi.order_shipment_id
-    ) AS os ON true
-  )
-  
-  SELECT
-    o.*,
-    COALESCE(oi.items, '[]'::JSONB) AS items
-  FROM orders AS o
-  LEFT JOIN LATERAL (
-    SELECT JSONB_AGG(oi.*) AS items
-    FROM oi
-    WHERE oi.order_id = o.id
-  ) AS oi ON true`,
+      SELECT JSONB_AGG(oi.*) AS items
+      FROM oi
+      WHERE oi.order_id = o.id
+    ) AS oi ON true`,
     { where: `o.id = $1`, params: [orderId], client }
   );
 

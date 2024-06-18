@@ -44,4 +44,20 @@ router.post(
   response
 );
 
+router.put(
+  '/v1/auth/admin/order/item',
+  dbConnect,
+  middleware(controllers.validateUpdateOrderItem),
+  middleware(controllers.updateOrderItem),
+  response
+);
+
+router.patch(
+  '/v1/auth/admin/order/item',
+  dbConnect,
+  middleware(controllers.validateRefundOrderItem),
+  middleware(controllers.refundOrderItem),
+  response
+);
+
 export default router;

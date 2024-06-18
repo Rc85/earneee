@@ -288,7 +288,7 @@ const ProductActions = ({ product, selectedVariant }: Props) => {
   const unavailable =
     (unavailableVariants.length > 0 && unavailableVariants.length === (product.variants?.length || 0)) ||
     product.status === 'unavailable';
-  const { data } = retrieveCart({ userId: user?.id });
+  const { refetch, data } = retrieveCart({ userId: user?.id });
   const { order } = data || {};
   const { country } = useAppSelector((state) => state.App);
   const refundTimeChunks = product.url?.refundTime ? product.url.refundTime.split(' ') : [];
@@ -330,6 +330,12 @@ const ProductActions = ({ product, selectedVariant }: Props) => {
 
   const handleAddToCartClick = () => {
     setStatus('Add Item');
+  };
+
+  const handleRefetchCart = async () => {
+    const r = await refetch();
+
+    console.log(r);
   };
 
   const handleAddProduct = (product: ProductsInterface, quantity: string) => {

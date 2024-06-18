@@ -6,7 +6,6 @@ import {
   UserProfilesInterface,
   UsersInterface
 } from '../../../../../_shared/types';
-import { stripe } from '../../../services';
 
 export const retrieveUserProfiles = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
@@ -221,6 +220,7 @@ export const retrieveOrders = async (req: Request, resp: Response, next: NextFun
       {
         where: 'o.user_id = $1 AND o.status != $2',
         params: [req.session.user.id, 'draft'],
+        orderBy: 'o.created_at DESC',
         client
       }
     );

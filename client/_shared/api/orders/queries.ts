@@ -14,8 +14,7 @@ export const retrieveCart = (options: { userId: string | undefined }) => {
       });
 
       return data;
-    },
-    refetchOnWindowFocus: true
+    }
   });
 };
 

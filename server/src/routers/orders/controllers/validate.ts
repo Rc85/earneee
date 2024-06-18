@@ -4,10 +4,13 @@ import {
   OrderItemsInterface,
   OrdersInterface,
   ProductOptionsInterface,
-  ProductsInterface
+  ProductsInterface,
+  RefundsInterface
 } from '../../../../../_shared/types';
 import { HttpException, validations } from '../../../utils';
 import dayjs from 'dayjs';
+import { stripe } from '../../../services';
+import Stripe from 'stripe';
 
 export const validateAddProduct = async (req: Request, resp: Response, next: NextFunction) => {
   const { product, quantity, orderId, country } = req.body;
@@ -295,4 +298,97 @@ export const validateCreateOrderShipment = async (req: Request, resp: Response, 
   }
 
   return next();
+};
+
+export const validateUpdateOrderItem = async (req: Request, resp: Response, next: NextFunction) => {
+  const { client } = resp.locals;
+  const { orderItem } = req.body;
+
+  if (!orderItem) {
+    return next(new HttpException(400, `Order item required`));
+  } else if (!['processed', 'shipped', 'delivered', 'refunded'].includes(orderItem.status)) {
+    return next(new HttpException(400, `Invalid status`));
+  }
+
+  const item = await database.retrieve<OrderItemsInterface[]>('SELECT * FROM order_items', {
+    where: 'id = $1',
+    params: [orderItem.id],
+    client
+  });
+
+  if (!item.length) {
+    return next(new HttpException(400, `${orderItem.name} does not exist`));
+  }
+
+  return next();
+};
+
+export const validateRefundOrderItem = async (req: Request, resp: Response, next: NextFunction) => {
+  const { client } = resp.locals;
+  const { orderItemId, quantity } = req.body;
+
+  const orderItem = await database.retrieve<OrderItemsInterface[]>(`SELECT * FROM order_items`, {
+    where: 'id = $1',
+    params: [orderItemId],
+    client
+  });
+
+  if (!orderItem.length) {
+    return next(new HttpException(400, `Order item does not exist`));
+  }
+
+  const refunds = await database.retrieve<RefundsInterface[]>(`SELECT * FROM refunds`, {
+    where: 'order_item_id = $1',
+    params: [orderItemId]
+  });
+
+  if (refunds.length) {
+    const qty = refunds.reduce((acc, refund) => acc + refund.quantity, 0);
+
+    if (qty === orderItem[0].quantity) {
+      return next(new HttpException(400, `Cannot refund anymore of that item`));
+    } else if (quantity > orderItem[0].quantity - qty) {
+      return next(new HttpException(400, `Quantity cannot exceed remaining ${orderItem[0].quantity - qty}`));
+    }
+  }
+
+  const order = await database.retrieve<OrdersInterface[]>(
+    `SELECT
+      o.*
+    FROM orders AS o`,
+    { where: `o.id = $1`, params: [orderItem[0].orderId], client }
+  );
+
+  if (order.length && order[0].sessionId) {
+    const lineItem = await findLineItem(order[0].sessionId, orderItemId, undefined, 10);
+
+    if (!lineItem) {
+      return next(new HttpException(400, `Order item does not exist`));
+    }
+
+    resp.locals.lineItem = lineItem;
+  }
+
+  resp.locals.order = order[0];
+
+  return next();
+};
+
+const findLineItem = async (
+  sessionId: string,
+  orderItemId: string,
+  startingAfter: string | undefined,
+  limit: number
+): Promise<Stripe.LineItem | undefined> => {
+  const lineItems = await stripe.checkout.sessions.listLineItems(sessionId, {
+    starting_after: startingAfter,
+    limit
+  });
+  const lineItem = lineItems.data.find((item) => item.price?.metadata.order_item_id === orderItemId);
+
+  if (!lineItem && lineItems.has_more) {
+    return findLineItem(sessionId, orderItemId, lineItems.data[lineItems.data.length - 1].id, limit);
+  }
+
+  return lineItem;
 };

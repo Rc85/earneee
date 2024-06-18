@@ -1,11 +1,14 @@
 import { PoolClient } from 'pg';
-import { OrdersInterface } from '../_shared/types';
+import { OrderItemsInterface, OrdersInterface } from '../_shared/types';
+import Stripe from 'stripe';
 
 interface ResponseLocals {
   client?: PoolClient;
   response?: { status?: number; data?: Record<K, T> };
   user?: UsersInterace;
   order?: OrdersInterface;
+  orderItem?: OrderItemsInterface;
+  lineItem?: Stripe.LineItem;
 }
 
 declare module 'express' {
