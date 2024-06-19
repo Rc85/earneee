@@ -370,6 +370,7 @@ export const validateRefundOrderItem = async (req: Request, resp: Response, next
   }
 
   resp.locals.order = order[0];
+  resp.locals.orderItem = orderItem[0];
 
   return next();
 };
@@ -382,11 +383,35 @@ export const validateUpdateRefund = async (req: Request, resp: Response, next: N
     return next(new HttpException(400, `Invalid status`));
   }
 
-  const refund = await database.retrieve<RefundsInterface[]>(`SELECT * FROM refunds`, {
-    where: 'id = $1',
-    params: [refundId],
-    client
-  });
+  const refund = await database.retrieve<RefundsInterface[]>(
+    `WITH
+    oi AS (
+      SELECT
+        oi.*,
+        o.order
+      FROM order_items AS oi
+      LEFT JOIN LATERAL (
+        SELECT TO_JSONB(o.*) AS order
+        FROM orders AS o
+        WHERE o.id = oi.order_id
+      ) AS o ON true
+    )
+
+    SELECT
+      r.*,
+      oi.item
+    FROM refunds AS r
+    LEFT JOIN LATERAL (
+      SELECT TO_JSONB(oi.*) AS item
+      FROM oi
+      WHERE oi.id = r.order_item_id
+    ) AS oi ON true`,
+    {
+      where: 'id = $1',
+      params: [refundId],
+      client
+    }
+  );
 
   if (!refund.length) {
     return next(new HttpException(400, `Refund not found`));
@@ -407,11 +432,35 @@ export const validateUpdateRefundNotes = async (req: Request, resp: Response, ne
     return next(new HttpException(400, `Notes must be a string`));
   }
 
-  const refund = await database.retrieve<RefundsInterface[]>(`SELECT * FROM refunds`, {
-    where: 'id = $1',
-    params: [refundId],
-    client
-  });
+  const refund = await database.retrieve<RefundsInterface[]>(
+    `WITH
+    oi AS (
+      SELECT
+        oi.*,
+        o.order
+      FROM order_items AS oi
+      LEFT JOIN LATERAL (
+        SELECT TO_JSONB(o.*) AS order
+        FROM orders AS o
+        WHERE o.id = oi.order_id
+      ) AS o ON true
+    )
+
+    SELECT
+      r.*,
+      oi.item
+    FROM refunds AS r
+    LEFT JOIN LATERAL (
+      SELECT TO_JSONB(oi.*) AS item
+      FROM oi
+      WHERE oi.id = r.order_item_id
+    ) AS oi ON true`,
+    {
+      where: 'id = $1',
+      params: [refundId],
+      client
+    }
+  );
 
   if (!refund.length) {
     return next(new HttpException(400, `Refund not found`));
@@ -436,11 +485,35 @@ export const validateUploadRefundPhotos = async (req: Request, resp: Response, n
     }
   }
 
-  const refund = await database.retrieve<RefundsInterface[]>(`SELECT * FROM refunds`, {
-    where: 'id = $1',
-    params: [refundId],
-    client
-  });
+  const refund = await database.retrieve<RefundsInterface[]>(
+    `WITH
+    oi AS (
+      SELECT
+        oi.*,
+        o.order
+      FROM order_items AS oi
+      LEFT JOIN LATERAL (
+        SELECT TO_JSONB(o.*) AS order
+        FROM orders AS o
+        WHERE o.id = oi.order_id
+      ) AS o ON true
+    )
+
+    SELECT
+      r.*,
+      oi.item
+    FROM refunds AS r
+    LEFT JOIN LATERAL (
+      SELECT TO_JSONB(oi.*) AS item
+      FROM oi
+      WHERE oi.id = r.order_item_id
+    ) AS oi ON true`,
+    {
+      where: 'id = $1',
+      params: [refundId],
+      client
+    }
+  );
 
   if (!refund.length) {
     return next(new HttpException(400, `Refund not found`));

@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { database } from '../../../middlewares';
 import { generateKey } from '../../../../../_shared/utils';
-import { ProductsInterface } from '../../../../../_shared/types';
+import { OrdersInterface, ProductsInterface } from '../../../../../_shared/types';
 
 export const addProduct = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
@@ -100,6 +100,19 @@ export const createShipment = async (req: Request, resp: Response, next: NextFun
       });
     }
   }
+
+  const order = await database.retrieve<OrdersInterface[]>(`SELECT * FROM orders`, {
+    where: 'id = $1',
+    params: [orderId],
+    client
+  });
+
+  await database.create(
+    'user_messages',
+    ['user_id', 'type', 'message'],
+    [order[0].userId, 'notification', `Shipping for order ${order[0].number} has been updated`],
+    { client }
+  );
 
   resp.locals.response = {
     data: { statusText: shipment[0].updatedAt ? 'Order shipment updated' : 'Order shipment created' }

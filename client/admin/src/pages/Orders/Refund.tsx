@@ -144,7 +144,7 @@ const Refund = () => {
         )} \u2022 ${refund?.status}`}
         titleVariant='h3'
         actions={
-          refund?.status === 'pending'
+          !refund?.refundId || refund?.status !== 'declined'
             ? [
                 <LoadingButton
                   key='issue'

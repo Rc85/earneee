@@ -108,7 +108,8 @@ export const refundOrderItem = async (req: Request, resp: Response, next: NextFu
       const refundObj: Stripe.RefundCreateParams = {
         amount: (itemPrice + itemTax) * quantity,
         metadata: {
-          order_item_id: orderItemId
+          order_item_id: orderItemId,
+          order_id: order.id
         }
       };
 
@@ -130,8 +131,6 @@ export const refundOrderItem = async (req: Request, resp: Response, next: NextFu
         [id, orderItemId, amount, refund.id, reason, quantity],
         { client }
       );
-
-      resp.locals.response = { data: { statusText: 'Refund issued' } };
     }
   }
 
@@ -144,26 +143,16 @@ export const updateRefund = async (req: Request, resp: Response, next: NextFunct
 
   if (refund) {
     if (status === 'complete') {
-      const orderItem = await database.retrieve<OrderItemsInterface[]>(`SELECT * FROM order_items`, {
-        where: 'id = $1',
-        params: [refund?.orderItemId],
-        client
-      });
-      const order = await database.retrieve<OrdersInterface[]>(`SELECT * FROM orders`, {
-        where: 'id = $1',
-        params: [orderItem[0]?.orderId],
-        client
-      });
-
-      if (order.length && order[0].sessionId) {
-        const checkoutSession = await stripe.checkout.sessions.retrieve(order[0].sessionId);
+      if (refund.item?.order?.sessionId) {
+        const checkoutSession = await stripe.checkout.sessions.retrieve(refund.item.order.sessionId);
 
         if (checkoutSession?.payment_intent) {
           const stripeRefund = await stripe.refunds.create({
             payment_intent: checkoutSession.payment_intent as string,
             amount: Math.round(refund.amount * 100),
             metadata: {
-              order_item_id: refund.orderItemId
+              order_item_id: refund.orderItemId,
+              order_id: refund.item?.order?.id
             },
             reason: 'requested_by_customer'
           });
@@ -181,6 +170,19 @@ export const updateRefund = async (req: Request, resp: Response, next: NextFunct
         params: ['declined', refund.id],
         client
       });
+
+      if (refund.item?.order) {
+        await database.create(
+          'user_messages',
+          ['user_id', 'type', 'message'],
+          [
+            refund.item.order.userId,
+            'notification',
+            `Your request for refund on ${refund.item.name} (Order ${refund.item.order.number}) has been declined. Please go see the order details for more information.`
+          ],
+          { client }
+        );
+      }
     }
   }
 
@@ -197,6 +199,19 @@ export const updateRefundNotes = async (req: Request, resp: Response, next: Next
       params: [notes || null, refund.id],
       client
     });
+
+    if (refund.item?.order) {
+      await database.create(
+        'user_messages',
+        ['user_id', 'type', 'message'],
+        [
+          refund.item.order.userId,
+          'notification',
+          `A note has been added to a refund (Order ${refund.item.order.number})`
+        ],
+        { client }
+      );
+    }
   }
 
   return next();
@@ -230,6 +245,19 @@ export const uploadRefundPhotos = async (req: Request, resp: Response, next: Nex
       await database.create('refund_photos', ['url', 'path', 'refund_id'], [url, key, refund.id], {
         client
       });
+    }
+
+    if (refund.item?.order) {
+      await database.create(
+        'user_messages',
+        ['user_id', 'type', 'message'],
+        [
+          refund.item.order.userId,
+          'notification',
+          `Photos has been uploaded to a refund (Order ${refund.item.order.number})`
+        ],
+        { client }
+      );
     }
   }
 
