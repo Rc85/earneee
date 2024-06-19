@@ -295,3 +295,31 @@ export const useDeleteAccount = (onSuccess?: (data: any) => void, onError?: (err
     }
   });
 };
+
+export const useCancelRefund = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (options: { refundId: string }) =>
+      axios({
+        method: 'delete',
+        url: '/v1/auth/user/refund',
+        withCredentials: true,
+        params: options
+      }),
+
+    onSuccess: (data) => {
+      dispatch(setIsLoading(false));
+
+      queryClient.invalidateQueries({ queryKey: ['user order'] });
+
+      onSuccess?.(data);
+    },
+    onError: (err) => {
+      dispatch(setIsLoading(false));
+
+      onError?.(err);
+    }
+  });
+};

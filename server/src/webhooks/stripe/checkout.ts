@@ -17,10 +17,11 @@ export const checkoutWebhook = async (req: Request, resp: Response, next: NextFu
   }
 
   if (event.type === 'checkout.session.completed') {
-    const orderId = event.data.object.metadata?.order_id;
+    const checkout = event.data.object;
+    const orderId = checkout.metadata?.order_id;
 
     if (orderId) {
-      const paymentIntent = await stripe.paymentIntents.retrieve(event.data.object.payment_intent as string, {
+      const paymentIntent = await stripe.paymentIntents.retrieve(checkout.payment_intent as string, {
         expand: ['latest_charge']
       });
       const latestCharge = paymentIntent.latest_charge as Stripe.Charge;

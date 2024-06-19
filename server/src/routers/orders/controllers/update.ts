@@ -126,17 +126,8 @@ export const refundOrderItem = async (req: Request, resp: Response, next: NextFu
 
       await database.create(
         'refunds',
-        ['id', 'order_item_id', 'amount', 'refund_id', 'reason', 'quantity', 'status', 'reference'],
-        [
-          id,
-          orderItemId,
-          amount,
-          refund.id,
-          reason,
-          quantity,
-          'complete',
-          refund.destination_details?.card?.reference || null
-        ],
+        ['id', 'order_item_id', 'amount', 'refund_id', 'reason', 'quantity'],
+        [id, orderItemId, amount, refund.id, reason, quantity],
         { client }
       );
 
@@ -150,58 +141,44 @@ export const refundOrderItem = async (req: Request, resp: Response, next: NextFu
 export const updateRefund = async (req: Request, resp: Response, next: NextFunction) => {
   const { client, refund } = resp.locals;
   const { status } = req.body;
-  const updateColumns = [];
-  const params = [];
 
   if (refund) {
-    if (status) {
-      updateColumns.push('status');
+    if (status === 'complete') {
+      const orderItem = await database.retrieve<OrderItemsInterface[]>(`SELECT * FROM order_items`, {
+        where: 'id = $1',
+        params: [refund?.orderItemId],
+        client
+      });
+      const order = await database.retrieve<OrdersInterface[]>(`SELECT * FROM orders`, {
+        where: 'id = $1',
+        params: [orderItem[0]?.orderId],
+        client
+      });
 
-      params.push(status);
-    }
+      if (order.length && order[0].sessionId) {
+        const checkoutSession = await stripe.checkout.sessions.retrieve(order[0].sessionId);
 
-    if (updateColumns.length > 0) {
-      if (status === 'complete') {
-        const orderItem = await database.retrieve<OrderItemsInterface[]>(`SELECT * FROM order_items`, {
-          where: 'id = $1',
-          params: [refund?.orderItemId],
-          client
-        });
-        const order = await database.retrieve<OrdersInterface[]>(`SELECT * FROM orders`, {
-          where: 'id = $1',
-          params: [orderItem[0]?.orderId],
-          client
-        });
+        if (checkoutSession?.payment_intent) {
+          const stripeRefund = await stripe.refunds.create({
+            payment_intent: checkoutSession.payment_intent as string,
+            amount: Math.round(refund.amount * 100),
+            metadata: {
+              order_item_id: refund.orderItemId
+            },
+            reason: 'requested_by_customer'
+          });
 
-        if (order.length && order[0].sessionId) {
-          const checkoutSession = await stripe.checkout.sessions.retrieve(order[0].sessionId);
-
-          if (checkoutSession?.payment_intent) {
-            const stripeRefund = await stripe.refunds.create({
-              payment_intent: checkoutSession.payment_intent as string,
-              amount: Math.round(refund.amount * 100),
-              metadata: {
-                order_item_id: refund.orderItemId
-              },
-              reason: 'requested_by_customer'
-            });
-
-            updateColumns.push('refund_id');
-            params.push(stripeRefund.id);
-
-            if (stripeRefund.destination_details?.card?.reference) {
-              updateColumns.push('reference');
-              params.push(stripeRefund.destination_details?.card?.reference);
-            }
-          }
+          await database.update('refunds', ['refund_id'], {
+            where: 'id = $2',
+            params: [stripeRefund.id, refund.id],
+            client
+          });
         }
       }
-
-      params.push(refund.id);
-
-      await database.update('refunds', updateColumns, {
-        where: `id = $${updateColumns.length + 1}`,
-        params,
+    } else if (status === 'declined') {
+      await database.update('refunds', ['status'], {
+        where: `id = $2`,
+        params: ['declined', refund.id],
         client
       });
     }

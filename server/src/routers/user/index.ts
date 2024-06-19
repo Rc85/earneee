@@ -123,4 +123,12 @@ router.post(
   response
 );
 
+router.delete(
+  '/v1/auth/user/refund',
+  dbConnect,
+  middleware(controllers.validateCancelRefund),
+  middleware(controllers.cancelRefund),
+  response
+);
+
 export default router;

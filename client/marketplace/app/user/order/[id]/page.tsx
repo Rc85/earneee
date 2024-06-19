@@ -4,6 +4,7 @@ import {
   Box,
   Chip,
   CircularProgress,
+  Divider,
   Link,
   List,
   ListItem,
@@ -12,12 +13,13 @@ import {
   TextField,
   Typography
 } from '@mui/material';
-import { retrieveUserOrder, useCreateRefund } from '../../../../../_shared/api';
-import { Loading, Modal, Section } from '../../../../../_shared/components';
+import { retrieveUserOrder, useCancelRefund, useCreateRefund } from '../../../../../_shared/api';
+import { Modal, Section } from '../../../../../_shared/components';
 import dayjs from 'dayjs';
 import { useSnackbar } from 'notistack';
 import { useState } from 'react';
-import { OrderItemsInterface } from '../../../../../../_shared/types';
+import { OrderItemsInterface, RefundsInterface } from '../../../../../../_shared/types';
+import Loading from './loading';
 
 interface Props {
   params: { id: string };
@@ -151,25 +153,11 @@ const OrderItemRow = ({ item }: { item: OrderItemsInterface }) => {
 
         {item.refunds && item.refunds.length > 0 && (
           <Paper variant='outlined' sx={{ p: 1, mb: 1 }}>
-            {item.refunds?.map((refund) => (
+            {item.refunds?.map((refund, i) => (
               <Box key={refund.id}>
-                <Typography variant='body2' color='error.main'>
-                  {refund.status === 'complete'
-                    ? 'Refund issued'
-                    : refund.status === 'declined'
-                    ? 'Refund declined'
-                    : 'Refund requested'}{' '}
-                  &bull; {refund.quantity} x ${refund.amount.toFixed(2)}
-                  {refund.reference ? ` \u2022 Reference: ${refund.reference}` : ''}
-                </Typography>
+                <RefundRow refund={refund} />
 
-                {refund.notes && <Typography variant='body2'>Notes: {refund.notes}</Typography>}
-
-                {refund.photos?.map((photo, i) => (
-                  <Link key={photo.id} href={photo.url} target='_blank' sx={{ display: 'block' }}>
-                    <Typography variant='body2'>Photo #{i + 1}</Typography>
-                  </Link>
-                ))}
+                {item.refunds && item.refunds.length !== i + 1 && <Divider sx={{ my: 1 }} />}
               </Box>
             ))}
           </Paper>
@@ -183,6 +171,74 @@ const OrderItemRow = ({ item }: { item: OrderItemsInterface }) => {
         sx={{ ml: 1, my: 1 }}
       />
     </ListItem>
+  );
+};
+
+const RefundRow = ({ refund }: { refund: RefundsInterface }) => {
+  const [status, setStatus] = useState('');
+  const { enqueueSnackbar } = useSnackbar();
+
+  const handleSuccess = (response: any) => {
+    if (response.data.statusText) {
+      enqueueSnackbar(response.data.statusText, { variant: 'success' });
+    }
+
+    setStatus('');
+  };
+
+  const handleError = (err: any) => {
+    if (err.response.data.statusText) {
+      enqueueSnackbar(err.response.data.statusText, { variant: 'error' });
+    }
+
+    setStatus('');
+  };
+
+  const cancelRefund = useCancelRefund(handleSuccess, handleError);
+
+  const handleCancelRefund = () => {
+    setStatus('Canceling Refund');
+
+    cancelRefund.mutate({ refundId: refund.id });
+  };
+
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+      <Modal
+        open={status === 'Confirm Cancel'}
+        title='Are you sure you want to cancel this refund?'
+        cancel={() => setStatus('')}
+        submit={handleCancelRefund}
+      />
+
+      <Box sx={{ flexGrow: 1 }}>
+        <Typography variant='body2' color='error.main'>
+          {refund.status === 'complete'
+            ? 'Refund issued'
+            : refund.status === 'declined'
+            ? 'Refund declined'
+            : 'Refund requested'}{' '}
+          &bull; {refund.quantity} x ${refund.amount.toFixed(2)}
+          {refund.reference ? ` \u2022 Reference: ${refund.reference}` : ''}
+        </Typography>
+
+        {refund.notes && <Typography variant='body2'>Notes: {refund.notes}</Typography>}
+
+        {refund.photos?.map((photo, i) => (
+          <Link key={photo.id} href={photo.url} target='_blank' sx={{ display: 'block' }}>
+            <Typography variant='body2'>Photo #{i + 1}</Typography>
+          </Link>
+        ))}
+      </Box>
+
+      {refund.status === 'pending' && (
+        <Box sx={{ flexShrink: 0 }}>
+          <Typography variant='body2'>
+            <Link onClick={() => setStatus('Confirm Cancel')}>Cancel</Link>
+          </Typography>
+        </Box>
+      )}
+    </Box>
   );
 };
 

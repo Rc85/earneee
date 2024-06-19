@@ -307,10 +307,6 @@ const Refund = () => {
           </Table>
         </TableContainer>
 
-        <Typography variant='h6' sx={{ mt: 3, mb: 0 }}>
-          Items
-        </Typography>
-
         <TableContainer>
           <Table>
             <TableHead>

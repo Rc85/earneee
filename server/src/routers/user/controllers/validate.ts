@@ -2,7 +2,13 @@ import { NextFunction, Request, Response } from 'express';
 import { HttpException, validations } from '../../../utils';
 import { database } from '../../../middlewares';
 import bcrypt from 'bcrypt';
-import { UserBansInterface, UsersInterface } from '../../../../../_shared/types';
+import {
+  OrderItemsInterface,
+  OrdersInterface,
+  RefundsInterface,
+  UserBansInterface,
+  UsersInterface
+} from '../../../../../_shared/types';
 import dayjs from 'dayjs';
 import { parsePhoneNumber } from 'awesome-phonenumber';
 
@@ -246,6 +252,47 @@ export const validateDeleteAccount = async (req: Request, resp: Response, next: 
   if (!match) {
     return next(new HttpException(400, `Incorrect password`));
   }
+
+  return next();
+};
+
+export const validateCancelRefund = async (req: Request, resp: Response, next: NextFunction) => {
+  const { client } = resp.locals;
+  const { refundId } = req.query;
+
+  const refund = await database.retrieve<RefundsInterface[]>(`SELECT * FROM refunds`, {
+    where: 'id = $1',
+    params: [refundId],
+    client
+  });
+
+  if (!refund.length) {
+    return next(new HttpException(400, `Refund not found`));
+  } else if (refund[0].status !== 'pending') {
+    return next(new HttpException(400, `Refund cannot be canceled`));
+  }
+
+  const orderItem = await database.retrieve<OrderItemsInterface[]>(`SELECT * FROM order_items`, {
+    where: 'id = $1',
+    params: [refund[0].orderItemId],
+    client
+  });
+
+  if (!orderItem.length) {
+    return next(new HttpException(400, `Order not found`));
+  }
+
+  const order = await database.retrieve<OrdersInterface[]>(`SELECT * FROM orders`, {
+    where: 'id = $1 AND user_id = $2',
+    params: [orderItem[0].orderId, req.session.user?.id],
+    client
+  });
+
+  if (!order.length) {
+    return next(new HttpException(400, `Order not found`));
+  }
+
+  resp.locals.refund = refund[0];
 
   return next();
 };

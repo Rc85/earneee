@@ -52,6 +52,7 @@ import { OrderItemsInterface, ProductsInterface } from '../../../../_shared/type
 import ProductConfigurator from '../ProductConfigurator/ProductConfigurator';
 import { useAppSelector } from '../../../_shared/redux/store';
 import { LoadingButton } from '@mui/lab';
+import { useQueryClient } from '@tanstack/react-query';
 
 const TopBar = () => {
   const [openDrawer, setOpenDrawer] = useState(false);
@@ -222,6 +223,11 @@ const Cart = () => {
   const { country } = useAppSelector((state) => state.App);
   const subtotal = (order?.items || []).reduce((acc, item) => acc + item.price * item.quantity, 0);
   const { enqueueSnackbar } = useSnackbar();
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ['cart'] });
+  }, [pathname]);
 
   const handleSuccess = (response: any) => {
     if (response.data.url) {
@@ -240,12 +246,6 @@ const Cart = () => {
   const removeProduct = useRemoveProduct();
   const updateProduct = useAddProduct();
   const checkout = useCheckout(handleSuccess, handleError);
-
-  useEffect(() => {
-    if (user) {
-      refetch();
-    }
-  }, [pathname]);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     refetch();

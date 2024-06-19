@@ -5,7 +5,6 @@ import Icon from '@mdi/react';
 import {
   Box,
   Chip,
-  Link,
   List,
   ListItem,
   ListItemButton,
@@ -18,6 +17,7 @@ import { retrieveUserOrders } from '../../../../_shared/api';
 import { Loading } from '../../../../_shared/components';
 import dayjs from 'dayjs';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 
 const page = () => {
   const search = useSearchParams();
@@ -35,7 +35,11 @@ const page = () => {
           <List disablePadding>
             {orders.map((order) => (
               <ListItem disableGutters disablePadding divider>
-                <Link href={`/user/order/${order.id}`} sx={{ flexGrow: 1 }} className='list-item-button-link'>
+                <Link
+                  href={`/user/order/${order.id}`}
+                  style={{ flexGrow: 1 }}
+                  className='list-item-button-link'
+                >
                   <ListItemButton sx={{ mr: 1 }}>
                     <ListItemText
                       primary={`Order ${order.number}`}

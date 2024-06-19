@@ -30,16 +30,13 @@ exports.up = (pgm) => {
       reason: {
         type: 'varchar'
       },
-      tracking_number: {
-        type: 'varchar'
-      },
-      shipping_provider: {
-        type: 'varchar'
-      },
       refund_id: {
         type: 'varchar'
       },
       references: {
+        type: 'varchar'
+      },
+      failure_reason: {
         type: 'varchar'
       },
       status: {

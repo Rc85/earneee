@@ -41,3 +41,15 @@ export const deleteAccount = async (req: Request, resp: Response, next: NextFunc
 
   return next();
 };
+
+export const cancelRefund = async (req: Request, resp: Response, next: NextFunction) => {
+  const { client, refund } = resp.locals;
+
+  if (refund) {
+    await database.delete('refunds', { where: 'id = $1', params: [refund.id], client });
+
+    resp.locals.response = { data: { statusText: 'Refund canceled' } };
+  }
+
+  return next();
+};
