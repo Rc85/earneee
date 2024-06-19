@@ -1,5 +1,5 @@
 import { PoolClient } from 'pg';
-import { OrderItemsInterface, OrdersInterface } from '../_shared/types';
+import { OrderItemsInterface, OrdersInterface, RefundsInterface } from '../_shared/types';
 import Stripe from 'stripe';
 
 interface ResponseLocals {
@@ -9,6 +9,7 @@ interface ResponseLocals {
   order?: OrdersInterface;
   orderItem?: OrderItemsInterface;
   lineItem?: Stripe.LineItem;
+  refund?: RefundsInterface;
 }
 
 declare module 'express' {

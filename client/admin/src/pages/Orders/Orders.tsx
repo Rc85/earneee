@@ -1,68 +1,57 @@
-import {
-  List,
-  Box,
-  Pagination,
-  Typography,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  Chip
-} from '@mui/material';
-import { Loading, Section } from '../../../../_shared/components';
-import { useState } from 'react';
-import { listOrders } from '../../../../_shared/api';
-import dayjs from 'dayjs';
-import { useNavigate } from 'react-router-dom';
+import { List, Box, ListItem, ListItemButton, ListItemText, ListItemIcon } from '@mui/material';
+import { Outlet, useNavigate } from 'react-router-dom';
+import { mdiCreditCardRefund, mdiListBox } from '@mdi/js';
+import { grey } from '@mui/material/colors';
+import Icon from '@mdi/react';
+import OrderList from './OrderList';
+import Refunds from './Refunds';
+import Refund from './Refund';
 
 const Orders = () => {
-  const [page, setPage] = useState(0);
-  const { isLoading, data } = listOrders({ page, limit: 20 });
-  const { orders, count = 0 } = data || {};
   const navigate = useNavigate();
 
-  return isLoading ? (
-    <Loading />
-  ) : (
-    <Section title='Products' titleVariant='h3' position='center' sx={{ p: 2, flex: 1 }}>
-      {orders && orders.length > 0 ? (
-        <>
-          <List disablePadding>
-            {orders.map((order) => (
-              <ListItem key={order.id} disableGutters disablePadding divider>
-                <ListItemButton onClick={() => navigate(`/order/${order.id}`)}>
-                  <ListItemText
-                    primary={`Order ${order.number}`}
-                    secondary={dayjs(order.createdAt).format('YYYY-MM-DD h:mm A')}
-                  />
-                </ListItemButton>
+  return (
+    <Box sx={{ display: 'flex', flexGrow: 1 }}>
+      <Box
+        sx={{
+          minWidth: '200px',
+          borderRightWidth: 1,
+          borderRightColor: grey[600],
+          borderRightStyle: 'solid'
+        }}
+      >
+        <List disablePadding>
+          <ListItem disablePadding disableGutters>
+            <ListItemButton onClick={() => navigate(`/orders`)}>
+              <ListItemIcon>
+                <Icon path={mdiListBox} size={1} />
+              </ListItemIcon>
 
-                <Chip
-                  size='small'
-                  color={order.status === 'fulfilled' ? 'success' : undefined}
-                  label={order.status}
-                  sx={{ ml: 1 }}
-                />
-              </ListItem>
-            ))}
-          </List>
+              <ListItemText primary='Orders' />
+            </ListItemButton>
+          </ListItem>
 
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
-            <Pagination
-              count={Math.ceil(count / 20)}
-              page={page + 1}
-              onChange={(_, page) => setPage(page - 1)}
-              showFirstButton
-              showLastButton
-            />
-          </Box>
-        </>
-      ) : (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}>
-          <Typography>There are no orders</Typography>
-        </Box>
-      )}
-    </Section>
+          <ListItem disablePadding disableGutters>
+            <ListItemButton onClick={() => navigate(`/orders/refunds`)}>
+              <ListItemIcon>
+                <Icon path={mdiCreditCardRefund} size={1} />
+              </ListItemIcon>
+
+              <ListItemText primary='Refunds' />
+            </ListItemButton>
+          </ListItem>
+        </List>
+      </Box>
+
+      <Box sx={{ p: 2, flexGrow: 1, minWidth: 0, overflow: 'hidden' }}>
+        <Outlet />
+      </Box>
+    </Box>
   );
 };
+
+Orders.List = OrderList;
+Orders.Refunds = Refunds;
+Orders.Refund = Refund;
 
 export default Orders;

@@ -239,3 +239,115 @@ export const useCreateRefund = (onSuccess?: (data: any) => void, onError?: (err:
     }
   });
 };
+
+export const useUpdateRefund = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (options: { refundId: string; status: string }) =>
+      axios({
+        method: 'post',
+        url: '/v1/auth/admin/refund',
+        withCredentials: true,
+        data: options
+      }),
+
+    onSuccess: (data) => {
+      dispatch(setIsLoading(false));
+
+      queryClient.invalidateQueries({ queryKey: ['admin refunds'] });
+
+      onSuccess?.(data);
+    },
+    onError: (err) => {
+      dispatch(setIsLoading(false));
+
+      onError?.(err);
+    }
+  });
+};
+
+export const useUpdateRefundNotes = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (options: { refundId: string; notes: string }) =>
+      axios({
+        method: 'patch',
+        url: '/v1/auth/admin/refund',
+        withCredentials: true,
+        data: options
+      }),
+
+    onSuccess: (data) => {
+      dispatch(setIsLoading(false));
+
+      queryClient.invalidateQueries({ queryKey: ['admin refunds'] });
+
+      onSuccess?.(data);
+    },
+    onError: (err) => {
+      dispatch(setIsLoading(false));
+
+      onError?.(err);
+    }
+  });
+};
+
+export const useUploadRefundPhoto = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (options: { refundId: string; photos: string[] }) =>
+      axios({
+        method: 'post',
+        url: '/v1/auth/admin/refund/photo',
+        withCredentials: true,
+        data: options
+      }),
+
+    onSuccess: (data) => {
+      dispatch(setIsLoading(false));
+
+      queryClient.invalidateQueries({ queryKey: ['admin refunds'] });
+
+      onSuccess?.(data);
+    },
+    onError: (err) => {
+      dispatch(setIsLoading(false));
+
+      onError?.(err);
+    }
+  });
+};
+
+export const useDeleteRefundPhoto = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (options: { refundId: string; photoId: number }) =>
+      axios({
+        method: 'delete',
+        url: '/v1/auth/admin/refund/photo',
+        withCredentials: true,
+        params: options
+      }),
+
+    onSuccess: (data) => {
+      dispatch(setIsLoading(false));
+
+      queryClient.invalidateQueries({ queryKey: ['admin refunds'] });
+
+      onSuccess?.(data);
+    },
+    onError: (err) => {
+      dispatch(setIsLoading(false));
+
+      onError?.(err);
+    }
+  });
+};

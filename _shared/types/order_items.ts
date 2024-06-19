@@ -1,6 +1,7 @@
 import { ProductsInterface } from './products';
 import { OrderShipmentsInterface } from './order_shipments';
 import { RefundsInterface } from './refunds';
+import { OrdersInterface } from './orders';
 
 export interface OrderItemsInterface {
   id: string;
@@ -16,4 +17,5 @@ export interface OrderItemsInterface {
   updatedAt: string | null;
   shipment?: OrderShipmentsInterface;
   refunds?: RefundsInterface[];
+  order?: OrdersInterface;
 }

@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { database } from '../../../middlewares';
-import { OrdersInterface } from '../../../../../_shared/types';
+import { OrdersInterface, RefundsInterface } from '../../../../../_shared/types';
 import { generateKey } from '../../../../../_shared/utils';
 import dayjs from 'dayjs';
 import { stripe } from '../../../services';
@@ -157,6 +157,65 @@ export const retrieveOrder = async (req: Request, resp: Response, next: NextFunc
   }
 
   resp.locals.response = { data: { order: order[0] } };
+
+  return next();
+};
+
+export const listRefunds = async (req: Request, resp: Response, next: NextFunction) => {
+  const { client } = resp.locals;
+  const { refundId } = req.query;
+  const offset = req.query.offset?.toString() || '0';
+  const limit = req.query.limit?.toString() || '20';
+  const where = [];
+  const params = [];
+
+  if (refundId) {
+    params.push(refundId);
+
+    where.push('r.id = $1');
+  }
+
+  const refunds = await database.retrieve<RefundsInterface[]>(
+    `WITH oi AS (
+      SELECT
+        oi.*,
+        o.order
+      FROM order_items AS oi
+      LEFT JOIN LATERAL (
+        SELECT TO_JSONB(o.*) AS order
+        FROM orders AS o
+        WHERE o.id = oi.order_id
+      ) AS o ON true
+    )
+    
+    SELECT
+      r.*,
+      oi.item,
+      COALESCE(rp.photos, '[]'::JSONB) AS photos
+    FROM refunds AS r
+    LEFT JOIN LATERAL (
+      SELECT TO_JSONB(oi.*) AS item
+      FROM oi
+      WHERE oi.id = r.order_item_id
+    ) AS oi ON true
+    LEFT JOIN LATERAL (
+      SELECT JSONB_AGG(rp.*) AS photos
+      FROM refund_photos AS rp
+      WHERE rp.refund_id = r.id
+    ) AS rp ON true`,
+    {
+      where: where.join(' AND '),
+      params,
+      orderBy: 'r.created_at DESC',
+      limit,
+      offset,
+      client
+    }
+  );
+
+  const count = await database.retrieve<{ count: number }[]>(`SELECT COUNT(r.*)::INT FROM refunds AS r`, {});
+
+  resp.locals.response = { data: { refunds, count: count[0].count } };
 
   return next();
 };

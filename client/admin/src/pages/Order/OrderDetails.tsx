@@ -75,8 +75,6 @@ const OrderDetails = () => {
       title={`Order ${order?.number}`}
       subtitle={`${dayjs(order?.createdAt).format('YYYY-MM-DD h:mm A')} \u2022 ${order?.status}`}
       titleVariant='h3'
-      position='center'
-      maxWidth='md'
       actions={[
         order?.status !== 'fulfilled' ? (
           <LoadingButton
@@ -94,7 +92,6 @@ const OrderDetails = () => {
           </LoadingButton>
         ) : null
       ]}
-      sx={{ p: 2 }}
     >
       <Modal
         open={status === 'Confirm Fulfill'}

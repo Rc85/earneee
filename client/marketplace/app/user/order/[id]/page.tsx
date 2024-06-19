@@ -8,6 +8,7 @@ import {
   List,
   ListItem,
   ListItemText,
+  Paper,
   TextField,
   Typography
 } from '@mui/material';
@@ -148,17 +149,31 @@ const OrderItemRow = ({ item }: { item: OrderItemsInterface }) => {
           )
         )}
 
-        {item.refunds?.map((refund) => (
-          <Typography key={refund.id} variant='body2' color='error.main'>
-            {refund.status === 'complete'
-              ? 'Refund'
-              : refund.status === 'denied'
-              ? 'Refund denied'
-              : 'Refund Requested'}{' '}
-            &bull; {refund.quantity} x ${refund.amount.toFixed(2)}
-            {refund.reference ? ` \u2022 Reference: ${refund.reference}` : ''}
-          </Typography>
-        ))}
+        {item.refunds && item.refunds.length > 0 && (
+          <Paper variant='outlined' sx={{ p: 1, mb: 1 }}>
+            {item.refunds?.map((refund) => (
+              <Box key={refund.id}>
+                <Typography variant='body2' color='error.main'>
+                  {refund.status === 'complete'
+                    ? 'Refund issued'
+                    : refund.status === 'declined'
+                    ? 'Refund declined'
+                    : 'Refund requested'}{' '}
+                  &bull; {refund.quantity} x ${refund.amount.toFixed(2)}
+                  {refund.reference ? ` \u2022 Reference: ${refund.reference}` : ''}
+                </Typography>
+
+                {refund.notes && <Typography variant='body2'>Notes: {refund.notes}</Typography>}
+
+                {refund.photos?.map((photo, i) => (
+                  <Link key={photo.id} href={photo.url} target='_blank' sx={{ display: 'block' }}>
+                    <Typography variant='body2'>Photo #{i + 1}</Typography>
+                  </Link>
+                ))}
+              </Box>
+            ))}
+          </Paper>
+        )}
       </Box>
 
       <Chip

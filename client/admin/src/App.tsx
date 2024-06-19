@@ -263,7 +263,34 @@ const App = () => {
                           <Pages.Orders />
                         </AuthenticatedRoute>
                       }
-                    />
+                    >
+                      <Route
+                        path='/orders'
+                        element={
+                          <AuthenticatedRoute>
+                            <Pages.Orders.List />
+                          </AuthenticatedRoute>
+                        }
+                      />
+
+                      <Route
+                        path='/orders/refunds'
+                        element={
+                          <AuthenticatedRoute>
+                            <Pages.Orders.Refunds />
+                          </AuthenticatedRoute>
+                        }
+                      />
+
+                      <Route
+                        path='/orders/refund/:refundId'
+                        element={
+                          <AuthenticatedRoute>
+                            <Pages.Orders.Refund />
+                          </AuthenticatedRoute>
+                        }
+                      />
+                    </Route>
 
                     <Route
                       path='/order/:orderId'

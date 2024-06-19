@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { OrdersInterface } from '../../../../_shared/types';
+import { OrdersInterface, RefundsInterface } from '../../../../_shared/types';
 import axios from 'axios';
 
 export const retrieveCart = (options: { userId: string | undefined }) => {
@@ -42,6 +42,23 @@ export const retrieveOrder = (options: { orderId: string | undefined }) => {
       const { data } = await axios({
         method: 'get',
         url: '/v1/auth/admin/order',
+        params: options,
+        withCredentials: true
+      });
+
+      return data;
+    },
+    refetchOnWindowFocus: true
+  });
+};
+
+export const listRefunds = (options: { refundId?: string; offset?: number; limit?: number }) => {
+  return useQuery<{ refunds: RefundsInterface[]; count: number }>({
+    queryKey: ['admin refunds', options.refundId, options.offset, options.limit],
+    queryFn: async () => {
+      const { data } = await axios({
+        method: 'get',
+        url: '/v1/auth/admin/refunds',
         params: options,
         withCredentials: true
       });

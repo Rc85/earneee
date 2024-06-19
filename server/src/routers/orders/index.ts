@@ -60,4 +60,32 @@ router.patch(
   response
 );
 
+router.get('/v1/auth/admin/refunds', dbConnect, middleware(controllers.listRefunds), response);
+
+router.post(
+  '/v1/auth/admin/refund',
+  dbConnect,
+  middleware(controllers.validateUpdateRefund),
+  middleware(controllers.updateRefund),
+  response
+);
+
+router.patch(
+  '/v1/auth/admin/refund',
+  dbConnect,
+  middleware(controllers.validateUpdateRefundNotes),
+  middleware(controllers.updateRefundNotes),
+  response
+);
+
+router.post(
+  '/v1/auth/admin/refund/photo',
+  dbConnect,
+  middleware(controllers.validateUploadRefundPhotos),
+  middleware(controllers.uploadRefundPhotos),
+  response
+);
+
+router.delete('/v1/auth/admin/refund/photo', dbConnect, middleware(controllers.deleteRefundPhoto), response);
+
 export default router;

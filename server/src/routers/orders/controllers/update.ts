@@ -1,9 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
-import { stripe } from '../../../services';
+import { s3, stripe } from '../../../services';
 import { database } from '../../../middlewares';
-import { OrdersInterface } from '../../../../../_shared/types';
+import { OrderItemsInterface, OrdersInterface } from '../../../../../_shared/types';
 import Stripe from 'stripe';
 import { generateKey } from '../../../../../_shared/utils';
+import { ObjectCannedACL } from '@aws-sdk/client-s3';
 
 export const checkout = async (req: Request, resp: Response, next: NextFunction) => {
   const { client, order } = resp.locals;
@@ -125,12 +126,133 @@ export const refundOrderItem = async (req: Request, resp: Response, next: NextFu
 
       await database.create(
         'refunds',
-        ['id', 'order_item_id', 'amount', 'refund_id', 'reason', 'quantity', 'status'],
-        [id, orderItemId, amount, refund.id, reason, quantity, 'complete'],
+        ['id', 'order_item_id', 'amount', 'refund_id', 'reason', 'quantity', 'status', 'reference'],
+        [
+          id,
+          orderItemId,
+          amount,
+          refund.id,
+          reason,
+          quantity,
+          'complete',
+          refund.destination_details?.card?.reference || null
+        ],
         { client }
       );
 
       resp.locals.response = { data: { statusText: 'Refund issued' } };
+    }
+  }
+
+  return next();
+};
+
+export const updateRefund = async (req: Request, resp: Response, next: NextFunction) => {
+  const { client, refund } = resp.locals;
+  const { status } = req.body;
+  const updateColumns = [];
+  const params = [];
+
+  if (refund) {
+    if (status) {
+      updateColumns.push('status');
+
+      params.push(status);
+    }
+
+    if (updateColumns.length > 0) {
+      if (status === 'complete') {
+        const orderItem = await database.retrieve<OrderItemsInterface[]>(`SELECT * FROM order_items`, {
+          where: 'id = $1',
+          params: [refund?.orderItemId],
+          client
+        });
+        const order = await database.retrieve<OrdersInterface[]>(`SELECT * FROM orders`, {
+          where: 'id = $1',
+          params: [orderItem[0]?.orderId],
+          client
+        });
+
+        if (order.length && order[0].sessionId) {
+          const checkoutSession = await stripe.checkout.sessions.retrieve(order[0].sessionId);
+
+          if (checkoutSession?.payment_intent) {
+            const stripeRefund = await stripe.refunds.create({
+              payment_intent: checkoutSession.payment_intent as string,
+              amount: Math.round(refund.amount * 100),
+              metadata: {
+                order_item_id: refund.orderItemId
+              },
+              reason: 'requested_by_customer'
+            });
+
+            updateColumns.push('refund_id');
+            params.push(stripeRefund.id);
+
+            if (stripeRefund.destination_details?.card?.reference) {
+              updateColumns.push('reference');
+              params.push(stripeRefund.destination_details?.card?.reference);
+            }
+          }
+        }
+      }
+
+      params.push(refund.id);
+
+      await database.update('refunds', updateColumns, {
+        where: `id = $${updateColumns.length + 1}`,
+        params,
+        client
+      });
+    }
+  }
+
+  return next();
+};
+
+export const updateRefundNotes = async (req: Request, resp: Response, next: NextFunction) => {
+  const { client, refund } = resp.locals;
+  const { notes } = req.body;
+
+  if (refund) {
+    await database.update('refunds', ['notes'], {
+      where: 'id = $2',
+      params: [notes || null, refund.id],
+      client
+    });
+  }
+
+  return next();
+};
+
+export const uploadRefundPhotos = async (req: Request, resp: Response, next: NextFunction) => {
+  const { client, refund } = resp.locals;
+  const { photos } = req.body;
+
+  if (photos && refund) {
+    for (const photo of photos) {
+      const base64 = photo.split(',')[1];
+      const extension = photo.split(',')[0].split('/')[1].split(';')[0];
+      const buffer = Buffer.from(base64, 'base64');
+
+      const key = `refunds/${refund.id}/${Date.now()}.${extension}`;
+      const params = {
+        Body: buffer,
+        Bucket: process.env.S3_BUCKET_NAME || '',
+        Key: key,
+        ACL: 'public-read' as ObjectCannedACL,
+        CacheControl: 'max-age=604800',
+        ContentType: 'image/jpeg'
+      };
+
+      await s3.putObject(params);
+      const url = `https://${process.env.S3_BUCKET_NAME}.${
+        process.env.S3_ENDPOINT
+      }/${key}?ETag=${Date.now()}`;
+
+      await database.create('refund_photos', ['url', 'path', 'refund_id'], [url, key, refund.id], {
+        client
+      });
     }
   }
 

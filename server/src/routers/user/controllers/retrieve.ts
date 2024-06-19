@@ -232,6 +232,13 @@ export const retrieveUserOrder = async (req: Request, resp: Response, next: Next
   if (req.session.user?.id) {
     const order = await database.retrieve<OrdersInterface[]>(
       `WITH
+      rp AS (
+        SELECT
+          rp.id,
+          rp.url,
+          rp.refund_id
+        FROM refund_photos AS rp
+      ),
       r AS (
         SELECT
           r.id,
@@ -239,8 +246,15 @@ export const retrieveUserOrder = async (req: Request, resp: Response, next: Next
           r.quantity,
           r.order_item_id,
           r.reference,
-          r.status
+          r.notes,
+          r.status,
+          COALESCE(rp.photos, '[]'::JSONB) AS photos
         FROM refunds AS r
+        LEFT JOIN LATERAL (
+          SELECT JSONB_AGG(rp.*) AS photos
+          FROM rp
+          WHERE rp.refund_id = r.id
+        ) AS rp ON true
       ),
       oi AS (
         SELECT

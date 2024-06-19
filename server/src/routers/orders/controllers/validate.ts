@@ -374,6 +374,83 @@ export const validateRefundOrderItem = async (req: Request, resp: Response, next
   return next();
 };
 
+export const validateUpdateRefund = async (req: Request, resp: Response, next: NextFunction) => {
+  const { refundId, status } = req.body;
+  const { client } = resp.locals;
+
+  if (status && !['complete', 'declined'].includes(status)) {
+    return next(new HttpException(400, `Invalid status`));
+  }
+
+  const refund = await database.retrieve<RefundsInterface[]>(`SELECT * FROM refunds`, {
+    where: 'id = $1',
+    params: [refundId],
+    client
+  });
+
+  if (!refund.length) {
+    return next(new HttpException(400, `Refund not found`));
+  } else if (status === 'complete' && refund[0].status === status) {
+    return next(new HttpException(400, `Refund already issued`));
+  }
+
+  resp.locals.refund = refund[0];
+
+  return next();
+};
+
+export const validateUpdateRefundNotes = async (req: Request, resp: Response, next: NextFunction) => {
+  const { client } = resp.locals;
+  const { refundId, notes } = req.body;
+
+  if (notes && typeof notes !== 'string') {
+    return next(new HttpException(400, `Notes must be a string`));
+  }
+
+  const refund = await database.retrieve<RefundsInterface[]>(`SELECT * FROM refunds`, {
+    where: 'id = $1',
+    params: [refundId],
+    client
+  });
+
+  if (!refund.length) {
+    return next(new HttpException(400, `Refund not found`));
+  }
+
+  resp.locals.refund = refund[0];
+
+  return next();
+};
+
+export const validateUploadRefundPhotos = async (req: Request, resp: Response, next: NextFunction) => {
+  const { client } = resp.locals;
+  const { refundId, photos } = req.body;
+
+  if (photos && !(photos instanceof Array)) {
+    return next(new HttpException(400, `Invalid photos`));
+  }
+
+  for (const photo of photos) {
+    if (typeof photo !== 'string') {
+      return next(new HttpException(400, `Invalid photo`));
+    }
+  }
+
+  const refund = await database.retrieve<RefundsInterface[]>(`SELECT * FROM refunds`, {
+    where: 'id = $1',
+    params: [refundId],
+    client
+  });
+
+  if (!refund.length) {
+    return next(new HttpException(400, `Refund not found`));
+  }
+
+  resp.locals.refund = refund[0];
+
+  return next();
+};
+
 const findLineItem = async (
   sessionId: string,
   orderItemId: string,
