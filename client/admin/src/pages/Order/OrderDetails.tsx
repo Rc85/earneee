@@ -35,8 +35,6 @@ const OrderDetails = () => {
   const subtotal = order?.items.reduce((acc, item) => acc + item.price * item.quantity, 0) || 0;
   const tax = (order?.details?.total_details?.amount_tax || 0) / 100;
   const { enqueueSnackbar } = useSnackbar();
-  const pendingOrderItems = order?.items.filter((item) => !item.shipment) || [];
-  const disabledFulfill = pendingOrderItems.length > 0;
   const totalRefund =
     order?.items.reduce(
       (acc, item) =>
@@ -86,7 +84,6 @@ const OrderDetails = () => {
             startIcon={<Icon path={mdiCheck} size={1} />}
             color='success'
             onClick={() => setStatus('Confirm Fulfill')}
-            disabled={disabledFulfill}
           >
             Fulfill
           </LoadingButton>

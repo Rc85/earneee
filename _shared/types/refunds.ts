@@ -9,6 +9,8 @@ export interface RefundsInterface {
   reason: string | null;
   refundId: string | null;
   reference: string | null;
+  shippingProvider: string | null;
+  trackingNumber: string | null;
   notes: string | null;
   status: string;
   createdAt: string;

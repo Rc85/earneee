@@ -152,7 +152,7 @@ const OrderItemRow = ({ item }: Props) => {
 
             {item.refunds?.map((refund) => (
               <Typography key={refund.id} variant='body2' color='error.main'>
-                Refund &bull; {refund.quantity} x ${refund.amount.toFixed(2)}
+                Refund issued &bull; {refund.quantity} x ${refund.amount.toFixed(2)}
                 {refund.reference ? ` \u2022 Reference: ${refund.reference}` : ''}
               </Typography>
             ))}

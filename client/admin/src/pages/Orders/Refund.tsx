@@ -138,8 +138,10 @@ const Refund = () => {
       </Breadcrumbs>
 
       <Section
-        title={`Order ${refund?.item?.order?.number}`}
-        subtitle={`${dayjs(refund?.createdAt).format('YYYY-MM-DD')} \u2022 ${refund?.status}`}
+        title={`Refund Request`}
+        subtitle={`Order ${refund?.item?.order?.number} \u2022 ${dayjs(refund?.createdAt).format(
+          'YYYY-MM-DD'
+        )} \u2022 ${refund?.status}`}
         titleVariant='h3'
         actions={
           refund?.status === 'pending'
