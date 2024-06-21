@@ -1,3 +1,5 @@
+import { ProductsInterface } from './products';
+
 export interface CategoriesInterface {
   id: number;
   name: string;
@@ -8,4 +10,5 @@ export interface CategoriesInterface {
   updatedAt: string | null;
   subcategories?: CategoriesInterface[];
   ancestors?: CategoriesInterface[];
+  products?: ProductsInterface[];
 }

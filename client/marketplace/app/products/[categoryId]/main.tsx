@@ -40,9 +40,10 @@ import { Section } from '../../../../_shared/components';
 interface Props {
   name: string | undefined;
   categoryId: string;
+  enableSpecificationFilters: boolean;
 }
 
-const Main = ({ name, categoryId }: Props) => {
+const Main = ({ name, categoryId, enableSpecificationFilters }: Props) => {
   const [page, setPage] = useState(0);
   const { data } = retrieveCategories({
     parentId: categoryId,
@@ -72,7 +73,7 @@ const Main = ({ name, categoryId }: Props) => {
   });
   const { isLoading } = p;
   const { products, count = 0 } = p.data || {};
-  const s = retrieveMarketplaceProductSpecifications({ categoryId, enabled: Boolean(categoryId) });
+  const s = retrieveMarketplaceProductSpecifications({ categoryId, enabled: enableSpecificationFilters });
   const { specifications = [] } = s.data || {};
   const specificationLabels = [
     ...new Set(specifications.map((specification) => specification.name.toUpperCase()))
@@ -206,7 +207,7 @@ const Main = ({ name, categoryId }: Props) => {
 
           <PriceFilter apply={(minPrice, maxPrice) => setFilters({ ...filters, minPrice, maxPrice })} />
 
-          {specificationLabels.length > 0 && (
+          {enableSpecificationFilters && specificationLabels.length > 0 && (
             <Box sx={{ overflowY: 'auto', maxHeight: '750px' }}>
               {specificationLabels.map((label) => {
                 const filteredSpecifications = specifications.filter(
@@ -301,7 +302,17 @@ const Main = ({ name, categoryId }: Props) => {
               {view === 'grid' ? (
                 <Grid2 container spacing={1}>
                   {products?.map((product) => {
-                    const mediaUrl = product.media?.[0]?.url;
+                    const productMedia = product?.media || [];
+                    const variants = product?.variants || [];
+                    const variant = variants.find((variant) =>
+                      variant.media?.find((media) => media.useAsThumbnail)
+                    );
+                    const media =
+                      productMedia.find((media) => media.useAsThumbnail) ||
+                      variant?.media?.[0] ||
+                      productMedia[0] ||
+                      variants?.[0]?.media?.[0];
+                    const mediaUrl = media?.url;
                     const price = product.url?.price || 0;
                     const currency = product.url?.currency || 'CAD';
                     const discount = product.url?.discount;
@@ -331,7 +342,7 @@ const Main = ({ name, categoryId }: Props) => {
                                 backgroundPosition: 'center',
                                 backgroundImage: mediaUrl ? `url('${mediaUrl}')` : undefined,
                                 backgroundRepeat: 'no-repeat',
-                                backgroundSize: 'contain',
+                                backgroundSize: media.sizing || 'contain',
                                 backgroundColor: mediaUrl ? 'transparent' : grey[300],
                                 display: 'flex',
                                 justifyContent: 'center',

@@ -1,6 +1,8 @@
 import { Box } from '@mui/material';
-import { FeaturedProducts, ProductShowcase, Offer, Subscribe } from '../components';
+import { FeaturedProducts, Offer, Subscribe } from '../components';
 import { OffersInterface, StatusesInterface } from '../../../_shared/types';
+import RecentProducts from '../components/RecentProducts/RecentProducts';
+import CategoryProducts from '../components/CategoryProducts/CategoryProducts';
 
 const Page = async () => {
   const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/v1/offer?status=active`, {
@@ -19,10 +21,12 @@ const Page = async () => {
   return (
     <>
       <Box sx={{ display: 'flex' }}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, overflowX: 'hidden', mr: 2 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, overflow: 'hidden', mr: 2 }}>
           <FeaturedProducts />
 
-          <ProductShowcase type='new' />
+          <RecentProducts />
+
+          <CategoryProducts />
         </Box>
 
         {Boolean(offers && offers.length > 0) && (

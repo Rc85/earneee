@@ -1,4 +1,4 @@
-import { expect, test } from 'vitest';
+import { test } from 'vitest';
 import { buildSubcategories } from '../list';
 import util from 'util';
 

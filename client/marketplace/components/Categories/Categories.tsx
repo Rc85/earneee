@@ -145,6 +145,7 @@ const Category = ({
       {categories.map((category) =>
         category.subcategories && category.subcategories.length > 0 ? (
           <Category
+            key={category.id}
             categories={category.subcategories}
             onNextClick={onNextClick}
             selectedCategory={selectedCategory}

@@ -19,7 +19,7 @@ export const listCategories = async (_: Request, resp: Response, next: NextFunct
       AND p.parent_id IS null
       AND p.published IS true
     ) AS p ON true`,
-    { where: `c.parent_id IS null`, client }
+    { where: `c.parent_id IS null`, orderBy: 'c.name', client }
   );
 
   const subcategories = await database.retrieve<CategoriesInterface[]>(
@@ -36,7 +36,7 @@ export const listCategories = async (_: Request, resp: Response, next: NextFunct
       AND p.parent_id IS null
       AND p.published IS true
     ) AS p ON true`,
-    { where: `c.parent_id IS NOT null`, client }
+    { where: `c.parent_id IS NOT null`, orderBy: 'c.name', client }
   );
 
   for (const category of categories) {

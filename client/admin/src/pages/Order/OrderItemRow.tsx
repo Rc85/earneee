@@ -7,8 +7,7 @@ import {
   Popover,
   MenuItem,
   CircularProgress,
-  TextField,
-  Divider
+  TextField
 } from '@mui/material';
 import { OrderItemsInterface } from '../../../../../_shared/types';
 import dayjs from 'dayjs';
@@ -147,16 +146,14 @@ const OrderItemRow = ({ item }: Props) => {
         )}
 
         {item.refunds && item.refunds.length > 0 && (
-          <>
-            <Divider sx={{ my: 2 }} />
-
+          <Box sx={{ mt: 1 }}>
             {item.refunds?.map((refund) => (
               <Typography key={refund.id} variant='body2' color='error.main'>
                 Refund issued &bull; {refund.quantity} x ${refund.amount.toFixed(2)}
                 {refund.reference ? ` \u2022 Reference: ${refund.reference}` : ''}
               </Typography>
             ))}
-          </>
+          </Box>
         )}
       </TableCell>
 

@@ -43,3 +43,19 @@ export const listCategories = () => {
     }
   });
 };
+
+export const retrieveMostRecentCategories = (options: { country: string }) => {
+  return useQuery<{ categories: CategoriesInterface[] }>({
+    queryKey: ['recent categories'],
+    queryFn: async () => {
+      const { data } = await axios({
+        method: 'get',
+        url: '/v1/category/recent',
+        withCredentials: true,
+        params: options
+      });
+
+      return data;
+    }
+  });
+};

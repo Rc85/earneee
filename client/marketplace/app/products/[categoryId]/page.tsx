@@ -56,7 +56,13 @@ const CategoryContainer = async ({ params: { categoryId } }: Props) => {
         )}
       </Breadcrumbs>
 
-      <Main name={name} categoryId={categoryId} />
+      <Main
+        name={name}
+        categoryId={categoryId}
+        enableSpecificationFilters={Boolean(
+          breadcrumbs?.[0]?.ancestors && breadcrumbs[0].ancestors.length >= 2
+        )}
+      />
     </Box>
   );
 };

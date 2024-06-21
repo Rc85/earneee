@@ -2,24 +2,49 @@
 
 import Section from '../../../_shared/components/Section/Section';
 import { Box, Divider, Paper, Typography } from '@mui/material';
-import { retrieveProductShowcase } from '../../../_shared/api';
-import { useAppSelector } from '../../../_shared/redux/store';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
 import Link from 'next/link';
+import { CategoriesInterface, ProductsInterface } from '../../../../_shared/types';
+import { Fragment } from 'react';
 
 interface Props {
-  type: 'new' | 'popular';
+  title: string;
+  products: ProductsInterface[];
+  actionUrl?: string;
+  breadcrumbs?: CategoriesInterface[];
 }
 
-const ProductShowcase = ({ type }: Props) => {
-  const { country } = useAppSelector((state) => state.App);
-  const { data } = retrieveProductShowcase({ type, country });
-  const { products } = data || {};
-
+const ProductShowcase = ({ title, products, actionUrl, breadcrumbs }: Props) => {
   return products && products.length > 0 ? (
     <Section
-      title={type === 'new' ? 'RECENTLY ADDED' : 'POPULAR PRODUCTS'}
+      title={title}
+      supertitle={
+        <Box sx={{ display: 'flex' }}>
+          {breadcrumbs?.map((category, i) => (
+            <Fragment key={category.id}>
+              <Link href={`/products/${category.id}`}>
+                <Typography variant='body2'>{category.name}</Typography>
+              </Link>
+
+              {i + 1 !== breadcrumbs.length && (
+                <Typography variant='body2' sx={{ mx: 1 }}>
+                  /
+                </Typography>
+              )}
+            </Fragment>
+          ))}
+        </Box>
+      }
       titleVariant='h4'
+      actions={
+        Boolean(actionUrl)
+          ? [
+              <Link key='url' href={actionUrl!}>
+                View All
+              </Link>
+            ]
+          : undefined
+      }
       containerStyle={{ mb: 3 }}
     >
       <Grid2 container spacing={1}>

@@ -12,7 +12,7 @@ const Search = () => {
   const searchParams = useSearchParams();
   const searchValue = searchParams.get('value');
   const category = searchParams.get('category');
-  const c = retrieveCategories({ categoryId: category as unknown as number });
+  const c = retrieveCategories({ categoryId: category as string });
   const { categories } = c.data || {};
   const { country } = useAppSelector((state) => state.App);
   const { isLoading, data } = searchProducts({ value: searchValue, category, country });

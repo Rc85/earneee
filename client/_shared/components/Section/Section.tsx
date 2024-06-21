@@ -44,6 +44,7 @@ interface Props {
   position?: 'left' | 'center' | 'right';
   disableGutters?: boolean;
   truncateTitle?: boolean;
+  supertitle?: any;
 }
 
 const Section = ({
@@ -62,7 +63,8 @@ const Section = ({
   containerStyle,
   position = 'left',
   disableGutters,
-  truncateTitle
+  truncateTitle,
+  supertitle
 }: Props) => {
   let titleStyles: any = {};
 
@@ -94,6 +96,8 @@ const Section = ({
       <Paper elevation={elevation} variant={variant} sx={sx} component={component} onSubmit={onSubmit}>
         <Box sx={{ display: 'flex' }}>
           <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
+            {supertitle}
+
             <Typography
               variant={titleVariant}
               sx={[

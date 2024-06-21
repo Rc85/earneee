@@ -201,7 +201,6 @@ export const retrieveMarketplaceProducts = async (req: Request, resp: Response, 
       pu.product_id,
       pu.price,
       pu.currency,
-      pu.type,
       a.affiliate,
       pd.discount
     FROM product_urls AS pu
@@ -727,6 +726,7 @@ export const retrieveMarketplaceProduct = async (req: Request, resp: Response, n
 };
 
 const matchingKeys = (requestedKeys: string[], lookupKeys: string[]) => {
+  console.log(requestedKeys, lookupKeys);
   requestedKeys.sort();
   lookupKeys.sort();
 
@@ -755,15 +755,23 @@ const filterBySpecifications = (
         const specificationNames = Array.from(
           new Set(specifications.map((specification) => specification.name))
         );
-        const filteredSpecificationNames = Array.from(new Set(Object.keys(filters)));
+        const filteredSpecNames = [];
+
+        for (const label in filters) {
+          for (const spec of filters[label]) {
+            filteredSpecNames.push(spec.name);
+          }
+        }
+
+        const filteredSpecificationNames = Array.from(new Set(filteredSpecNames));
 
         if (matchingKeys(filteredSpecificationNames, specificationNames)) {
           const matches = [];
 
-          for (const name in filters) {
+          for (const label in filters) {
             let match = false;
 
-            for (const spec of filters[name]) {
+            for (const spec of filters[label]) {
               const m = Boolean(specifications.find((s) => s.id === spec.id));
 
               if (m) {

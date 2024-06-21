@@ -61,7 +61,7 @@ const Subscribe = () => {
         p: 5,
         display: 'flex',
         alignItems: 'center',
-        mb: 3
+        my: 3
       }}
     >
       <img
