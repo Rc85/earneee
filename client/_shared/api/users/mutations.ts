@@ -181,6 +181,31 @@ export const useResetPassword = (onSuccess?: (data: any) => void, onError?: (err
   });
 };
 
+export const useUpdatePassword = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
+  const dispatch = useDispatch();
+
+  return useMutation({
+    mutationFn: (options: { password: string; confirmPassword: string; token: string }) =>
+      axios({
+        method: 'put',
+        url: '/v1/password/update',
+        withCredentials: true,
+        data: options
+      }),
+
+    onSuccess: (data) => {
+      dispatch(setIsLoading(false));
+
+      onSuccess?.(data);
+    },
+    onError: (err) => {
+      dispatch(setIsLoading(false));
+
+      onError?.(err);
+    }
+  });
+};
+
 export const useUpdateProfile = (onSuccess?: (data: any) => void, onError?: (err: any) => void) => {
   const dispatch = useDispatch();
   const queryClient = useQueryClient();

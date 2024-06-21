@@ -131,4 +131,12 @@ router.delete(
   response
 );
 
+router.put(
+  '/v1/password/update',
+  dbConnect,
+  middleware(controllers.validateUpdatePassword),
+  middleware(controllers.updatePassword),
+  response
+);
+
 export default router;

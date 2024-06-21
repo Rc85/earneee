@@ -1,8 +1,11 @@
 import { NextFunction, Request, Response } from 'express';
 import { database } from '../../../middlewares';
 import dayjs from 'dayjs';
-import { UserBansInterface } from '../../../../../_shared/types';
+import { PasswordResetsInterface, UserBansInterface } from '../../../../../_shared/types';
 import bcrypt from 'bcrypt';
+import { PoolClient } from 'pg';
+import { generateKey } from '../../../../../_shared/utils';
+import { sendEmail } from '../../../services';
 
 export const activateAccount = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
@@ -94,8 +97,19 @@ export const updateUser = async (req: Request, resp: Response, next: NextFunctio
 
 export const resetPassword = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
+  const { email } = req.body;
 
-  // send email
+  const token = await generateToken(client);
+
+  await database.update('password_resets', ['expire_at'], {
+    where: 'email = $2 AND expire_at > NOW()',
+    params: [new Date(), email],
+    client
+  });
+
+  await database.create('password_resets', ['email', 'token'], [email, token], { client });
+
+  await sendEmail.resetPassword.send(email, token);
 
   return next();
 };
@@ -153,4 +167,43 @@ export const updateMessage = async (req: Request, resp: Response, next: NextFunc
   }
 
   return next();
+};
+
+export const updatePassword = async (req: Request, resp: Response, next: NextFunction) => {
+  const { client, resetPassword } = resp.locals;
+  const { token, password } = req.body;
+
+  if (resetPassword) {
+    const encrypted = await bcrypt.hash(password, 10);
+
+    await database.update('users', ['password'], {
+      where: 'email = $2',
+      params: [encrypted, resetPassword.email],
+      client
+    });
+
+    await database.update('password_resets', ['expire_at'], {
+      where: 'token = $2',
+      params: [new Date(), token],
+      client
+    });
+  }
+
+  return next();
+};
+
+const generateToken = async (client?: PoolClient): Promise<string> => {
+  const token = generateKey(1, 12);
+
+  const exists = await database.retrieve<PasswordResetsInterface[]>(`SELECT * FROM password_resets`, {
+    where: 'token = $1',
+    params: [token],
+    client
+  });
+
+  if (exists.length) {
+    return await generateToken(client);
+  }
+
+  return token;
 };

@@ -20,3 +20,4 @@ export type { OrdersInterface } from './orders';
 export type { OrderItemsInterface } from './order_items';
 export type { OrderShipmentsInterface } from './order_shipments';
 export type { RefundsInterface } from './refunds';
+export type { PasswordResetsInterface } from './password_resets';

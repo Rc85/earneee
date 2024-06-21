@@ -27,5 +27,28 @@ export const sendEmail = {
         throw err;
       });
     }
+  },
+  resetPassword: {
+    send: async (to: string, token: string) => {
+      const message = {
+        to,
+        from: {
+          email: `noreply@earneee.com`
+        },
+        templateId: 'd-509b2c386f414278b334fd53198bc26f',
+        dynamicTemplateData: {
+          token
+        },
+        trackingSettings: {
+          clickTracking: {
+            enable: false
+          }
+        }
+      };
+
+      await sgMail.send(message).catch((err: any) => {
+        throw err;
+      });
+    }
   }
 };

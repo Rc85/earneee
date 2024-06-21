@@ -5,6 +5,7 @@ import bcrypt from 'bcrypt';
 import {
   OrderItemsInterface,
   OrdersInterface,
+  PasswordResetsInterface,
   RefundsInterface,
   UserBansInterface,
   UsersInterface
@@ -293,6 +294,33 @@ export const validateCancelRefund = async (req: Request, resp: Response, next: N
   }
 
   resp.locals.refund = refund[0];
+
+  return next();
+};
+
+export const validateUpdatePassword = async (req: Request, resp: Response, next: NextFunction) => {
+  const { client } = resp.locals;
+  const { password, confirmPassword, token } = req.body;
+
+  if (!password || validations.blankCheck.test(password)) {
+    return next(new HttpException(400, `Password required`));
+  } else if (password !== confirmPassword) {
+    return next(new HttpException(400, `Passwords do not match`));
+  } else if (password.length < 8) {
+    return next(new HttpException(400, `Password is too short`));
+  }
+
+  const resetPassword = await database.retrieve<PasswordResetsInterface[]>(`SELECT * FROM password_resets`, {
+    where: 'token = $1',
+    params: [token],
+    client
+  });
+
+  if (!resetPassword.length || dayjs(resetPassword[0].expireAt).isBefore(dayjs())) {
+    return next(new HttpException(400, `Link has expired, please request a new one`));
+  }
+
+  resp.locals.resetPassword = resetPassword[0];
 
   return next();
 };

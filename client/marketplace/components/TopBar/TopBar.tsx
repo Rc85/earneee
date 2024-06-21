@@ -68,7 +68,8 @@ const TopBar = () => {
   const loginStatus = statuses?.find((status) => status.name === 'login');
   const registrationStatus = statuses?.find((status) => status.name === 'registration');
   const dispatch = useDispatch();
-  const redirect = /^\/account\/activate\/.*$/.test(pathname) ? '/' : pathname;
+  const redirect =
+    /^\/account\/activate\/.*$/.test(pathname) || /^\/reset-password.*$/.test(pathname) ? '/' : pathname;
   const userMessages = retrieveMessageCount(Boolean(user));
   const { count = 0 } = userMessages.data || {};
 
