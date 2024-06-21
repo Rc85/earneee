@@ -72,6 +72,15 @@ a.list-item-button-link:hover {
   outline: none;
 }
 
+.product-container {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.product-container::-webkit-scrollbar {
+  display: none;
+}
+
 .vertical-align-top {
   vertical-align: top;
 }
