@@ -304,10 +304,14 @@ export const validateUpdatePassword = async (req: Request, resp: Response, next:
 
   if (!password || validations.blankCheck.test(password)) {
     return next(new HttpException(400, `Password required`));
+  } else if (typeof password !== 'string' || typeof confirmPassword !== 'string') {
+    return next(new HttpException(400, `Invalid password`));
   } else if (password !== confirmPassword) {
     return next(new HttpException(400, `Passwords do not match`));
   } else if (password.length < 8) {
     return next(new HttpException(400, `Password is too short`));
+  } else if (typeof token !== 'string') {
+    return next(new HttpException(400, `Invalid token`));
   }
 
   const resetPassword = await database.retrieve<PasswordResetsInterface[]>(`SELECT * FROM password_resets`, {
