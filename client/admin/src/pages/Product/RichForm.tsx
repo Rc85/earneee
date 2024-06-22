@@ -102,7 +102,7 @@ const RichForm = ({ field }: Props) => {
       <LoadingButton
         variant='contained'
         fullWidth
-        loading={status === 'loading'}
+        loading={status === 'Loading'}
         startIcon={<Icon path={mdiArrowUpDropCircle} size={1} />}
         loadingIndicator={<CircularProgress size={20} />}
         loadingPosition='start'

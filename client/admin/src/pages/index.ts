@@ -13,6 +13,7 @@ import Statuses from './Statuses/Statuses';
 import Users from './Users/Users';
 import Orders from './Orders/Orders';
 import Order from './Order/Order';
+import FAQ from './FAQ/FAQ';
 
 export {
   Account,
@@ -29,5 +30,6 @@ export {
   Statuses,
   Users,
   Orders,
-  Order
+  Order,
+  FAQ
 };

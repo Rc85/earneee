@@ -3,6 +3,7 @@ import {
   mdiAccount,
   mdiAccountGroup,
   mdiHandshake,
+  mdiHelpCircle,
   mdiHome,
   mdiLogout,
   mdiMenu,
@@ -206,6 +207,18 @@ const TopBar = ({ maxWidth }: Props) => {
                 </ListItemIcon>
 
                 <ListItemText primary='Statuses' />
+              </ListItemButton>
+            </ListItem>
+          )}
+
+          {user?.isAdmin && (
+            <ListItem disableGutters disablePadding>
+              <ListItemButton onClick={() => handleNavClick('/faq')}>
+                <ListItemIcon>
+                  <Icon path={mdiHelpCircle} size={1} />
+                </ListItemIcon>
+
+                <ListItemText primary='FAQ' />
               </ListItemButton>
             </ListItem>
           )}

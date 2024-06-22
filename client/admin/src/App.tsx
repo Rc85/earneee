@@ -376,6 +376,33 @@ const App = () => {
                         </AuthenticatedRoute>
                       }
                     />
+
+                    <Route
+                      path='/faq'
+                      element={
+                        <AuthenticatedRoute>
+                          <Pages.FAQ />
+                        </AuthenticatedRoute>
+                      }
+                    >
+                      <Route
+                        path='/faq'
+                        element={
+                          <AuthenticatedRoute>
+                            <Pages.FAQ.Questions />
+                          </AuthenticatedRoute>
+                        }
+                      />
+
+                      <Route
+                        path='/faq/create/:questionId?'
+                        element={
+                          <AuthenticatedRoute>
+                            <Pages.FAQ.Create />
+                          </AuthenticatedRoute>
+                        }
+                      />
+                    </Route>
                   </Routes>
                 </Box>
               </BrowserRouter>

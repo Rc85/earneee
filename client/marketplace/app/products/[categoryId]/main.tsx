@@ -342,7 +342,7 @@ const Main = ({ name, categoryId, enableSpecificationFilters }: Props) => {
                                 backgroundPosition: 'center',
                                 backgroundImage: mediaUrl ? `url('${mediaUrl}')` : undefined,
                                 backgroundRepeat: 'no-repeat',
-                                backgroundSize: media.sizing || 'contain',
+                                backgroundSize: media?.sizing || 'contain',
                                 backgroundColor: mediaUrl ? 'transparent' : grey[300],
                                 display: 'flex',
                                 justifyContent: 'center',

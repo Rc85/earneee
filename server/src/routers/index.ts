@@ -10,6 +10,7 @@ import productMediaRouter from './product_media';
 import statusRouter from './statuses';
 import discountRouter from './product_discount';
 import orderRouter from './orders';
+import faqRouter from './faq';
 
 export {
   affiliateRouter,
@@ -23,5 +24,6 @@ export {
   productSpecificationRouter,
   discountRouter,
   orderRouter,
-  productOptionRouter
+  productOptionRouter,
+  faqRouter
 };

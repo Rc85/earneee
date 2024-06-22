@@ -81,9 +81,9 @@ const Footer = () => {
               Support
             </Typography>
 
-            {/* <Typography color='white' sx={{ mb: 2 }}>
-              FAQ
-            </Typography> */}
+            <Typography color='white' sx={{ mb: 2 }}>
+              <Link href='/faq'>FAQ</Link>
+            </Typography>
 
             <Typography color='white'>
               <Link href='/contact'>Contact Us</Link>

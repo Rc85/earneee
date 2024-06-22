@@ -61,15 +61,11 @@ const Product = ({ params: { id } }: { params: { id: string } }) => {
       ) : (
         <>
           <Breadcrumbs>
-            {product?.ancestors?.map((ancestor, i, arr) => {
-              const paths = arr.slice(0, i + 1);
-
-              return (
-                <Link key={ancestor.id} href={`/products/${paths.map((path) => path.id).join('/')}`}>
-                  {ancestor.name}
-                </Link>
-              );
-            })}
+            {product?.ancestors?.map((ancestor) => (
+              <Link key={ancestor.id} href={`/products/${ancestor.id}`}>
+                {ancestor.name}
+              </Link>
+            ))}
           </Breadcrumbs>
 
           <Section

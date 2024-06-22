@@ -99,6 +99,7 @@ app.use(routers.offerRouter);
 app.use(routers.discountRouter);
 app.use(routers.orderRouter);
 app.use(routers.productOptionRouter);
+app.use(routers.faqRouter);
 app.use(stripeWebhookRouter);
 
 app.use(middlewares.errorHandler);

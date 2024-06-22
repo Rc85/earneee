@@ -73,3 +73,5 @@ export * from './products/specifications/queries';
 export * from './products/options/queries';
 export * from './orders/mutations';
 export * from './orders/queries';
+export * from './faq/mutations';
+export * from './faq/queries';
