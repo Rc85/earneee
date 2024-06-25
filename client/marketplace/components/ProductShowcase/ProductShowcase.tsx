@@ -1,13 +1,12 @@
 'use client';
 
 import Section from '../../../_shared/components/Section/Section';
-import { Box, Divider, IconButton, Paper, Typography } from '@mui/material';
+import { Box, Divider, Paper, Typography } from '@mui/material';
 import Link from 'next/link';
 import { CategoriesInterface, ProductsInterface } from '../../../../_shared/types';
 import { Fragment, UIEvent, useEffect, useRef, useState } from 'react';
 import Icon from '@mdi/react';
 import { mdiChevronLeft, mdiChevronRight } from '@mdi/js';
-import { grey } from '@mui/material/colors';
 
 interface Props {
   title: string;
@@ -88,16 +87,20 @@ const ProductShowcase = ({ title, products, actionUrl, breadcrumbs }: Props) => 
             sx={{
               display: 'flex',
               alignItems: 'center',
-              height: 'calc(100% - 50px)',
               position: 'absolute',
-              left: 0,
+              top: 10,
+              left: 10,
               zIndex: 1,
-              backgroundColor: 'rgba(255, 255, 255, 0.75)'
+              borderRadius: '100%',
+              backgroundColor: 'white',
+              cursor: scrollLeft === 0 ? undefined : 'pointer',
+              opacity: scrollLeft === 0 ? 0.5 : 1
             }}
+            onClick={handleLeftClick}
           >
-            <IconButton size='small' disabled={scrollLeft === 0} onClick={handleLeftClick}>
-              <Icon path={mdiChevronLeft} size={2} color={grey[500]} />
-            </IconButton>
+            {/* <IconButton size='small' disabled={scrollLeft === 0} onClick={handleLeftClick}> */}
+            <Icon path={mdiChevronLeft} size={2} />
+            {/* </IconButton> */}
           </Box>
         )}
 
@@ -114,7 +117,7 @@ const ProductShowcase = ({ title, products, actionUrl, breadcrumbs }: Props) => 
           }}
           onScroll={handleScroll}
         >
-          {products?.map((product) => {
+          {products?.map((product, i) => {
             const productMedia = product?.media || [];
             const variants = product?.variants || [];
             const variant = variants.find((variant) => variant.media?.find((media) => media.useAsThumbnail));
@@ -152,7 +155,7 @@ const ProductShowcase = ({ title, products, actionUrl, breadcrumbs }: Props) => 
                   width: '25%',
                   maxWidth: '400px',
                   minWidth: '300px',
-                  mr: 1
+                  mr: i + 1 !== products.length ? 1 : 0
                 }}
                 className='product'
               >
@@ -245,20 +248,24 @@ const ProductShowcase = ({ title, products, actionUrl, breadcrumbs }: Props) => 
             sx={{
               display: 'flex',
               alignItems: 'center',
-              height: 'calc(100% - 50px)',
               position: 'absolute',
-              right: 0,
+              top: 10,
+              right: 10,
               zIndex: 1,
-              backgroundColor: 'rgba(255, 255, 255, 0.75)'
+              borderRadius: '100%',
+              backgroundColor: 'white',
+              cursor: scrollLeft + offsetWidth >= scrollWidth ? undefined : 'pointer',
+              opacity: scrollLeft + offsetWidth >= scrollWidth ? 0.5 : 1
             }}
+            onClick={handleRightClick}
           >
-            <IconButton
+            {/* <IconButton
               size='small'
               onClick={handleRightClick}
               disabled={scrollLeft + offsetWidth >= scrollWidth}
-            >
-              <Icon path={mdiChevronRight} size={2} color={grey[500]} />
-            </IconButton>
+            > */}
+            <Icon path={mdiChevronRight} size={2} />
+            {/* </IconButton> */}
           </Box>
         )}
       </Box>
