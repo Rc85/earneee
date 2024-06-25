@@ -23,8 +23,4 @@ exports.down = (pgm) => {
   pgm.dropIndex({ name: 'products', schema: 'public' }, ['name', 'parent_id'], {
     name: 'unique_variant_name_idx'
   });
-
-  pgm.addConstraint({ name: 'products', schema: 'public' }, 'products_name_key', {
-    unique: ['name']
-  });
 };

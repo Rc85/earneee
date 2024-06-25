@@ -193,7 +193,7 @@ export const createProduct = async (req: Request, resp: Response, next: NextFunc
                 discount.amountType,
                 url.id,
                 discount.startsAt
-                  ? dayjs(discount.startsAt).set('hour', 23).set('minute', 59).set('second', 59).toDate()
+                  ? dayjs(discount.startsAt).set('hour', 0).set('minute', 0).set('second', 0).toDate()
                   : dayjs().toDate(),
                 discount.endsAt
                   ? dayjs(discount.endsAt).set('hour', 23).set('minute', 59).set('second', 59).toDate()

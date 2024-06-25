@@ -29,10 +29,6 @@ export const retrieveProducts = async (req: Request, resp: Response, next: NextF
 
   const products = await database.retrieve<ProductsInterface[]>(
     `WITH
-    pd AS (
-      SELECT * FROM product_discounts AS pd
-      WHERE pd.starts_at <= NOW()
-    ),
     pu AS (
       SELECT
         pu.*,
@@ -46,7 +42,7 @@ export const retrieveProducts = async (req: Request, resp: Response, next: NextF
       ) AS a ON true
       LEFT JOIN LATERAL (
         SELECT JSONB_AGG(pd.*) AS discounts
-        FROM pd
+        FROM product_discounts AS pd
         WHERE pd.product_url_id = pu.id
       ) AS pd ON true
     )

@@ -3,6 +3,8 @@ import bcrypt from 'bcrypt';
 import { database } from '../../../middlewares';
 import { sendEmail } from '../../../services';
 import { generateKey } from '../../../../../_shared/utils';
+import { PoolClient } from 'pg';
+import { RefundsInterface } from '../../../../../_shared/types';
 
 export const createUser = async (req: Request, resp: Response, next: NextFunction) => {
   const { client } = resp.locals;
@@ -60,11 +62,12 @@ export const createRefund = async (req: Request, resp: Response, next: NextFunct
     const itemPrice = lineItem?.price?.unit_amount || 0;
     const itemTax = (lineItem?.amount_tax || 0) / (lineItem?.quantity || 1);
     const amount = (itemPrice + itemTax) / 100;
+    const number = await generateRefundNumber(client);
 
     await database.create(
       'refunds',
-      ['id', 'order_item_id', 'amount', 'quantity', 'reason', 'status'],
-      [id, orderItemId, amount, quantity, reason, 'pending'],
+      ['id', 'order_item_id', 'amount', 'quantity', 'reason', 'status', 'number'],
+      [id, orderItemId, amount, quantity, reason, 'pending', number],
       { client }
     );
 
@@ -72,4 +75,20 @@ export const createRefund = async (req: Request, resp: Response, next: NextFunct
   }
 
   return next();
+};
+
+const generateRefundNumber = async (client?: PoolClient): Promise<string> => {
+  const number = generateKey(1, 8).toUpperCase();
+
+  const exists = await database.retrieve<RefundsInterface[]>(`SELECT * FROM refunds`, {
+    where: 'number = $1',
+    params: [number],
+    client
+  });
+
+  if (exists.length) {
+    return await generateRefundNumber(client);
+  }
+
+  return number;
 };
