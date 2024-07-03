@@ -25,6 +25,7 @@ export const retrieveProductSpecifications = (options?: {
 
 export const retrieveSpecifications = (options?: { name?: string }) => {
   return useQuery<{ specifications: ProductSpecificationsInterface[] }>({
+    enabled: Boolean(options?.name),
     queryKey: ['specifications', options?.name],
     queryFn: async () => {
       const { data } = await axios({

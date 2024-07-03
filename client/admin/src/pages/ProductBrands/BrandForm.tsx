@@ -1,10 +1,10 @@
 import { mdiTrashCan, mdiUpload } from '@mdi/js';
 import Icon from '@mdi/react';
-import { Box, IconButton, Button, TextField, useTheme } from '@mui/material';
+import { Box, IconButton, Button, TextField, useTheme, Autocomplete } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { ProductBrandsInterface } from '../../../../../_shared/types';
-import { ChangeEvent, useRef } from 'react';
-import { retrieveUserProfiles } from '../../../../_shared/api';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { retrieveBrandOwners } from '../../../../_shared/api';
 
 interface Props {
   submit?: (brand: ProductBrandsInterface) => void;
@@ -15,9 +15,21 @@ interface Props {
 
 const BrandForm = ({ brand, setForm }: Props) => {
   const theme = useTheme();
-  const user = retrieveUserProfiles();
-  const { userProfiles } = user.data || {};
+  const [email, setEmail] = useState('');
+  const [debouncedEmail, setDebouncedEmail] = useState('');
+  const user = retrieveBrandOwners({ email: debouncedEmail });
+  const { owners } = user.data || {};
   const fileInputRef = useRef<any>();
+
+  useEffect(() => {
+    const emailTimeout = setTimeout(() => {
+      setDebouncedEmail(email);
+    }, 500);
+
+    return () => {
+      clearTimeout(emailTimeout);
+    };
+  }, [email]);
 
   const handleRemoveLogo = () => {
     setForm({ ...brand, logoUrl: null });
@@ -113,20 +125,15 @@ const BrandForm = ({ brand, setForm }: Props) => {
             value={brand.url}
           />
 
-          <TextField
-            label='Owner'
-            select
-            SelectProps={{ native: true }}
-            onChange={(e) => setForm({ ...brand, owner: e.target.value })}
+          <Autocomplete
+            options={owners?.map((user) => user.email) || []}
+            onChange={(_, newValue) => setForm({ ...brand, owner: newValue || null })}
+            defaultValue={brand.owner || ''}
             value={brand.owner || ''}
-          >
-            <option value=''></option>
-            {userProfiles?.map((user) => (
-              <option key={user.id} value={user.id}>
-                {user.email} {user.firstName ? `(${user.firstName}${user.lastName})` : ''}
-              </option>
-            ))}
-          </TextField>
+            renderInput={(params) => (
+              <TextField {...params} label='Owner' onChange={(e) => setEmail(e.target.value)} />
+            )}
+          />
         </Box>
       </Box>
     </>

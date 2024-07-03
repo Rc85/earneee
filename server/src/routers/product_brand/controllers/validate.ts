@@ -16,8 +16,8 @@ export const validateCreateBrand = async (req: Request, resp: Response, next: Ne
   } else if (logoUrl && typeof logoUrl !== 'string') {
     return next(new HttpException(400, `Invalid logo`));
   } else if (owner) {
-    const user = await database.retrieve<UsersInterface[]>(`SELECT email FROM users`, {
-      where: 'id = $1',
+    const user = await database.retrieve<UsersInterface[]>(`SELECT id, email FROM users`, {
+      where: 'email = $1',
       params: [owner],
       client
     });
@@ -25,13 +25,15 @@ export const validateCreateBrand = async (req: Request, resp: Response, next: Ne
     if (user.length === 0) {
       return next(new HttpException(400, `The owner does not exist`));
     }
+
+    req.body.owner = user[0].id;
   } else if (status && !['active', 'inactive'].includes(status)) {
     return next(new HttpException(400, `Invalid status`));
   }
 
   const brand = await database.retrieve<ProductBrandsInterface[]>(`SELECT * FROM product_brands`, {
     where: 'name = $1 AND owner = $2',
-    params: [name, owner],
+    params: [name, req.body.owner],
     client
   });
 

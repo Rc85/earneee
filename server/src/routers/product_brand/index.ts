@@ -16,4 +16,6 @@ router.post(
 
 router.delete('/v1/auth/admin/brand', dbConnect, middleware(controllers.deleteBrand), response);
 
+router.get('/v1/auth/admin/brand/owners', dbConnect, middleware(controllers.retrieveBrandOnwers), response);
+
 export default router;

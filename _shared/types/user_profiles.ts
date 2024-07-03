@@ -12,4 +12,5 @@ export interface UserProfilesInterface {
   logoPath: string | null;
   createdAt: string;
   updatedAt: string | null;
+  email?: string;
 }
