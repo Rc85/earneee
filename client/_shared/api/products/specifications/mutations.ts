@@ -25,6 +25,7 @@ export const useCreateProductSpecification = (
     onSuccess: (data) => {
       dispatch(setIsLoading(false));
 
+      queryClient.invalidateQueries({ queryKey: ['product specifications'] });
       queryClient.invalidateQueries({ queryKey: ['specifications'] });
 
       onSuccess?.(data);
@@ -58,6 +59,7 @@ export const useUpdateProductSpecification = (
     onSuccess: (data) => {
       dispatch(setIsLoading(false));
 
+      queryClient.invalidateQueries({ queryKey: ['product specifications'] });
       queryClient.invalidateQueries({ queryKey: ['specifications'] });
 
       onSuccess?.(data);
@@ -89,7 +91,7 @@ export const useDeleteProductSpecification = (
     onSuccess: (data) => {
       dispatch(setIsLoading(false));
 
-      queryClient.invalidateQueries({ queryKey: ['specifications'] });
+      queryClient.invalidateQueries({ queryKey: ['product specifications'] });
 
       onSuccess?.(data);
     },
@@ -120,7 +122,7 @@ export const useSortProductSpecifications = (
     onSuccess: (data) => {
       dispatch(setIsLoading(false));
 
-      queryClient.invalidateQueries({ queryKey: ['specifications'] });
+      queryClient.invalidateQueries({ queryKey: ['product specifications'] });
 
       onSuccess?.(data);
     },

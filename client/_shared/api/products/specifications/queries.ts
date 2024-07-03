@@ -9,11 +9,27 @@ export const retrieveProductSpecifications = (options?: {
 }) => {
   return useQuery<{ specifications: ProductSpecificationsInterface[] }>({
     enabled: options?.enabled,
-    queryKey: ['specifications', options?.productId, options?.categoryId],
+    queryKey: ['product specifications', options?.productId, options?.categoryId],
     queryFn: async () => {
       const { data } = await axios({
         method: 'get',
         url: '/v1/product/specification',
+        params: options,
+        withCredentials: true
+      });
+
+      return data;
+    }
+  });
+};
+
+export const retrieveSpecifications = (options?: { name?: string }) => {
+  return useQuery<{ specifications: ProductSpecificationsInterface[] }>({
+    queryKey: ['specifications', options?.name],
+    queryFn: async () => {
+      const { data } = await axios({
+        method: 'get',
+        url: '/v1/specifications',
         params: options,
         withCredentials: true
       });

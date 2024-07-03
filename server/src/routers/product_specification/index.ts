@@ -49,4 +49,6 @@ router.patch(
   response
 );
 
+router.get('/v1/specifications', dbConnect, middleware(controllers.retrieveSpecifications), response);
+
 export default router;

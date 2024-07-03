@@ -1,11 +1,11 @@
-import { Alert, Chip, TextField } from '@mui/material';
+import { Alert, Autocomplete, Chip, TextField } from '@mui/material';
 import { Modal } from '../../../../_shared/components';
 import { ProductSpecificationsInterface } from '../../../../../_shared/types';
-import { FormEvent, KeyboardEvent, useRef, useState } from 'react';
+import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from 'react';
 import { generateKey } from '../../../../../_shared/utils';
 import { useSnackbar } from 'notistack';
 import { useParams } from 'react-router-dom';
-import { useCreateProductSpecification } from '../../../../_shared/api';
+import { retrieveSpecifications, useCreateProductSpecification } from '../../../../_shared/api';
 
 interface Props {
   cancel: () => void;
@@ -15,19 +15,32 @@ const AddSpecification = ({ cancel }: Props) => {
   const params = useParams();
   const { productId, id } = params;
   const [status, setStatus] = useState('');
+  const [nameValue, setNameValue] = useState('');
   const [name, setName] = useState('');
   const { enqueueSnackbar } = useSnackbar();
   const nameInputRef = useRef<any>(null);
-  const [specifications, setSpecifications] = useState<ProductSpecificationsInterface[]>([]);
+  const [productSpecifications, setProductSpecifications] = useState<ProductSpecificationsInterface[]>([]);
   const [value, setValue] = useState('');
   const [shiftDown, setShiftDown] = useState(false);
+  const { data } = retrieveSpecifications({ name });
+  const { specifications } = data || {};
+
+  useEffect(() => {
+    const nameTimeout = setTimeout(() => {
+      setName(nameValue);
+    }, 500);
+
+    return () => {
+      clearTimeout(nameTimeout);
+    };
+  }, [nameValue]);
 
   const handleSuccess = () => {
     nameInputRef.current?.focus();
 
-    setName('');
+    setNameValue('');
     setValue('');
-    setSpecifications([]);
+    setProductSpecifications([]);
     setStatus('');
   };
 
@@ -46,7 +59,7 @@ const AddSpecification = ({ cancel }: Props) => {
 
     setStatus('Loading');
 
-    createProductSpecification.mutate(specifications);
+    createProductSpecification.mutate(productSpecifications);
   };
 
   const handleKeyUp = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -68,7 +81,7 @@ const AddSpecification = ({ cancel }: Props) => {
           updatedAt: null
         };
 
-        setSpecifications([...specifications, specification]);
+        setProductSpecifications([...productSpecifications, specification]);
         setValue('');
       }
     } else if (e.key === 'Shift') {
@@ -83,11 +96,11 @@ const AddSpecification = ({ cancel }: Props) => {
   };
 
   const handleDeleteValue = (index: number) => {
-    const specs = [...specifications];
+    const specs = [...productSpecifications];
 
     specs.splice(index, 1);
 
-    setSpecifications(specs);
+    setProductSpecifications(specs);
   };
 
   return (
@@ -99,13 +112,19 @@ const AddSpecification = ({ cancel }: Props) => {
       disableBackdropClick
       loading={status === 'Loading'}
     >
-      <TextField
-        inputRef={nameInputRef}
-        label='Name'
-        required
-        autoFocus
-        onChange={(e) => setName(e.target.value)}
-        value={name}
+      <Autocomplete
+        freeSolo
+        options={specifications?.map((specification) => specification.name) || []}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label='Name'
+            onChange={(e) => setNameValue(e.target.value)}
+            value={name}
+            autoFocus
+          />
+        )}
+        sx={{ mb: 1.25 }}
       />
 
       <TextField
@@ -117,10 +136,10 @@ const AddSpecification = ({ cancel }: Props) => {
         onKeyDown={handleKeyDown}
       />
 
-      {specifications.length === 0 ? (
+      {productSpecifications.length === 0 ? (
         <Alert severity='error'>Add a specification</Alert>
       ) : (
-        specifications.map((specification, i) => (
+        productSpecifications.map((specification, i) => (
           <Chip
             key={specification.id}
             onDelete={() => handleDeleteValue(i)}

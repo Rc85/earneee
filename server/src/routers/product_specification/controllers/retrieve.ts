@@ -25,6 +25,22 @@ export const retrieveProductSpecification = async (req: Request, resp: Response,
   return next();
 };
 
+export const retrieveSpecifications = async (req: Request, resp: Response, next: NextFunction) => {
+  const { client } = resp.locals;
+  const { name } = req.query;
+
+  if (name) {
+    const specifications = await database.retrieve<ProductSpecificationsInterface[]>(
+      `SELECT DISTINCT ON (s.name) s.* FROM specifications AS s`,
+      { where: `name ILIKE $1`, params: [`%${name}%`], orderBy: `s.name`, client }
+    );
+
+    resp.locals.response = { data: { specifications } };
+  }
+
+  return next();
+};
+
 export const retrieveMarketplaceProductSpecifications = async (
   req: Request,
   resp: Response,
